@@ -15,12 +15,16 @@ here's what it looks like to use it:
 
 
 ### src/Main.elm
+> Uses `Application.create`
 
-This is the entrypoint to the app, it imports:
+This is the entrypoint to the app, it imports a few things:
 
-- `Application` - this package
+- `Application` - (this package)
 - `App` - the top level `Model`, `Msg`, `init`, `update`, `subscriptions`, and `view`
-- `
+- `Context` - the shared state between pages.
+- `Route` - the routes for your application
+- `Flags` - the initial JSON sent into the app
+
 
 ```elm
 module Main exposing (main)
@@ -56,7 +60,7 @@ main =
 
 
 ### src/Pages/Homepage.elm
-> Uses `Application.Page.static`
+> uses `Application.Page.static`
 
 The homepage is static, so it's just a `view`:
 
@@ -73,7 +77,7 @@ view =
 
 
 ### src/Pages/Counter.elm
-> Uses `Application.Page.Sandbox`
+> uses `Application.Page.Sandbox`
 
 The counter page doesn't have any side effects:
 
@@ -121,7 +125,7 @@ view model =
 
 
 ### src/Pages/Random.elm
-> Uses `Application.Page.element`
+> uses `Application.Page.element`
 
 The random page doesn't need to update the context of the application:
 
@@ -142,12 +146,12 @@ import Random
 
 
 type alias Model =
-    { roll : Maybe Int
-    }
+  { roll : Maybe Int
+  }
 
 type Msg
-    = Roll
-    | GotOutcome Int
+  = Roll
+  | GotOutcome Int
 
 
 init : Flags -> ( Model, Cmd Msg )
@@ -178,15 +182,15 @@ view model =
   div []
     [ button [ Events.onClick Roll ] [ text "Roll" ]
     , p []
-        [ case model.roll of
+        ( case model.roll of
             Just roll ->
-              text (String.fromInt roll)
+              [ text (String.fromInt roll) ]
             Nothing ->
-              text "Click the button!"
-        ]
+              []
+        )
     ]
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+  Sub.none
 ```
