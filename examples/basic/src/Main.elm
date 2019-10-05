@@ -2,12 +2,8 @@ module Main exposing (main)
 
 import App
 import Application exposing (Application)
-import Application.Page exposing (Context)
 import Context
 import Flags exposing (Flags)
-import Html exposing (..)
-import Html.Attributes as Attr
-import Html.Events as Events
 import Route exposing (Route)
 
 
