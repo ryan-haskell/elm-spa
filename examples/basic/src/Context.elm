@@ -1,26 +1,29 @@
 module Context exposing
     ( Model
-    , Msg
+    , Msg(..)
     , init
     , subscriptions
     , update
     , view
     )
 
+import Application
+import Data.User exposing (User)
 import Flags exposing (Flags)
 import Html exposing (..)
-import Html.Attributes as Attr
+import Html.Attributes as Attr exposing (class)
 import Html.Events as Events
 import Route exposing (Route)
+import Utils.Cmd
 
 
 type alias Model =
-    { user : Maybe String
+    { user : Maybe User
     }
 
 
 type Msg
-    = SignIn String
+    = SignIn (Result String User)
     | SignOut
 
 
@@ -31,18 +34,25 @@ init route flags =
     )
 
 
-update : Route -> Msg -> Model -> ( Model, Cmd Msg )
-update route msg model =
+update :
+    Application.Messages Route msg
+    -> Route
+    -> Msg
+    -> Model
+    -> ( Model, Cmd Msg, Cmd msg )
+update { navigateTo } route msg model =
     case msg of
-        SignIn user ->
+        SignIn (Ok user) ->
             ( { model | user = Just user }
             , Cmd.none
+            , navigateTo Route.Homepage
             )
 
+        SignIn (Err _) ->
+            Utils.Cmd.pure model
+
         SignOut ->
-            ( { model | user = Nothing }
-            , Cmd.none
-            )
+            Utils.Cmd.pure { model | user = Nothing }
 
 
 view :
@@ -53,19 +63,17 @@ view :
     }
     -> Html msg
 view { context, route, toMsg, viewPage } =
-    div [ Attr.class "layout" ]
+    div [ class "layout" ]
         [ Html.map toMsg (viewNavbar route context)
-        , br [] []
-        , viewPage
-        , br [] []
+        , div [ class "container" ] [ viewPage ]
         , Html.map toMsg (viewFooter context)
         ]
 
 
 viewNavbar : Route -> Model -> Html Msg
 viewNavbar currentRoute model =
-    header [ Attr.class "navbar" ]
-        [ ul []
+    header [ class "navbar" ]
+        [ div [ class "navbar__links" ]
             (List.map
                 (viewLink currentRoute)
                 [ Route.Homepage, Route.Counter, Route.Random ]
@@ -75,31 +83,53 @@ viewNavbar currentRoute model =
                 button [ Events.onClick SignOut ] [ text <| "Sign out" ]
 
             Nothing ->
-                button [ Events.onClick (SignIn "Ryan") ] [ text "Sign in" ]
+                a [ Attr.href "/sign-in" ] [ text "Sign in" ]
         ]
 
 
 viewLink : Route -> Route -> Html msg
 viewLink currentRoute route =
-    li []
-        [ a
-            [ Attr.href (Route.toPath route)
-            , Attr.style "font-weight"
-                (if route == currentRoute then
-                    "bold"
+    a
+        [ class "navbar__link-item"
+        , Attr.href (Route.toPath route)
+        , Attr.style "font-weight"
+            (if route == currentRoute then
+                "bold"
 
-                 else
-                    "normal"
-                )
-            ]
-            [ text (Route.title route) ]
+             else
+                "normal"
+            )
         ]
+        [ text (linkLabel route) ]
+
+
+linkLabel : Route -> String
+linkLabel route =
+    case route of
+        Route.Homepage ->
+            "Home"
+
+        Route.Counter ->
+            "Counter"
+
+        Route.SignIn ->
+            "Sign In"
+
+        Route.Random ->
+            "Random"
+
+        Route.NotFound ->
+            "Not found"
 
 
 viewFooter : Model -> Html Msg
 viewFooter model =
     footer [ Attr.class "footer" ]
-        [ model.user |> Maybe.withDefault "Not signed in" |> text
+        [ model.user
+            |> Maybe.map Data.User.username
+            |> Maybe.withDefault "not signed in"
+            |> (++) "Current user: "
+            |> text
         ]
 
 

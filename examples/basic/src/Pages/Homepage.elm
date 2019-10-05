@@ -1,8 +1,19 @@
-module Pages.Homepage exposing (view)
+module Pages.Homepage exposing
+    ( title
+    , view
+    )
 
-import Html exposing (Html)
+import Html exposing (..)
+
+
+title : String
+title =
+    "Homepage"
 
 
 view : Html Never
 view =
-    Html.text "Homepage!"
+    div []
+        [ h1 [] [ text "Homepage!" ]
+        , p [] [ text "It's boring, but it works!" ]
+        ]

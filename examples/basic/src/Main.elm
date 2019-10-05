@@ -24,9 +24,10 @@ main =
         , page =
             { init = App.init
             , update = App.update
-            , view = App.view
-            , subscriptions = App.subscriptions
+            , bundle = App.bundle
             }
-        , toRoute = Route.fromUrl
-        , title = Route.title
+        , route =
+            { fromUrl = Route.fromUrl
+            , toPath = Route.toPath
+            }
         }

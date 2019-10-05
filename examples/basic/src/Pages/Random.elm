@@ -3,6 +3,7 @@ module Pages.Random exposing
     , Msg
     , init
     , subscriptions
+    , title
     , update
     , view
     )
@@ -21,6 +22,11 @@ type alias Model =
 type Msg
     = Roll
     | GotOutcome Int
+
+
+title : Model -> String
+title model =
+    "Random | elm-app"
 
 
 init : Flags -> ( Model, Cmd Msg )
@@ -52,12 +58,16 @@ update msg model =
 view : Model -> Html Msg
 view model =
     div []
-        [ button [ Events.onClick Roll ] [ text "Roll" ]
-        , p []
-            [ model.roll
-                |> Maybe.map String.fromInt
-                |> Maybe.withDefault "Click the button!"
-                |> text
+        [ h1 [] [ text "Random!" ]
+        , p [] [ text "Did somebody say 'random numbers pls'?" ]
+        , div []
+            [ button [ Events.onClick Roll ] [ text "Roll" ]
+            , p []
+                [ model.roll
+                    |> Maybe.map String.fromInt
+                    |> Maybe.withDefault "Click the button!"
+                    |> text
+                ]
             ]
         ]
 

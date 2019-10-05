@@ -1,4 +1,11 @@
-module Pages.Counter exposing (Model, Msg, init, update, view)
+module Pages.Counter exposing
+    ( Model
+    , Msg
+    , init
+    , title
+    , update
+    , view
+    )
 
 import Html exposing (..)
 import Html.Events as Events
@@ -12,6 +19,11 @@ type alias Model =
 type Msg
     = Increment
     | Decrement
+
+
+title : Model -> String
+title model =
+    "Counter: " ++ String.fromInt model.counter ++ " | elm-app"
 
 
 init : Model
@@ -33,7 +45,11 @@ update msg model =
 view : Model -> Html Msg
 view model =
     div []
-        [ button [ Events.onClick Decrement ] [ text "-" ]
-        , text (String.fromInt model.counter)
-        , button [ Events.onClick Increment ] [ text "+" ]
+        [ h1 [] [ text "Counter!" ]
+        , p [] [ text "Even the browser tab updates!" ]
+        , div []
+            [ button [ Events.onClick Decrement ] [ text "-" ]
+            , text (String.fromInt model.counter)
+            , button [ Events.onClick Increment ] [ text "+" ]
+            ]
         ]

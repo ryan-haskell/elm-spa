@@ -1,13 +1,13 @@
 module App exposing
     ( Model
     , Msg
+    , bundle
     , init
-    , subscriptions
     , update
-    , view
     )
 
 import Application.Page as Page exposing (Context)
+import Browser
 import Context
 import Flags exposing (Flags)
 import Html exposing (Html)
@@ -15,6 +15,7 @@ import Pages.Counter
 import Pages.Homepage
 import Pages.NotFound
 import Pages.Random
+import Pages.SignIn
 import Route exposing (Route)
 
 
@@ -22,6 +23,7 @@ type Model
     = HomepageModel ()
     | CounterModel Pages.Counter.Model
     | RandomModel Pages.Random.Model
+    | SignInModel Pages.SignIn.Model
     | NotFoundModel ()
 
 
@@ -29,18 +31,21 @@ type Msg
     = HomepageMsg Never
     | CounterMsg Pages.Counter.Msg
     | RandomMsg Pages.Random.Msg
+    | SignInMsg Pages.SignIn.Msg
     | NotFoundMsg Never
 
 
 pages =
     { homepage =
         Page.static
-            { view = Pages.Homepage.view
+            { title = Pages.Homepage.title
+            , view = Pages.Homepage.view
             , toModel = HomepageModel
             }
     , counter =
         Page.sandbox
-            { init = Pages.Counter.init
+            { title = Pages.Counter.title
+            , init = Pages.Counter.init
             , update = Pages.Counter.update
             , view = Pages.Counter.view
             , toModel = CounterModel
@@ -48,16 +53,28 @@ pages =
             }
     , random =
         Page.element
-            { init = Pages.Random.init
+            { title = Pages.Random.title
+            , init = Pages.Random.init
             , update = Pages.Random.update
             , subscriptions = Pages.Random.subscriptions
             , view = Pages.Random.view
             , toModel = RandomModel
             , toMsg = RandomMsg
             }
+    , signIn =
+        Page.page
+            { title = Pages.SignIn.title
+            , init = Pages.SignIn.init
+            , update = Pages.SignIn.update
+            , subscriptions = Pages.SignIn.subscriptions
+            , view = Pages.SignIn.view
+            , toModel = SignInModel
+            , toMsg = SignInMsg
+            }
     , notFound =
         Page.static
-            { view = Pages.NotFound.view
+            { title = Pages.NotFound.title
+            , view = Pages.NotFound.view
             , toModel = NotFoundModel
             }
     }
@@ -70,23 +87,33 @@ init context =
     case context.route of
         Route.Homepage ->
             Page.init
-                { page = pages.homepage }
-                context
+                { page = pages.homepage
+                , context = context
+                }
 
         Route.Counter ->
             Page.init
-                { page = pages.counter }
-                context
+                { page = pages.counter
+                , context = context
+                }
 
         Route.Random ->
             Page.init
-                { page = pages.random }
-                context
+                { page = pages.random
+                , context = context
+                }
+
+        Route.SignIn ->
+            Page.init
+                { page = pages.signIn
+                , context = context
+                }
 
         Route.NotFound ->
             Page.init
-                { page = pages.notFound }
-                context
+                { page = pages.notFound
+                , context = context
+                }
 
 
 update :
@@ -101,8 +128,8 @@ update context appMsg appModel =
                 { page = pages.homepage
                 , msg = msg
                 , model = model
+                , context = context
                 }
-                context
 
         ( HomepageModel _, _ ) ->
             ( appModel
@@ -115,8 +142,8 @@ update context appMsg appModel =
                 { page = pages.counter
                 , msg = msg
                 , model = model
+                , context = context
                 }
-                context
 
         ( CounterModel _, _ ) ->
             ( appModel
@@ -129,10 +156,24 @@ update context appMsg appModel =
                 { page = pages.random
                 , msg = msg
                 , model = model
+                , context = context
                 }
-                context
 
         ( RandomModel _, _ ) ->
+            ( appModel
+            , Cmd.none
+            , Cmd.none
+            )
+
+        ( SignInModel model, SignInMsg msg ) ->
+            Page.update
+                { page = pages.signIn
+                , msg = msg
+                , model = model
+                , context = context
+                }
+
+        ( SignInModel _, _ ) ->
             ( appModel
             , Cmd.none
             , Cmd.none
@@ -143,8 +184,8 @@ update context appMsg appModel =
                 { page = pages.notFound
                 , msg = msg
                 , model = model
+                , context = context
                 }
-                context
 
         ( NotFoundModel _, _ ) ->
             ( appModel
@@ -153,71 +194,43 @@ update context appMsg appModel =
             )
 
 
-subscriptions :
+bundle :
     Context Flags Route Context.Model
     -> Model
-    -> Sub Msg
-subscriptions context appModel =
+    -> Page.Bundle Msg
+bundle context appModel =
     case appModel of
         HomepageModel model ->
-            Page.subscriptions
+            Page.bundle
                 { page = pages.homepage
                 , model = model
+                , context = context
                 }
-                context
 
         CounterModel model ->
-            Page.subscriptions
+            Page.bundle
                 { page = pages.counter
                 , model = model
+                , context = context
                 }
-                context
 
         RandomModel model ->
-            Page.subscriptions
+            Page.bundle
                 { page = pages.random
                 , model = model
+                , context = context
                 }
-                context
+
+        SignInModel model ->
+            Page.bundle
+                { page = pages.signIn
+                , model = model
+                , context = context
+                }
 
         NotFoundModel model ->
-            Page.subscriptions
+            Page.bundle
                 { page = pages.notFound
                 , model = model
+                , context = context
                 }
-                context
-
-
-view :
-    Context Flags Route Context.Model
-    -> Model
-    -> Html Msg
-view context appModel =
-    case appModel of
-        HomepageModel model ->
-            Page.view
-                { page = pages.homepage
-                , model = model
-                }
-                context
-
-        CounterModel model ->
-            Page.view
-                { page = pages.counter
-                , model = model
-                }
-                context
-
-        RandomModel model ->
-            Page.view
-                { page = pages.random
-                , model = model
-                }
-                context
-
-        NotFoundModel model ->
-            Page.view
-                { page = pages.notFound
-                , model = model
-                }
-                context
