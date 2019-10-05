@@ -8,7 +8,7 @@ __Note:__ This package is still under design/development. (but one day, it may b
 
 ```
 git clone https://github.com/ryannhg/elm-app
-cd elm-app
+cd elm-app/examples/basic
 npm install
 npm run dev
 ```
