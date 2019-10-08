@@ -647,6 +647,8 @@ type Msg
   | SignInMsg Pages.SignIn.Msg
   | NotFoundMsg Never
 
+pages = -- TODO
+
 init = -- TODO
 
 update = -- TODO
@@ -654,6 +656,190 @@ update = -- TODO
 bundle = -- TODO
 ```
 
-## uh... still writing the docs 😬
+Here we define a top level `Model` and `Msg`, so we can easily implement `init`, `update`, and `bundle`.
 
-dont look at me... dont look at me!!!
+### pages
+
+```elm
+import Application.Page as Page ✨
+
+pages =
+  { homepage =
+      Page.static
+        { title = Pages.Homepage.title
+        , view = Pages.Homepage.view
+        , toModel = HomepageModel
+        }
+  , signIn =
+      Page.page
+        { title = Pages.SignIn.title
+        , init = Pages.SignIn.init
+        , update = Pages.SignIn.update
+        , subscriptions = Pages.SignIn.subscriptions
+        , view = Pages.SignIn.view
+        , toModel = SignInModel
+        , toMsg = SignInMsg
+        }
+  , notFound =
+      Page.static
+        { title = Pages.NotFound.title
+        , view = Pages.NotFound.view
+        , toModel = NotFoundModel
+        }
+  }
+```
+
+The `Page` type is the important abstraction that allows us to make our `init` function take in the same shape.
+
+#### init
+
+```elm
+import Application exposing (Context) ✨
+import Flags exposing (Flags) ✨
+import Global ✨
+import Route exposing (Route) ✨
+
+init :
+    Context Flags Route Global.Model
+    -> ( Model, Cmd Msg, Cmd Global.Msg )
+init context =
+    case context.route of
+        Route.Homepage ->
+            Application.init
+                { page = pages.homepage
+                , context = context
+                }
+
+        Route.SignIn ->
+            Application.init
+                { page = pages.signIn
+                , context = context
+                }
+
+        Route.NotFound ->
+            Application.init
+                { page = pages.notFound
+                , context = context
+                }
+```
+
+The `Application.init` function takes a `page` and a `context`, to return a consistent type, using the `toModel` and `view` functions you provided in `page` under the hood!
+
+#### update
+
+```elm
+update :
+    Context Flags Route Global.Model
+    -> Msg
+    -> Model
+    -> ( Model, Cmd Msg, Cmd Global.Msg )
+update context appMsg appModel =
+    case ( appModel, appMsg ) of
+        ( HomepageModel model, HomepageMsg msg ) ->
+            Application.update
+                { page = pages.homepage
+                , msg = msg
+                , model = model
+                , context = context
+                }
+
+        ( HomepageModel _, _ ) ->
+            ( appModel
+            , Cmd.none
+            , Cmd.none
+            )
+
+        ( SignInModel model, SignInMsg msg ) ->
+            Application.update
+                { page = pages.signIn
+                , msg = msg
+                , model = model
+                , context = context
+                }
+
+        ( SignInModel _, _ ) ->
+            ( appModel
+            , Cmd.none
+            , Cmd.none
+            )
+
+        ( NotFoundModel model, NotFoundMsg msg ) ->
+            Application.update
+                { page = pages.notFound
+                , msg = msg
+                , model = model
+                , context = context
+                }
+
+        ( NotFoundModel _, _ ) ->
+            ( appModel
+            , Cmd.none
+            , Cmd.none
+            )
+```
+
+Just like `init`, this covers all our pages and uses a helper (`Application.update`) to make typos easy to catch.
+
+#### bundle
+
+```elm
+bundle :
+    Context Flags Route Global.Model
+    -> Model
+    -> Bundle Msg
+bundle context appModel =
+    case appModel of
+        HomepageModel model ->
+            Application.bundle
+                { page = pages.homepage
+                , model = model
+                , context = context
+                }
+
+        SignInModel model ->
+            Application.bundle
+                { page = pages.signIn
+                , model = model
+                , context = context
+                }
+
+        NotFoundModel model ->
+            Application.bundle
+                { page = pages.notFound
+                , model = model
+                , context = context
+                }
+```
+
+Like with the last two examples, `Application.bundle` makes our case expression consistent. Behind the scenes, `bundle` is used to provide `view`, `subscriptions`, and `title`.
+
+The alternative would look super repetitive:
+
+```elm
+-- AN IMPROVEMENT ON
+view =
+  case appModel of
+    HomepageModel model -> Application.view { ... }
+    SignInModel model -> Application.view { ... }
+    NotFounfModel model -> Application.view { ... }
+
+title =
+  case appModel of
+    HomepageModel model -> Application.title { ... }
+    SignInModel model -> Application.title { ... }
+    NotFounfModel model -> Application.title { ... }
+
+subscriptions =
+  case appModel of
+    HomepageModel model -> Application.subscriptions { ... }
+    SignInModel model -> Application.subscriptions { ... }
+    NotFounfModel model -> Application.subscriptions { ... }
+```
+
+The `bundle` abstraction gives us the ability to only write __one case expression__ at the top level for all three of these things 😎
+
+You can find `src/Pages/*.elm` examples in the [basic example]. All those pages are really just normal Elm `init/update/view` things!
+
+## that's it!
+
+Thanks for reading this huge README, I hope this package helps you build great single page apps with Elm! 😄
