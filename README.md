@@ -312,7 +312,7 @@ toPath route =
     NotFound -> "/not-found"
 ```
 
-### that's it for Route.elm!
+#### that's it for Route.elm!
 
 here's the complete file we made.
 
