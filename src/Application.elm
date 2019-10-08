@@ -76,11 +76,12 @@ type alias Config flags route contextModel contextMsg model msg =
             -> contextModel
             -> ( contextModel, Cmd contextMsg, Cmd (Msg contextMsg msg) )
         , subscriptions :
-            route
+            LayoutContext route flags (Msg contextMsg msg)
             -> contextModel
             -> Sub contextMsg
         , view :
-            { route : route
+            { flags : flags
+            , route : route
             , toMsg : contextMsg -> Msg contextMsg msg
             , viewPage : Html (Msg contextMsg msg)
             }
@@ -352,7 +353,8 @@ viewWithConfig config model =
             , Attr.style "opacity" (layoutOpacity model.page)
             ]
             [ config.layout.view
-                { route = config.routing.fromUrl model.url
+                { flags = model.flags
+                , route = config.routing.fromUrl model.url
                 , toMsg = ContextMsg
                 , viewPage =
                     div
@@ -379,7 +381,14 @@ subscriptionsWithConfig config model =
             contextAndPage ( config, model )
     in
     Sub.batch
-        [ Sub.map ContextMsg (config.layout.subscriptions (config.routing.fromUrl model.url) model.context)
+        [ Sub.map ContextMsg
+            (config.layout.subscriptions
+                { navigateTo = navigateTo config model.url
+                , route = config.routing.fromUrl model.url
+                , flags = model.flags
+                }
+                model.context
+            )
         , Sub.map PageMsg (config.pages.bundle context pageModel |> .subscriptions)
         ]
 

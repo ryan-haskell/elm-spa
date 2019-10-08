@@ -448,9 +448,9 @@ This file needs to export the following four functions:
 
 ```elm
 init :
-    { navigateTo : Route -> Cmd msg
+    { flags : Flags
     , route : Route
-    , flags : Flags
+    , navigateTo : Route -> Cmd msg
     }
     -> ( Global.Model, Cmd Global.Msg, Cmd msg )
 init _ =
@@ -462,11 +462,11 @@ init _ =
 
 Initially, our layout has access to a record with three fields:
 
-- __navigateTo__ - allows programmatic navigation to other pages.
+- __flags__ - the initial JSON passed in with the app.
 
 - __route__ - the current route
 
-- __flags__ - the initial JSON passed in with the app.
+- __navigateTo__ - allows programmatic navigation to other pages.
 
 For our example, we set `isSignedIn` to `False`, don't perform any `Global.Msg` side effects, nor use `messages.navigateTo` to change to another page.
 
@@ -474,9 +474,9 @@ For our example, we set `isSignedIn` to `False`, don't perform any `Global.Msg` 
 
 ```elm
 update :
-    { navigateTo : Route -> Cmd msg
+    { flags : Flags
     , route : Route
-    , flags : Flags
+    , navigateTo : Route -> Cmd msg
     }
     -> Global.Msg
     -> Global.Model
@@ -500,8 +500,159 @@ In addition to the record we saw earlier with `init`, our layout's `update` func
 
 That allows us to return an updated state of the app, and programmatically navigate to different pages!
 
+#### view
+
+```elm
+view :
+  { flags : Flags
+  , route : Route
+  , viewPage : Html msg
+  , toMsg : Global.Msg -> msg
+  }
+  -> Global.Model
+  -> Html msg
+view { viewPage, toMsg } model =
+  div [ class "layout" ]
+      [ Html.map toMsg (viewNavbar model)
+      , viewPage
+      , viewFooter
+      ]
+```
+
+Instead of `navigateTo`, our `view` function takes in a record with two other properties:
+
+2. __viewPage__ - where we want the rendered page to show up in our layout
+
+3. __toMsg__ - a way to convert from `Global.Msg` to `msg`, so that components can send global messages, but still return `Html msg`.
+
+The `viewNavbar` function is an example of where we would use `Html.map toMsg` to turn `Html Global.Msg` into `Html msg`:
+
+```elm
+viewNavbar : Global.Model -> Html Global.Msg
+viewNavbar model =
+  header
+    [ class "navbar" ]
+    [ a [ href (Route.toPath Route.Homepage) ]
+        [ text "Home" ]
+    , if model.isSignedIn then 
+        button
+          [ Events.onClick SignOut ]
+          [ text "Sign out" ]
+      else
+        button
+          [ Events.onClick SignIn ]
+          [ text "Sign in" ]
+    ]
+```
+
+The `viewFooter` function doesn't send messages, so `Html.map toMsg` isn't necessary!
+
+```elm
+viewFooter : Html msg
+viewFooter =
+  footer
+    [ class "footer" ]
+    [ text "Build with Elm in 2019" ]
+```
+
+If you'd like, you can update the view to use components in folders like this:
+
+```
+our-project/
+  elm.json
+  src/
+    Main.elm
+    Route.elm
+    Flags.elm
+    Global.elm
+    Components/
+      Layout.elm
+      Navbar.elm ✨
+      Footer.elm ✨
+```
+
+```elm
+import Components.Navbar as Navbar ✨
+import Components.Footer as Footer ✨
+
+-- ...
+
+view :
+  { flags : Flags
+  , route : Route
+  , viewPage : Html msg
+  , toMsg : Global.Msg -> msg
+  }
+  -> Global.Model
+  -> Html msg
+view { viewPage, toMsg } model =
+  div [ class "layout" ]
+      [ Html.map toMsg (Navbar.view model) ✨
+      , viewPage
+      , Footer.view ✨
+      ]
+```
+
+Moving `Components.Layout.viewNavbar` into `Components.Navbar.view`
+
+#### subscriptions
+
+```elm
+subscriptions :
+  { navigateTo : Route -> Cmd msg
+  , route : Route
+  , flags : Flags
+  }
+  -> Global.Model
+  -> Html Global.Msg
+subscriptions _ model =
+  Sub.none
+```
+
+That's the entire file! Here it is
 
 ---
+
+### src/Pages.elm
+
+```
+our-project/
+  elm.json
+  src/
+    Main.elm
+    Route.elm
+    Flags.elm
+    Global.elm
+    Pages.elm ✨
+    Components/
+      Layout.elm
+      Navbar.elm
+      Footer.elm
+```
+
+```elm
+module Pages exposing (init, update, bundle)
+
+import Pages.Homepage
+import Pages.SignIn
+import Pages.NotFound
+
+type Model
+  = HomepageModel ()
+  | SignInModel Pages.SignIn.Model
+  | NotFoundModel ()
+
+type Msg
+  = HomepageMsg Never
+  | SignInModel Pages.SignIn.Msg
+  | NotFoundMsg Never
+
+init = -- TODO
+
+update = -- TODO
+
+bundle = -- TODO
+```
 
 ## uh... still writing the docs 😬
 

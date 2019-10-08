@@ -58,7 +58,8 @@ update { navigateTo } msg model =
 
 
 view :
-    { route : Route
+    { flags : Flags
+    , route : Route
     , toMsg : Global.Msg -> msg
     , viewPage : Html msg
     }
@@ -79,6 +80,12 @@ view { route, toMsg, viewPage } model =
         ]
 
 
-subscriptions : Route -> Global.Model -> Sub Global.Msg
-subscriptions route model =
+subscriptions :
+    { navigateTo : Route -> Cmd msg
+    , route : Route
+    , flags : Flags
+    }
+    -> Global.Model
+    -> Sub Global.Msg
+subscriptions _ model =
     Sub.none
