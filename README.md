@@ -644,7 +644,7 @@ type Model
 
 type Msg
   = HomepageMsg Never
-  | SignInModel Pages.SignIn.Msg
+  | SignInMsg Pages.SignIn.Msg
   | NotFoundMsg Never
 
 init = -- TODO
