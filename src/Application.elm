@@ -5,7 +5,6 @@ module Application exposing
     , Context
     , init, update
     , Bundle, bundle
-    , Messages
     )
 
 {-|
@@ -21,8 +20,6 @@ module Application exposing
 @docs init, update
 
 @docs Bundle, bundle
-
-@docs Messages
 
 -}
 
@@ -60,7 +57,7 @@ create config =
 
 
 type alias LayoutContext route flags msg =
-    { messages : Messages route msg
+    { navigateTo : route -> Cmd msg
     , route : route
     , flags : flags
     }
@@ -181,23 +178,6 @@ type Msg contextMsg msg
     | PageMsg msg
 
 
-{-| These are the messages that your top-level can send to the application.
-
-For now, the only message is `navigateTo`, which navigates to the provided route!
-
-    case msg of
-        SignIn (Ok user) ->
-            ( { model | user = Just user }
-            , Cmd.none
-            , navigateTo Route.Homepage
-            )
-
--}
-type alias Messages route msg =
-    { navigateTo : route -> Cmd msg
-    }
-
-
 initWithConfig :
     Config flags route contextModel contextMsg model msg
     -> flags
@@ -211,7 +191,7 @@ initWithConfig config flags url key =
 
         ( contextModel, contextCmd, globalCmd ) =
             config.layout.init
-                { messages = { navigateTo = navigateTo config url }
+                { navigateTo = navigateTo config url
                 , route = route
                 , flags = flags
                 }
@@ -288,7 +268,7 @@ updateWithConfig config msg model =
             let
                 ( contextModel, contextCmd, globalCmd ) =
                     config.layout.update
-                        { messages = { navigateTo = navigateTo config model.url }
+                        { navigateTo = navigateTo config model.url
                         , route = config.routing.fromUrl model.url
                         , flags = model.flags
                         }

@@ -19,7 +19,7 @@ import Utils.Cmd
 
 
 init :
-    { messages : Application.Messages Route msg
+    { navigateTo : Route -> Cmd msg
     , route : Route
     , flags : Flags
     }
@@ -32,26 +32,29 @@ init _ =
 
 
 update :
-    { messages : Application.Messages Route msg
+    { navigateTo : Route -> Cmd msg
     , route : Route
     , flags : Flags
     }
     -> Global.Msg
     -> Global.Model
     -> ( Global.Model, Cmd Global.Msg, Cmd msg )
-update { messages } msg model =
+update { navigateTo } msg model =
     case msg of
         Global.SignIn (Ok user) ->
             ( { model | user = Just user }
             , Cmd.none
-            , messages.navigateTo Route.Homepage
+            , navigateTo Route.Homepage
             )
 
         Global.SignIn (Err _) ->
             Utils.Cmd.pure model
 
         Global.SignOut ->
-            Utils.Cmd.pure { model | user = Nothing }
+            ( { model | user = Nothing }
+            , Cmd.none
+            , navigateTo Route.SignIn
+            )
 
 
 view :
