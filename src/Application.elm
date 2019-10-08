@@ -1,60 +1,80 @@
 module Application exposing
-    ( Application
-    , create
+    ( create
+    , Application
+    , Config
+    , Context
+    , init, update
+    , Bundle, bundle
     , Messages
     )
 
-{-| A package for building single page apps with Elm!
-
-
-# Application
-
-@docs Application
-
-
-# Creating applications
+{-|
 
 @docs create
 
+@docs Application
 
-# Navigating all smooth-like
+@docs Config
+
+@docs Context
+
+@docs init, update
+
+@docs Bundle, bundle
 
 @docs Messages
 
 -}
 
-import Application.Page exposing (Context)
 import Browser
 import Browser.Navigation as Nav
 import Html exposing (Html, div)
 import Html.Attributes as Attr
+import Internals.Context as Context exposing (Context)
+import Internals.Page as Page exposing (Page)
 import Process
 import Task
 import Url exposing (Url)
 
 
 {-| A type that's provided for type annotations!
-
-Instead of `Program Flags Model Msg`, you can use this type to annotate your main method:
-
-    main : Application Flags Context.Model Context.Msg App.Model App.Msg
-    main =
-        Application.create { ... }
-
 -}
 type alias Application flags contextModel contextMsg model msg =
     Program flags (Model flags contextModel model) (Msg contextMsg msg)
 
 
+{-| The way to create an `Html` single page application!
+-}
+create :
+    Config flags route contextModel contextMsg model msg
+    -> Application flags contextModel contextMsg model msg
+create config =
+    Browser.application
+        { init = initWithConfig config
+        , update = updateWithConfig config
+        , view = viewWithConfig config
+        , subscriptions = subscriptionsWithConfig config
+        , onUrlChange = UrlChanged
+        , onUrlRequest = UrlRequested
+        }
+
+
+type alias LayoutContext route flags msg =
+    { messages : Messages route msg
+    , route : route
+    , flags : flags
+    }
+
+
+{-| Provide some high-level information for your application.
+-}
 type alias Config flags route contextModel contextMsg model msg =
-    { context :
+    { layout :
         { init :
-            route
-            -> flags
-            -> ( contextModel, Cmd contextMsg )
+            LayoutContext route flags (Msg contextMsg msg)
+            -> ( contextModel, Cmd contextMsg, Cmd (Msg contextMsg msg) )
         , update :
-            Messages route (Msg contextMsg msg)
-            -> route
+            LayoutContext route flags (Msg contextMsg msg)
             -> contextMsg
             -> contextModel
             -> ( contextModel, Cmd contextMsg, Cmd (Msg contextMsg msg) )
@@ -64,13 +84,13 @@ type alias Config flags route contextModel contextMsg model msg =
             -> Sub contextMsg
         , view :
             { route : route
-            , context : contextModel
             , toMsg : contextMsg -> Msg contextMsg msg
             , viewPage : Html (Msg contextMsg msg)
             }
+            -> contextModel
             -> Html (Msg contextMsg msg)
         }
-    , page :
+    , pages :
         { init :
             Context flags route contextModel
             -> ( model, Cmd msg, Cmd contextMsg )
@@ -82,56 +102,24 @@ type alias Config flags route contextModel contextMsg model msg =
         , bundle :
             Context flags route contextModel
             -> model
-            -> Application.Page.Bundle msg
+            -> Bundle msg
         }
-    , route :
-        { fromUrl : Url -> route
+    , routing :
+        { transition : Float
+        , fromUrl : Url -> route
         , toPath : route -> String
         }
-    , transition : Float
     }
 
 
-{-| The way to create an `Application`!
-
-Provide this function with a configuration, and it will bundle things up for you.
-
-Here's an example (from the `examples/basic` folder of this repo):
-
-    main : Application Flags Context.Model Context.Msg App.Model App.Msg
-    main =
-        Application.create
-            { transition = 200
-            , context =
-                { init = Context.init
-                , update = Context.update
-                , view = Context.view
-                , subscriptions = Context.subscriptions
-                }
-            , page =
-                { init = App.init
-                , update = App.update
-                , bundle = App.view
-                }
-            , route =
-                { fromUrl = Route.fromUrl
-                , toPath = Route.toPath
-                }
-            }
-
+{-| The nformation about the route, flags, or global app state.
 -}
-create :
-    Config flags route contextModel contextMsg model msg
-    -> Application flags contextModel contextMsg model msg
-create config =
-    Browser.application
-        { init = init config
-        , update = update config
-        , view = view config
-        , subscriptions = subscriptions config
-        , onUrlChange = UrlChanged
-        , onUrlRequest = UrlRequested
-        }
+type alias Context flags route contextModel =
+    Context.Context flags route contextModel
+
+
+
+-- ACTUAl STUFF
 
 
 type alias Model flags contextModel model =
@@ -193,27 +181,43 @@ type Msg contextMsg msg
     | PageMsg msg
 
 
+{-| These are the messages that your top-level can send to the application.
+
+For now, the only message is `navigateTo`, which navigates to the provided route!
+
+    case msg of
+        SignIn (Ok user) ->
+            ( { model | user = Just user }
+            , Cmd.none
+            , navigateTo Route.Homepage
+            )
+
+-}
 type alias Messages route msg =
     { navigateTo : route -> Cmd msg
     }
 
 
-init :
+initWithConfig :
     Config flags route contextModel contextMsg model msg
     -> flags
     -> Url
     -> Nav.Key
     -> ( Model flags contextModel model, Cmd (Msg contextMsg msg) )
-init config flags url key =
+initWithConfig config flags url key =
     let
         route =
-            config.route.fromUrl url
+            config.routing.fromUrl url
 
-        ( contextModel, contextCmd ) =
-            config.context.init route flags
+        ( contextModel, contextCmd, globalCmd ) =
+            config.layout.init
+                { messages = { navigateTo = navigateTo config url }
+                , route = route
+                , flags = flags
+                }
 
         ( pageModel, pageCmd, pageContextCmd ) =
-            config.page.init
+            config.pages.init
                 { route = route
                 , flags = flags
                 , context = contextModel
@@ -226,7 +230,8 @@ init config flags url key =
       , page = FirstLoad pageModel
       }
     , Cmd.batch
-        [ delay config.transition (PageLoaded url)
+        [ globalCmd
+        , delay config.routing.transition (PageLoaded url)
         , Cmd.map ContextMsg contextCmd
         , Cmd.map ContextMsg pageContextCmd
         , Cmd.map PageMsg pageCmd
@@ -239,12 +244,12 @@ delay ms msg =
     Task.perform (\_ -> msg) (Process.sleep ms)
 
 
-update :
+updateWithConfig :
     Config flags route contextModel contextMsg model msg
     -> Msg contextMsg msg
     -> Model flags contextModel model
     -> ( Model flags contextModel model, Cmd (Msg contextMsg msg) )
-update config msg model =
+updateWithConfig config msg model =
     case msg of
         UrlRequested urlRequest ->
             case urlRequest of
@@ -260,14 +265,14 @@ update config msg model =
 
         UrlChanged url ->
             ( { model | page = Loading (unwrap model.page) }
-            , delay config.transition (PageLoaded url)
+            , delay config.routing.transition (PageLoaded url)
             )
 
         PageLoaded url ->
             let
                 ( pageModel, pageCmd, contextCmd ) =
-                    config.page.init
-                        { route = config.route.fromUrl url
+                    config.pages.init
+                        { route = config.routing.fromUrl url
                         , flags = model.flags
                         , context = model.context
                         }
@@ -282,10 +287,11 @@ update config msg model =
         ContextMsg msg_ ->
             let
                 ( contextModel, contextCmd, globalCmd ) =
-                    config.context.update
-                        { navigateTo = navigateTo config model.url
+                    config.layout.update
+                        { messages = { navigateTo = navigateTo config model.url }
+                        , route = config.routing.fromUrl model.url
+                        , flags = model.flags
                         }
-                        (config.route.fromUrl model.url)
                         msg_
                         model.context
             in
@@ -299,8 +305,8 @@ update config msg model =
         PageMsg msg_ ->
             let
                 ( pageModel, pageCmd, contextCmd ) =
-                    config.page.update
-                        { route = config.route.fromUrl model.url
+                    config.pages.update
+                        { route = config.routing.fromUrl model.url
                         , flags = model.flags
                         , context = model.context
                         }
@@ -321,11 +327,11 @@ type alias Document msg =
     }
 
 
-view :
+viewWithConfig :
     Config flags route contextModel contextMsg model msg
     -> Model flags contextModel model
     -> Document (Msg contextMsg msg)
-view config model =
+viewWithConfig config model =
     let
         transitionProp : Float -> String
         transitionProp ms =
@@ -358,43 +364,43 @@ view config model =
         ( context, pageModel ) =
             contextAndPage ( config, model )
     in
-    { title = config.page.bundle context pageModel |> .title
+    { title = config.pages.bundle context pageModel |> .title
     , body =
         [ div
             [ Attr.class "app"
-            , Attr.style "transition" (transitionProp config.transition)
+            , Attr.style "transition" (transitionProp config.routing.transition)
             , Attr.style "opacity" (layoutOpacity model.page)
             ]
-            [ config.context.view
-                { route = config.route.fromUrl model.url
+            [ config.layout.view
+                { route = config.routing.fromUrl model.url
                 , toMsg = ContextMsg
-                , context = model.context
                 , viewPage =
                     div
-                        [ Attr.style "transition" (transitionProp config.transition)
+                        [ Attr.style "transition" (transitionProp config.routing.transition)
                         , Attr.style "opacity" (pageOpacity model.page)
                         ]
                         [ Html.map PageMsg
-                            (config.page.bundle context pageModel |> .view)
+                            (config.pages.bundle context pageModel |> .view)
                         ]
                 }
+                model.context
             ]
         ]
     }
 
 
-subscriptions :
+subscriptionsWithConfig :
     Config flags route contextModel contextMsg model msg
     -> Model flags contextModel model
     -> Sub (Msg contextMsg msg)
-subscriptions config model =
+subscriptionsWithConfig config model =
     let
         ( context, pageModel ) =
             contextAndPage ( config, model )
     in
     Sub.batch
-        [ Sub.map ContextMsg (config.context.subscriptions (config.route.fromUrl model.url) model.context)
-        , Sub.map PageMsg (config.page.bundle context pageModel |> .subscriptions)
+        [ Sub.map ContextMsg (config.layout.subscriptions (config.routing.fromUrl model.url) model.context)
+        , Sub.map PageMsg (config.pages.bundle context pageModel |> .subscriptions)
         ]
 
 
@@ -404,9 +410,9 @@ subscriptions config model =
 
 contextAndPage :
     ( Config flags route contextModel contextMsg model msg, Model flags contextModel model )
-    -> ( Application.Page.Context flags route contextModel, model )
+    -> ( Context flags route contextModel, model )
 contextAndPage ( config, model ) =
-    ( { route = config.route.fromUrl model.url
+    ( { route = config.routing.fromUrl model.url
       , flags = model.flags
       , context = model.context
       }
@@ -420,7 +426,131 @@ navigateTo :
     -> route
     -> Cmd (Msg contextMsg msg)
 navigateTo config url route =
-    Task.succeed (config.route.toPath route)
+    Task.succeed (config.routing.toPath route)
         |> Task.map (\path -> { url | path = path })
         |> Task.map Browser.Internal
         |> Task.perform UrlRequested
+
+
+
+-- HELPERS
+
+
+{-| Used to help wire up the top-level `init` function.
+
+    -- ...
+    case context.route of
+        Route.Homepage ->
+            Application.init
+                { page = pages.homepage
+                , context = context
+                }
+    -- ...
+
+-}
+init :
+    { page : Page route flags contextModel contextMsg model msg appModel appMsg
+    , context : Context flags route contextModel
+    }
+    -> ( appModel, Cmd appMsg, Cmd contextMsg )
+init config =
+    Page.init config.page config.context
+        |> mapTruple
+            { fromMsg = Page.toMsg config.page
+            , fromModel = Page.toModel config.page
+            }
+
+
+{-| Used to help wire up the top-level `update` function.
+
+    -- ...
+    case ( appModel, appMsg ) of
+        ( HomepageModel model, HomepageMsg msg ) ->
+            Application.update
+                { page = pages.homepage
+                , msg = msg
+                , model = model
+                , context = context
+                }
+    -- ...
+
+-}
+update :
+    { page : Page route flags contextModel contextMsg model msg appModel appMsg
+    , msg : msg
+    , model : model
+    , context : Context flags route contextModel
+    }
+    -> ( appModel, Cmd appMsg, Cmd contextMsg )
+update config =
+    Page.update config.page config.context config.msg config.model
+        |> mapTruple
+            { fromMsg = Page.toMsg config.page
+            , fromModel = Page.toModel config.page
+            }
+
+
+{-| A bundle of `view`, `subscriptions`, and `title`, to eliminate the need for three separate functions for each at the top-level.
+-}
+type alias Bundle appMsg =
+    { title : String
+    , view : Html appMsg
+    , subscriptions : Sub appMsg
+    }
+
+
+{-| Used to help wire up the top-level `bundle` function.
+
+    -- ...
+    case appModel of
+        HomepageModel model ->
+            Application.bundle
+                { page = pages.homepage
+                , model = model
+                , context = context
+                }
+    -- ...
+
+-}
+bundle :
+    { page : Page route flags contextModel contextMsg model msg appModel appMsg
+    , model : model
+    , context : Context flags route contextModel
+    }
+    -> Bundle appMsg
+bundle config =
+    { title =
+        Page.title
+            config.page
+            config.context
+            config.model
+    , view =
+        Html.map (Page.toMsg config.page) <|
+            Page.view
+                config.page
+                config.context
+                config.model
+    , subscriptions =
+        Sub.map (Page.toMsg config.page) <|
+            Page.subscriptions
+                config.page
+                config.context
+                config.model
+    }
+
+
+
+-- UTILS
+
+
+mapTruple :
+    { fromMsg : msg -> appMsg
+    , fromModel : model -> appModel
+    }
+    -> ( model, Cmd msg, Cmd contextMsg )
+    -> ( appModel, Cmd appMsg, Cmd contextMsg )
+mapTruple { fromModel, fromMsg } ( a, b, c ) =
+    ( fromModel a
+    , Cmd.map fromMsg b
+    , c
+    )

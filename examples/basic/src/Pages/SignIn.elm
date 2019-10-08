@@ -8,10 +8,10 @@ module Pages.SignIn exposing
     , view
     )
 
-import Application.Page exposing (Context)
-import Context
+import Application exposing (Context)
 import Data.User as User exposing (User)
 import Flags exposing (Flags)
+import Global
 import Html exposing (..)
 import Html.Attributes as Attr
 import Html.Events as Events
@@ -35,7 +35,7 @@ type Field
     | Password
 
 
-title : Context Flags Route Context.Model -> Model -> String
+title : Context Flags Route Global.Model -> Model -> String
 title { context } model =
     case context.user of
         Just user ->
@@ -46,17 +46,17 @@ title { context } model =
 
 
 init :
-    Context Flags Route Context.Model
-    -> ( Model, Cmd Msg, Cmd Context.Msg )
+    Context Flags Route Global.Model
+    -> ( Model, Cmd Msg, Cmd Global.Msg )
 init _ =
     Utils.Cmd.pure { username = "", password = "" }
 
 
 update :
-    Context Flags Route Context.Model
+    Context Flags Route Global.Model
     -> Msg
     -> Model
-    -> ( Model, Cmd Msg, Cmd Context.Msg )
+    -> ( Model, Cmd Msg, Cmd Global.Msg )
 update _ msg model =
     case msg of
         Update Username value ->
@@ -71,13 +71,13 @@ update _ msg model =
             , User.signIn
                 { username = model.username
                 , password = model.password
-                , msg = Context.SignIn
+                , msg = Global.SignIn
                 }
             )
 
 
 view :
-    Context Flags Route Context.Model
+    Context Flags Route Global.Model
     -> Model
     -> Html Msg
 view _ model =
@@ -129,7 +129,7 @@ viewInput options =
 
 
 subscriptions :
-    Context Flags Route Context.Model
+    Context Flags Route Global.Model
     -> Model
     -> Sub Msg
 subscriptions _ model =

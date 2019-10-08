@@ -1,4 +1,4 @@
-module App exposing
+module Pages exposing
     ( Model
     , Msg
     , bundle
@@ -6,10 +6,11 @@ module App exposing
     , update
     )
 
-import Application.Page as Page exposing (Context)
+import Application exposing (Bundle, Context)
+import Application.Page as Page
 import Browser
-import Context
 import Flags exposing (Flags)
+import Global
 import Html exposing (Html)
 import Pages.Counter
 import Pages.Homepage
@@ -81,50 +82,50 @@ pages =
 
 
 init :
-    Context Flags Route Context.Model
-    -> ( Model, Cmd Msg, Cmd Context.Msg )
+    Context Flags Route Global.Model
+    -> ( Model, Cmd Msg, Cmd Global.Msg )
 init context =
     case context.route of
         Route.Homepage ->
-            Page.init
+            Application.init
                 { page = pages.homepage
                 , context = context
                 }
 
         Route.Counter ->
-            Page.init
+            Application.init
                 { page = pages.counter
                 , context = context
                 }
 
         Route.Random ->
-            Page.init
+            Application.init
                 { page = pages.random
                 , context = context
                 }
 
         Route.SignIn ->
-            Page.init
+            Application.init
                 { page = pages.signIn
                 , context = context
                 }
 
         Route.NotFound ->
-            Page.init
+            Application.init
                 { page = pages.notFound
                 , context = context
                 }
 
 
 update :
-    Context Flags Route Context.Model
+    Context Flags Route Global.Model
     -> Msg
     -> Model
-    -> ( Model, Cmd Msg, Cmd Context.Msg )
+    -> ( Model, Cmd Msg, Cmd Global.Msg )
 update context appMsg appModel =
     case ( appModel, appMsg ) of
         ( HomepageModel model, HomepageMsg msg ) ->
-            Page.update
+            Application.update
                 { page = pages.homepage
                 , msg = msg
                 , model = model
@@ -138,7 +139,7 @@ update context appMsg appModel =
             )
 
         ( CounterModel model, CounterMsg msg ) ->
-            Page.update
+            Application.update
                 { page = pages.counter
                 , msg = msg
                 , model = model
@@ -152,7 +153,7 @@ update context appMsg appModel =
             )
 
         ( RandomModel model, RandomMsg msg ) ->
-            Page.update
+            Application.update
                 { page = pages.random
                 , msg = msg
                 , model = model
@@ -166,7 +167,7 @@ update context appMsg appModel =
             )
 
         ( SignInModel model, SignInMsg msg ) ->
-            Page.update
+            Application.update
                 { page = pages.signIn
                 , msg = msg
                 , model = model
@@ -180,7 +181,7 @@ update context appMsg appModel =
             )
 
         ( NotFoundModel model, NotFoundMsg msg ) ->
-            Page.update
+            Application.update
                 { page = pages.notFound
                 , msg = msg
                 , model = model
@@ -195,41 +196,41 @@ update context appMsg appModel =
 
 
 bundle :
-    Context Flags Route Context.Model
+    Context Flags Route Global.Model
     -> Model
-    -> Page.Bundle Msg
+    -> Bundle Msg
 bundle context appModel =
     case appModel of
         HomepageModel model ->
-            Page.bundle
+            Application.bundle
                 { page = pages.homepage
                 , model = model
                 , context = context
                 }
 
         CounterModel model ->
-            Page.bundle
+            Application.bundle
                 { page = pages.counter
                 , model = model
                 , context = context
                 }
 
         RandomModel model ->
-            Page.bundle
+            Application.bundle
                 { page = pages.random
                 , model = model
                 , context = context
                 }
 
         SignInModel model ->
-            Page.bundle
+            Application.bundle
                 { page = pages.signIn
                 , model = model
                 , context = context
                 }
 
         NotFoundModel model ->
-            Page.bundle
+            Application.bundle
                 { page = pages.notFound
                 , model = model
                 , context = context

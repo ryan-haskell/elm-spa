@@ -68,7 +68,7 @@ label div {
   width: 100%;
 }
 
-.container {
+.layout__page {
   flex: 1 0 auto;
   padding: 2rem 0;
   box-sizing: border-box;

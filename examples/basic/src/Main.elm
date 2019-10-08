@@ -1,29 +1,30 @@
 module Main exposing (main)
 
-import App
 import Application exposing (Application)
-import Context
+import Components.Layout as Layout
 import Flags exposing (Flags)
+import Global
+import Pages
 import Route exposing (Route)
 
 
-main : Application Flags Context.Model Context.Msg App.Model App.Msg
+main : Application Flags Global.Model Global.Msg Pages.Model Pages.Msg
 main =
     Application.create
-        { transition = 200
-        , context =
-            { init = Context.init
-            , update = Context.update
-            , view = Context.view
-            , subscriptions = Context.subscriptions
-            }
-        , page =
-            { init = App.init
-            , update = App.update
-            , bundle = App.bundle
-            }
-        , route =
-            { fromUrl = Route.fromUrl
+        { routing =
+            { transition = 200
+            , fromUrl = Route.fromUrl
             , toPath = Route.toPath
+            }
+        , layout =
+            { init = Layout.init
+            , update = Layout.update
+            , view = Layout.view
+            , subscriptions = Layout.subscriptions
+            }
+        , pages =
+            { init = Pages.init
+            , update = Pages.update
+            , bundle = Pages.bundle
             }
         }
