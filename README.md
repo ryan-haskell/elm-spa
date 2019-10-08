@@ -237,13 +237,12 @@ module Route exposing (Route(..))
 
 type Route
   = Homepage
+  | SignIn
 ```
 
-For now, there is only one route called `Homepage`.
+For now, there is only two routes: `Homepage` and `SignIn`.
 
-__Note:__ Our `exposing` statement has `Route(..)` instead of `Route`. so we can access `Route.Homepage` outside of this module (We'll come back to that later)
-
-For `src/Main.elm` to work, we also need to create and expose `fromUrl` and `toPath` so our application handles routing and page navigation correctly!
+We also need to make `fromUrl` and `toPath` so our application handles routing and page navigation correctly!
 
 For that, we need to install the official `elm/url` package:
 
@@ -265,6 +264,7 @@ import Url.Parser as Parser exposing (Parser) ✨
 
 type Route
   = Homepage
+  | SignIn
 
 fromUrl : Url -> Route ✨
 -- TODO
@@ -280,14 +280,16 @@ Let's get started on implementing `fromUrl` by using the `Parser` module:
 ```elm
 type Route
   = Homepage
+  | SignIn
   | NotFound ✨ -- see note #2
 
 fromUrl : Url -> Route
 fromUrl url =
   let
     router =
-      Parser.oneOf
-        [ Parser.map Homepage Parser.top ✨ -- see note #1
+      Parser.oneOf ✨ -- see note #1
+        [ Parser.map Homepage Parser.top
+        , Parser.map SignIn (Parser.s "sign-in")
         ]
   in
     Parser.parse router url
@@ -296,9 +298,10 @@ fromUrl url =
 
 __Notes__
 
-1. Here we're matching the top url `/` with our `Homepage`
+1. With `Parser.oneOf`, we match `/` to `Homepage` and `/sign-in` to `SignIn`.
 
 2. `Parser.parse` returns a `Maybe Route` because it not find a match in our `router`. That means we need to add a `NotFound` case (good catch, Elm!)
+
 
 #### toPath
 
@@ -309,6 +312,7 @@ toPath : Route -> String ✨
 toPath route =
   case route of
     Homepage -> "/"
+    SignIn -> "/sign-in"
     NotFound -> "/not-found"
 ```
 
@@ -328,6 +332,7 @@ import Url.Parser as Parser exposing (Parser)
 
 type Route
   = Homepage
+  | SignIn
   | NotFound
 
 fromUrl : Url -> Route
@@ -336,6 +341,7 @@ fromUrl url =
     router =
       Parser.oneOf
         [ Parser.map Homepage Parser.top
+        , Parser.map SignIn (Parser.s "sign-in")
         ]
   in
     Parser.parse router url
@@ -345,6 +351,7 @@ toPath : Route -> String
 toPath route =
   case route of
     Homepage -> "/"
+    SignIn -> "/sign-in"
     NotFound -> "/not-found"
 ```
 
@@ -367,7 +374,7 @@ our-project/
     Flags.elm ✨
 ```
 
-For this app, we don't actually have flags, so we return an empty tuple!
+For this app, we don't actually have flags, so we return an empty tuple.
 
 ```elm
 module Flags exposing (Flags)
@@ -375,7 +382,7 @@ module Flags exposing (Flags)
 type alias Flags = ()
 ```
 
-Let's move onto something more interesting!
+So let's move onto something more interesting!
 
 ---
 
@@ -391,7 +398,7 @@ our-project/
     Global.elm ✨
 ```
 
-Let's create `src/Global.elm` to define the `Model` and `Msg` types we'll share across pages and use in our layout functions:
+The purpose of `Global.elm` is to define the `Model` and `Msg` types we'll share across pages and use in our layout functions:
 
 ```elm
 module Global exposing ( Model, Msg(..) )
@@ -407,7 +414,7 @@ type Msg
 
 Here we create a simple record to keep track of the user's sign in status.
 
-Let's use `Global.Model` and `Global.Msg` in our layout:
+Let's see an example of `Global.Model` and `Global.Msg` being used in our layout:
 
 
 ### src/Components/Layout.elm
@@ -453,9 +460,9 @@ init _ =
   )
 ```
 
-Initially, our layout takes in three inputs:
+Initially, our layout has access to a record with three fields:
 
-- __messages__ - not used here, but allows programmatic navigation to other pages.
+- __navigateTo__ - allows programmatic navigation to other pages.
 
 - __route__ - the current route
 
@@ -489,13 +496,9 @@ update { navigateTo } msg model =
       )
 ```
 
-Here, our layout's update takes four inputs:
+In addition to the record we saw earlier with `init`, our layout's `update` function take a `Global.Msg` and `Global.Model`:
 
-- __messages__ - allows programmatic navigation to other pages.
-
-- __route__ - the current route
-
-- __flags__ - the initial JSON passed in with the app.
+That allows us to return an updated state of the app, and programmatically navigate to different pages!
 
 
 ---
