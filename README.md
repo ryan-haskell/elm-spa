@@ -298,7 +298,7 @@ __Notes__
 
 1. Here we're matching the top url `/` with our `Homepage`
 
-2. Because `Parser.parse` returns a `Maybe Route` because it not find a match in our `router`. That means we need to add a `NotFound` case (good catch, Elm!)
+2. `Parser.parse` returns a `Maybe Route` because it not find a match in our `router`. That means we need to add a `NotFound` case (good catch, Elm!)
 
 #### toPath
 
