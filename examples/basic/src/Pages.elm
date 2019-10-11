@@ -128,7 +128,7 @@ update appMsg appModel =
                 }
 
         ( HomepageModel _, _ ) ->
-            Application.pure appModel
+            Application.keep appModel
 
         ( CounterModel model, CounterMsg msg ) ->
             Application.update
@@ -138,7 +138,7 @@ update appMsg appModel =
                 }
 
         ( CounterModel _, _ ) ->
-            Application.pure appModel
+            Application.keep appModel
 
         ( RandomModel model, RandomMsg msg ) ->
             Application.update
@@ -148,7 +148,7 @@ update appMsg appModel =
                 }
 
         ( RandomModel _, _ ) ->
-            Application.pure appModel
+            Application.keep appModel
 
         ( SignInModel model, SignInMsg msg ) ->
             Application.update
@@ -158,7 +158,7 @@ update appMsg appModel =
                 }
 
         ( SignInModel _, _ ) ->
-            Application.pure appModel
+            Application.keep appModel
 
         ( NotFoundModel model, NotFoundMsg msg ) ->
             Application.update
@@ -168,7 +168,7 @@ update appMsg appModel =
                 }
 
         ( NotFoundModel _, _ ) ->
-            Application.pure appModel
+            Application.keep appModel
 
 
 bundle :

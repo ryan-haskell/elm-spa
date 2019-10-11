@@ -3,7 +3,7 @@ module Application exposing
     , Application
     , Config
     , Context
-    , init, update, pure
+    , init, update, keep
     , Bundle, bundle
     )
 
@@ -17,7 +17,7 @@ module Application exposing
 
 @docs Context
 
-@docs init, update, pure
+@docs init, update, keep
 
 @docs Bundle, bundle
 
@@ -425,11 +425,11 @@ update config context =
             }
 
 
-pure :
+keep :
     appModel
     -> Context flags route contextModel
     -> ( appModel, Cmd appMsg, Cmd contextMsg )
-pure model _ =
+keep model _ =
     ( model, Cmd.none, Cmd.none )
 
 

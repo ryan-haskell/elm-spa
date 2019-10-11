@@ -739,7 +739,7 @@ update appMsg appModel =
                 }
 
         ( HomepageModel _, _ ) ->
-            Application.pure appModel
+            Application.keep appModel
 
         ( SignInModel model, SignInMsg msg ) ->
             Application.update
@@ -749,7 +749,7 @@ update appMsg appModel =
                 }
 
         ( SignInModel _, _ ) ->
-            Application.pure appModel
+            Application.keep appModel
 
         ( NotFoundModel model, NotFoundMsg msg ) ->
             Application.update
@@ -759,7 +759,7 @@ update appMsg appModel =
                 }
 
         ( NotFoundModel _, _ ) ->
-            Application.pure appModel
+            Application.keep appModel
 ```
 
 #### bundle
