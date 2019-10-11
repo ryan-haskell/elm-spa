@@ -3,7 +3,7 @@ module Application exposing
     , Application
     , Config
     , Context
-    , init, update
+    , init, update, pure
     , Bundle, bundle
     )
 
@@ -17,7 +17,7 @@ module Application exposing
 
 @docs Context
 
-@docs init, update
+@docs init, update, pure
 
 @docs Bundle, bundle
 
@@ -29,6 +29,7 @@ import Html exposing (Html, div)
 import Html.Attributes as Attr
 import Internals.Context as Context exposing (Context)
 import Internals.Page as Page exposing (Page)
+import Internals.Transitionable as Transitionable exposing (Transitionable)
 import Process
 import Task
 import Url exposing (Url)
@@ -90,16 +91,17 @@ type alias Config flags route contextModel contextMsg model msg =
         }
     , pages :
         { init :
-            Context flags route contextModel
+            route
+            -> Context flags route contextModel
             -> ( model, Cmd msg, Cmd contextMsg )
         , update :
-            Context flags route contextModel
-            -> msg
+            msg
             -> model
+            -> Context flags route contextModel
             -> ( model, Cmd msg, Cmd contextMsg )
         , bundle :
-            Context flags route contextModel
-            -> model
+            model
+            -> Context flags route contextModel
             -> Bundle msg
         }
     , routing :
@@ -125,50 +127,8 @@ type alias Model flags contextModel model =
     , url : Url
     , flags : flags
     , context : contextModel
-    , page : Loadable model
+    , page : Transitionable model
     }
-
-
-type Loadable a
-    = FirstLoad a
-    | Loading a
-    | Loaded a
-
-
-isFirstLoad : Loadable a -> Bool
-isFirstLoad loadable =
-    case loadable of
-        FirstLoad _ ->
-            True
-
-        _ ->
-            False
-
-
-unwrap : Loadable a -> a
-unwrap loadable =
-    case loadable of
-        FirstLoad a ->
-            a
-
-        Loading a ->
-            a
-
-        Loaded a ->
-            a
-
-
-map : (a -> b) -> Loadable a -> Loadable b
-map fn loadable =
-    case loadable of
-        FirstLoad a ->
-            FirstLoad (fn a)
-
-        Loading a ->
-            Loading (fn a)
-
-        Loaded a ->
-            Loaded (fn a)
 
 
 type Msg contextMsg msg
@@ -199,6 +159,7 @@ initWithConfig config flags url key =
 
         ( pageModel, pageCmd, pageContextCmd ) =
             config.pages.init
+                route
                 { route = route
                 , flags = flags
                 , context = contextModel
@@ -208,7 +169,7 @@ initWithConfig config flags url key =
       , key = key
       , flags = flags
       , context = contextModel
-      , page = FirstLoad pageModel
+      , page = Transitionable.FirstLoad pageModel
       }
     , Cmd.batch
         [ globalCmd
@@ -245,20 +206,24 @@ updateWithConfig config msg model =
                     )
 
         UrlChanged url ->
-            ( { model | page = Loading (unwrap model.page) }
+            ( { model | page = Transitionable.Loading (Transitionable.unwrap model.page) }
             , delay config.routing.transition (PageLoaded url)
             )
 
         PageLoaded url ->
             let
+                route =
+                    config.routing.fromUrl url
+
                 ( pageModel, pageCmd, contextCmd ) =
                     config.pages.init
-                        { route = config.routing.fromUrl url
+                        route
+                        { route = route
                         , flags = model.flags
                         , context = model.context
                         }
             in
-            ( { model | url = url, page = Loaded pageModel }
+            ( { model | url = url, page = Transitionable.Loaded pageModel }
             , Cmd.batch
                 [ Cmd.map PageMsg pageCmd
                 , Cmd.map ContextMsg contextCmd
@@ -287,14 +252,14 @@ updateWithConfig config msg model =
             let
                 ( pageModel, pageCmd, contextCmd ) =
                     config.pages.update
+                        msg_
+                        (Transitionable.unwrap model.page)
                         { route = config.routing.fromUrl model.url
                         , flags = model.flags
                         , context = model.context
                         }
-                        msg_
-                        (unwrap model.page)
             in
-            ( { model | page = map (always pageModel) model.page }
+            ( { model | page = Transitionable.map (always pageModel) model.page }
             , Cmd.batch
                 [ Cmd.map ContextMsg contextCmd
                 , Cmd.map PageMsg pageCmd
@@ -318,39 +283,18 @@ viewWithConfig config model =
         transitionProp ms =
             "opacity " ++ String.fromFloat ms ++ "ms ease-in-out"
 
-        layoutOpacity : Loadable a -> String
-        layoutOpacity loadable =
-            case loadable of
-                FirstLoad _ ->
-                    "0"
-
-                Loading _ ->
-                    "1"
-
-                Loaded _ ->
-                    "1"
-
-        pageOpacity : Loadable a -> String
-        pageOpacity loadable =
-            case loadable of
-                FirstLoad _ ->
-                    "0"
-
-                Loading _ ->
-                    "0"
-
-                Loaded _ ->
-                    "1"
-
         ( context, pageModel ) =
             contextAndPage ( config, model )
+
+        bundle_ =
+            config.pages.bundle pageModel context
     in
-    { title = config.pages.bundle context pageModel |> .title
+    { title = bundle_.title
     , body =
         [ div
             [ Attr.class "app"
             , Attr.style "transition" (transitionProp config.routing.transition)
-            , Attr.style "opacity" (layoutOpacity model.page)
+            , Attr.style "opacity" (Transitionable.layoutOpacity model.page)
             ]
             [ config.layout.view
                 { flags = model.flags
@@ -359,10 +303,9 @@ viewWithConfig config model =
                 , viewPage =
                     div
                         [ Attr.style "transition" (transitionProp config.routing.transition)
-                        , Attr.style "opacity" (pageOpacity model.page)
+                        , Attr.style "opacity" (Transitionable.pageOpacity model.page)
                         ]
-                        [ Html.map PageMsg
-                            (config.pages.bundle context pageModel |> .view)
+                        [ Html.map PageMsg bundle_.view
                         ]
                 }
                 model.context
@@ -379,6 +322,9 @@ subscriptionsWithConfig config model =
     let
         ( context, pageModel ) =
             contextAndPage ( config, model )
+
+        bundle_ =
+            config.pages.bundle pageModel context
     in
     Sub.batch
         [ Sub.map ContextMsg
@@ -389,7 +335,7 @@ subscriptionsWithConfig config model =
                 }
                 model.context
             )
-        , Sub.map PageMsg (config.pages.bundle context pageModel |> .subscriptions)
+        , Sub.map PageMsg bundle_.subscriptions
         ]
 
 
@@ -405,7 +351,7 @@ contextAndPage ( config, model ) =
       , flags = model.flags
       , context = model.context
       }
-    , unwrap model.page
+    , Transitionable.unwrap model.page
     )
 
 
@@ -439,11 +385,11 @@ navigateTo config url route =
 -}
 init :
     { page : Page route flags contextModel contextMsg model msg appModel appMsg
-    , context : Context flags route contextModel
     }
+    -> Context flags route contextModel
     -> ( appModel, Cmd appMsg, Cmd contextMsg )
-init config =
-    Page.init config.page config.context
+init config context =
+    Page.init config.page context
         |> mapTruple
             { fromMsg = Page.toMsg config.page
             , fromModel = Page.toModel config.page
@@ -468,15 +414,23 @@ update :
     { page : Page route flags contextModel contextMsg model msg appModel appMsg
     , msg : msg
     , model : model
-    , context : Context flags route contextModel
     }
+    -> Context flags route contextModel
     -> ( appModel, Cmd appMsg, Cmd contextMsg )
-update config =
-    Page.update config.page config.context config.msg config.model
+update config context =
+    Page.update config.page context config.msg config.model
         |> mapTruple
             { fromMsg = Page.toMsg config.page
             , fromModel = Page.toModel config.page
             }
+
+
+pure :
+    appModel
+    -> Context flags route contextModel
+    -> ( appModel, Cmd appMsg, Cmd contextMsg )
+pure model _ =
+    ( model, Cmd.none, Cmd.none )
 
 
 {-| A bundle of `view`, `subscriptions`, and `title`, to eliminate the need for three separate functions for each at the top-level.
@@ -504,26 +458,26 @@ type alias Bundle appMsg =
 bundle :
     { page : Page route flags contextModel contextMsg model msg appModel appMsg
     , model : model
-    , context : Context flags route contextModel
     }
+    -> Context flags route contextModel
     -> Bundle appMsg
-bundle config =
+bundle config context =
     { title =
         Page.title
             config.page
-            config.context
+            context
             config.model
     , view =
         Html.map (Page.toMsg config.page) <|
             Page.view
                 config.page
-                config.context
+                context
                 config.model
     , subscriptions =
         Sub.map (Page.toMsg config.page) <|
             Page.subscriptions
                 config.page
-                config.context
+                context
                 config.model
     }
 

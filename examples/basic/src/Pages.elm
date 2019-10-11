@@ -82,156 +82,127 @@ pages =
 
 
 init :
-    Context Flags Route Global.Model
+    Route
+    -> Context Flags Route Global.Model
     -> ( Model, Cmd Msg, Cmd Global.Msg )
-init context =
-    case context.route of
+init route =
+    case route of
         Route.Homepage ->
             Application.init
                 { page = pages.homepage
-                , context = context
                 }
 
         Route.Counter ->
             Application.init
                 { page = pages.counter
-                , context = context
                 }
 
         Route.Random ->
             Application.init
                 { page = pages.random
-                , context = context
                 }
 
         Route.SignIn ->
             Application.init
                 { page = pages.signIn
-                , context = context
                 }
 
         Route.NotFound ->
             Application.init
                 { page = pages.notFound
-                , context = context
                 }
 
 
 update :
-    Context Flags Route Global.Model
-    -> Msg
+    Msg
     -> Model
+    -> Context Flags Route Global.Model
     -> ( Model, Cmd Msg, Cmd Global.Msg )
-update context appMsg appModel =
+update appMsg appModel =
     case ( appModel, appMsg ) of
         ( HomepageModel model, HomepageMsg msg ) ->
             Application.update
                 { page = pages.homepage
                 , msg = msg
                 , model = model
-                , context = context
                 }
 
         ( HomepageModel _, _ ) ->
-            ( appModel
-            , Cmd.none
-            , Cmd.none
-            )
+            Application.pure appModel
 
         ( CounterModel model, CounterMsg msg ) ->
             Application.update
                 { page = pages.counter
                 , msg = msg
                 , model = model
-                , context = context
                 }
 
         ( CounterModel _, _ ) ->
-            ( appModel
-            , Cmd.none
-            , Cmd.none
-            )
+            Application.pure appModel
 
         ( RandomModel model, RandomMsg msg ) ->
             Application.update
                 { page = pages.random
                 , msg = msg
                 , model = model
-                , context = context
                 }
 
         ( RandomModel _, _ ) ->
-            ( appModel
-            , Cmd.none
-            , Cmd.none
-            )
+            Application.pure appModel
 
         ( SignInModel model, SignInMsg msg ) ->
             Application.update
                 { page = pages.signIn
                 , msg = msg
                 , model = model
-                , context = context
                 }
 
         ( SignInModel _, _ ) ->
-            ( appModel
-            , Cmd.none
-            , Cmd.none
-            )
+            Application.pure appModel
 
         ( NotFoundModel model, NotFoundMsg msg ) ->
             Application.update
                 { page = pages.notFound
                 , msg = msg
                 , model = model
-                , context = context
                 }
 
         ( NotFoundModel _, _ ) ->
-            ( appModel
-            , Cmd.none
-            , Cmd.none
-            )
+            Application.pure appModel
 
 
 bundle :
-    Context Flags Route Global.Model
-    -> Model
+    Model
+    -> Context Flags Route Global.Model
     -> Bundle Msg
-bundle context appModel =
+bundle appModel =
     case appModel of
         HomepageModel model ->
             Application.bundle
                 { page = pages.homepage
                 , model = model
-                , context = context
                 }
 
         CounterModel model ->
             Application.bundle
                 { page = pages.counter
                 , model = model
-                , context = context
                 }
 
         RandomModel model ->
             Application.bundle
                 { page = pages.random
                 , model = model
-                , context = context
                 }
 
         SignInModel model ->
             Application.bundle
                 { page = pages.signIn
                 , model = model
-                , context = context
                 }
 
         NotFoundModel model ->
             Application.bundle
                 { page = pages.notFound
                 , model = model
-                , context = context
                 }
