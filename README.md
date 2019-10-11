@@ -821,19 +821,19 @@ view =
   case appModel of
     HomepageModel model -> Application.view { ... }
     SignInModel model -> Application.view { ... }
-    NotFounfModel model -> Application.view { ... }
+    NotFoundModel model -> Application.view { ... }
 
 title =
   case appModel of
     HomepageModel model -> Application.title { ... }
     SignInModel model -> Application.title { ... }
-    NotFounfModel model -> Application.title { ... }
+    NotFoundModel model -> Application.title { ... }
 
 subscriptions =
   case appModel of
     HomepageModel model -> Application.subscriptions { ... }
     SignInModel model -> Application.subscriptions { ... }
-    NotFounfModel model -> Application.subscriptions { ... }
+    NotFoundModel model -> Application.subscriptions { ... }
 ```
 
 The `bundle` abstraction gives us the ability to only write __one case expression__ at the top level for all three of these things 😎
