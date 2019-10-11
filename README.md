@@ -700,114 +700,93 @@ import Global ✨
 import Route exposing (Route) ✨
 
 init :
-    Context Flags Route Global.Model
+    Route
+    -> Context Flags Route Global.Model
     -> ( Model, Cmd Msg, Cmd Global.Msg )
-init context =
-    case context.route of
+init route =
+    case route of
         Route.Homepage ->
             Application.init
                 { page = pages.homepage
-                , context = context
                 }
 
         Route.SignIn ->
             Application.init
                 { page = pages.signIn
-                , context = context
                 }
 
         Route.NotFound ->
             Application.init
                 { page = pages.notFound
-                , context = context
                 }
 ```
-
-The `Application.init` function takes a `page` and a `context`, to return a consistent type, using the `toModel` and `view` functions you provided in `page` under the hood!
 
 #### update
 
 ```elm
 update :
-    Context Flags Route Global.Model
-    -> Msg
+    Msg
     -> Model
+    -> Context Flags Route Global.Model
     -> ( Model, Cmd Msg, Cmd Global.Msg )
-update context appMsg appModel =
+update appMsg appModel =
     case ( appModel, appMsg ) of
         ( HomepageModel model, HomepageMsg msg ) ->
             Application.update
                 { page = pages.homepage
                 , msg = msg
                 , model = model
-                , context = context
                 }
 
         ( HomepageModel _, _ ) ->
-            ( appModel
-            , Cmd.none
-            , Cmd.none
-            )
+            Application.pure appModel
 
         ( SignInModel model, SignInMsg msg ) ->
             Application.update
                 { page = pages.signIn
                 , msg = msg
                 , model = model
-                , context = context
                 }
 
         ( SignInModel _, _ ) ->
-            ( appModel
-            , Cmd.none
-            , Cmd.none
-            )
+            Application.pure appModel
 
         ( NotFoundModel model, NotFoundMsg msg ) ->
             Application.update
                 { page = pages.notFound
                 , msg = msg
                 , model = model
-                , context = context
                 }
 
         ( NotFoundModel _, _ ) ->
-            ( appModel
-            , Cmd.none
-            , Cmd.none
-            )
+            Application.pure appModel
 ```
-
-Just like `init`, this covers all our pages and uses a helper (`Application.update`) to make typos easy to catch.
 
 #### bundle
 
 ```elm
 bundle :
-    Context Flags Route Global.Model
-    -> Model
+    Model
+    -> Context Flags Route Global.Model
     -> Bundle Msg
-bundle context appModel =
+bundle appModel =
     case appModel of
         HomepageModel model ->
             Application.bundle
                 { page = pages.homepage
                 , model = model
-                , context = context
                 }
 
         SignInModel model ->
             Application.bundle
                 { page = pages.signIn
                 , model = model
-                , context = context
                 }
 
         NotFoundModel model ->
             Application.bundle
                 { page = pages.notFound
                 , model = model
-                , context = context
                 }
 ```
 
@@ -817,19 +796,19 @@ The alternative would look super repetitive:
 
 ```elm
 -- AN IMPROVEMENT ON
-view =
+view appModel =
   case appModel of
     HomepageModel model -> Application.view { ... }
     SignInModel model -> Application.view { ... }
     NotFoundModel model -> Application.view { ... }
 
-title =
+title appModel =
   case appModel of
     HomepageModel model -> Application.title { ... }
     SignInModel model -> Application.title { ... }
     NotFoundModel model -> Application.title { ... }
 
-subscriptions =
+subscriptions appModel =
   case appModel of
     HomepageModel model -> Application.subscriptions { ... }
     SignInModel model -> Application.subscriptions { ... }
