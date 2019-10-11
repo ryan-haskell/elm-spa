@@ -395,7 +395,8 @@ our-project/
     Main.elm
     Route.elm
     Flags.elm
-    Global.elm ✨
+    Global.elm
+    Ports.elm ✨
 ```
 
 The purpose of `Global.elm` is to define the `Model` and `Msg` types we'll share across pages and use in our layout functions:
@@ -410,11 +411,35 @@ type alias Model =
 type Msg
     = SignIn
     | SignOut
+    | Log String
 ```
 
 Here we create a simple record to keep track of the user's sign in status.
 
 Let's see an example of `Global.Model` and `Global.Msg` being used in our layout:
+
+#### src/Ports.elm
+
+```
+our-project/
+  elm.json
+  src/
+    Main.elm
+    Route.elm
+    Flags.elm
+    Global.elm
+    Ports.elm ✨
+```
+
+If you need to use ports, create a file called `src/Ports.elm`
+
+```elm
+port module Ports exposing (log)
+
+port log : String -> Cmd msg
+```
+
+We'll use them in the layouts component up next!
 
 
 ### src/Components/Layout.elm
@@ -427,6 +452,7 @@ our-project/
     Route.elm
     Flags.elm
     Global.elm
+    Ports.elm
     Components/
       Layout.elm ✨
 ```
@@ -473,6 +499,8 @@ For our example, we set `isSignedIn` to `False`, don't perform any `Global.Msg` 
 #### update
 
 ```elm
+import Ports ✨
+
 update :
     { flags : Flags
     , route : Route
@@ -493,6 +521,12 @@ update { navigateTo } msg model =
       ( { model | isSignedIn = False }
       , Cmd.none
       , navigateTo Route.SignIn
+      )
+
+    Log message ->
+      ( model
+      , Cmd.none
+      , Ports.log message
       )
 ```
 
@@ -565,6 +599,7 @@ our-project/
     Route.elm
     Flags.elm
     Global.elm
+    Ports.elm
     Components/
       Layout.elm
       Navbar.elm ✨
@@ -623,6 +658,7 @@ our-project/
     Route.elm
     Flags.elm
     Global.elm
+    Ports.elm
     Pages.elm ✨
     Components/
       Layout.elm
