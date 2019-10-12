@@ -432,19 +432,20 @@ type alias TitleViewSubs appMsg =
 
 
 bundle :
-    { page : Page route flags contextModel contextMsg model msg appModel appMsg pageElement
-    , model : model
-    , toHtml : (msg -> appMsg) -> pageElement -> Html appMsg
-    }
+    ((msg -> appMsg) -> pageElement -> Html appMsg)
+    ->
+        { page : Page route flags contextModel contextMsg model msg appModel appMsg pageElement
+        , model : model
+        }
     -> Bundle flags route contextModel appMsg
-bundle config context =
+bundle toHtml config context =
     { title =
         Page.title
             config.page
             context
             config.model
     , view =
-        config.toHtml (Page.toMsg config.page) <|
+        toHtml (Page.toMsg config.page) <|
             Page.view
                 config.page
                 context

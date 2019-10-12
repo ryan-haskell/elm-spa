@@ -35,6 +35,11 @@ type Msg
     | NotFoundMsg Never
 
 
+app =
+    { bundle = Application.bundle Html.map
+    }
+
+
 pages =
     { homepage =
         Page.static
@@ -176,36 +181,31 @@ bundle :
 bundle appModel =
     case appModel of
         HomepageModel model ->
-            Application.bundle
+            app.bundle
                 { page = pages.homepage
                 , model = model
-                , toHtml = Html.map
                 }
 
         CounterModel model ->
-            Application.bundle
+            app.bundle
                 { page = pages.counter
                 , model = model
-                , toHtml = Html.map
                 }
 
         RandomModel model ->
-            Application.bundle
+            app.bundle
                 { page = pages.random
                 , model = model
-                , toHtml = Html.map
                 }
 
         SignInModel model ->
-            Application.bundle
+            app.bundle
                 { page = pages.signIn
                 , model = model
-                , toHtml = Html.map
                 }
 
         NotFoundModel model ->
-            Application.bundle
+            app.bundle
                 { page = pages.notFound
                 , model = model
-                , toHtml = Html.map
                 }
