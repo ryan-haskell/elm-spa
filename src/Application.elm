@@ -1,25 +1,22 @@
 module Application exposing
     ( create
-    , Application
-    , Config
+    , Application, Config
     , Context
-    , init, update, keep
-    , Bundle, bundle
+    , init, update, keep, bundle
+    , Update, Bundle
     )
 
 {-|
 
 @docs create
 
-@docs Application
-
-@docs Config
+@docs Application, Config
 
 @docs Context
 
-@docs init, update, keep
+@docs init, update, keep, bundle
 
-@docs Bundle, bundle
+@docs Update, Bundle
 
 -}
 
@@ -35,14 +32,10 @@ import Task
 import Url exposing (Url)
 
 
-{-| A type that's provided for type annotations!
--}
 type alias Application flags contextModel contextMsg model msg =
     Program flags (Model flags contextModel model) (Msg contextMsg msg)
 
 
-{-| The way to create an `Html` single page application!
--}
 create :
     Config flags route contextModel contextMsg model msg
     -> Application flags contextModel contextMsg model msg
@@ -64,8 +57,6 @@ type alias LayoutContext route flags msg =
     }
 
 
-{-| Provide some high-level information for your application.
--}
 type alias Config flags route contextModel contextMsg model msg =
     { layout :
         { init :
@@ -102,7 +93,7 @@ type alias Config flags route contextModel contextMsg model msg =
         , bundle :
             model
             -> Context flags route contextModel
-            -> Bundle msg
+            -> TitleViewSubs msg
         }
     , routing :
         { transition : Float
@@ -112,8 +103,6 @@ type alias Config flags route contextModel contextMsg model msg =
     }
 
 
-{-| The nformation about the route, flags, or global app state.
--}
 type alias Context flags route contextModel =
     Context.Context flags route contextModel
 
@@ -371,23 +360,18 @@ navigateTo config url route =
 -- HELPERS
 
 
-{-| Used to help wire up the top-level `init` function.
+type alias Update flags route contextModel contextMsg appModel appMsg =
+    Context flags route contextModel -> ( appModel, Cmd appMsg, Cmd contextMsg )
 
-    -- ...
-    case context.route of
-        Route.Homepage ->
-            Application.init
-                { page = pages.homepage
-                , context = context
-                }
-    -- ...
 
--}
+type alias Bundle flags route contextModel appMsg =
+    Context flags route contextModel -> TitleViewSubs appMsg
+
+
 init :
     { page : Page route flags contextModel contextMsg model msg appModel appMsg
     }
-    -> Context flags route contextModel
-    -> ( appModel, Cmd appMsg, Cmd contextMsg )
+    -> Update flags route contextModel contextMsg appModel appMsg
 init config context =
     Page.init config.page context
         |> mapTruple
@@ -396,27 +380,12 @@ init config context =
             }
 
 
-{-| Used to help wire up the top-level `update` function.
-
-    -- ...
-    case ( appModel, appMsg ) of
-        ( HomepageModel model, HomepageMsg msg ) ->
-            Application.update
-                { page = pages.homepage
-                , msg = msg
-                , model = model
-                , context = context
-                }
-    -- ...
-
--}
 update :
     { page : Page route flags contextModel contextMsg model msg appModel appMsg
     , msg : msg
     , model : model
     }
-    -> Context flags route contextModel
-    -> ( appModel, Cmd appMsg, Cmd contextMsg )
+    -> Update flags route contextModel contextMsg appModel appMsg
 update config context =
     Page.update config.page context config.msg config.model
         |> mapTruple
@@ -427,40 +396,23 @@ update config context =
 
 keep :
     appModel
-    -> Context flags route contextModel
-    -> ( appModel, Cmd appMsg, Cmd contextMsg )
+    -> Update flags route contextModel contextMsg appModel appMsg
 keep model _ =
     ( model, Cmd.none, Cmd.none )
 
 
-{-| A bundle of `view`, `subscriptions`, and `title`, to eliminate the need for three separate functions for each at the top-level.
--}
-type alias Bundle appMsg =
+type alias TitleViewSubs appMsg =
     { title : String
     , view : Html appMsg
     , subscriptions : Sub appMsg
     }
 
 
-{-| Used to help wire up the top-level `bundle` function.
-
-    -- ...
-    case appModel of
-        HomepageModel model ->
-            Application.bundle
-                { page = pages.homepage
-                , model = model
-                , context = context
-                }
-    -- ...
-
--}
 bundle :
     { page : Page route flags contextModel contextMsg model msg appModel appMsg
     , model : model
     }
-    -> Context flags route contextModel
-    -> Bundle appMsg
+    -> Bundle flags route contextModel appMsg
 bundle config context =
     { title =
         Page.title

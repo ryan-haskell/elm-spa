@@ -5,7 +5,7 @@ import Components.Layout as Layout
 import Flags exposing (Flags)
 import Global
 import Pages
-import Route exposing (Route)
+import Route
 
 
 main : Application Flags Global.Model Global.Msg Pages.Model Pages.Msg

@@ -6,12 +6,10 @@ module Pages exposing
     , update
     )
 
-import Application exposing (Bundle, Context)
+import Application
 import Application.Page as Page
-import Browser
 import Flags exposing (Flags)
 import Global
-import Html exposing (Html)
 import Pages.Counter
 import Pages.Homepage
 import Pages.NotFound
@@ -83,8 +81,7 @@ pages =
 
 init :
     Route
-    -> Context Flags Route Global.Model
-    -> ( Model, Cmd Msg, Cmd Global.Msg )
+    -> Application.Update Flags Route Global.Model Global.Msg Model Msg
 init route =
     case route of
         Route.Homepage ->
@@ -116,8 +113,7 @@ init route =
 update :
     Msg
     -> Model
-    -> Context Flags Route Global.Model
-    -> ( Model, Cmd Msg, Cmd Global.Msg )
+    -> Application.Update Flags Route Global.Model Global.Msg Model Msg
 update appMsg appModel =
     case ( appModel, appMsg ) of
         ( HomepageModel model, HomepageMsg msg ) ->
@@ -173,8 +169,7 @@ update appMsg appModel =
 
 bundle :
     Model
-    -> Context Flags Route Global.Model
-    -> Bundle Msg
+    -> Application.Bundle Flags Route Global.Model Msg
 bundle appModel =
     case appModel of
         HomepageModel model ->

@@ -5,15 +5,12 @@ module Components.Layout exposing
     , view
     )
 
-import Application
 import Components.Footer
 import Components.Navbar
-import Data.User exposing (User)
 import Flags exposing (Flags)
 import Global
 import Html exposing (..)
-import Html.Attributes as Attr exposing (class)
-import Html.Events as Events
+import Html.Attributes exposing (class)
 import Route exposing (Route)
 import Utils.Cmd
 
