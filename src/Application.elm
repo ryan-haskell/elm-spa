@@ -7,16 +7,16 @@ module Application exposing
     , Update
     , bundle
     , create
+    , createWith
     , init
     , keep
     , start
     , update
-    , usingLayout
     )
 
 import Browser
 import Browser.Navigation as Nav
-import Html exposing (Html, div)
+import Html exposing (Html)
 import Html.Attributes as Attr
 import Internals.Context as Context exposing (Context)
 import Internals.Page as Page exposing (Page)
@@ -26,9 +26,9 @@ import Task
 import Url exposing (Url)
 
 
-type Application flags route contextModel contextMsg model msg appElement element
+type Application flags route contextModel contextMsg model msg appElement element appAttribute
     = Application
-        { adapters : Adapters appElement element contextMsg msg
+        { adapters : Adapters appElement appAttribute element contextMsg msg
         , config : Config flags route contextModel contextMsg model msg appElement element
         }
 
@@ -37,10 +37,11 @@ type alias Program flags contextModel contextMsg model msg =
     Platform.Program flags (Model flags contextModel model) (Msg contextMsg msg)
 
 
-type alias Adapters appElement element contextMsg msg =
+type alias Adapters appElement appAttribute element contextMsg msg =
     { toLayout : appElement -> Html (Msg contextMsg msg)
-    , fromHtml : Html (Msg contextMsg msg) -> appElement
-    , map : (msg -> Msg contextMsg msg) -> element -> Html (Msg contextMsg msg)
+    , fromAttribute : Html.Attribute (Msg contextMsg msg) -> appAttribute
+    , map : (msg -> Msg contextMsg msg) -> element -> appElement
+    , node : List appAttribute -> List appElement -> appElement
     }
 
 
@@ -103,27 +104,20 @@ type alias Context flags route contextModel =
 
 create :
     Config flags route contextModel contextMsg model msg (Html (Msg contextMsg msg)) (Html msg)
-    -> Application flags route contextModel contextMsg model msg (Html (Msg contextMsg msg)) (Html msg)
+    -> Application flags route contextModel contextMsg model msg (Html (Msg contextMsg msg)) (Html msg) (Html.Attribute (Msg contextMsg msg))
 create =
     createWith
         { toLayout = identity
-        , fromHtml = identity
+        , fromAttribute = identity
         , map = Html.map
+        , node = Html.div
         }
 
 
-usingLayout :
-    Adapters appElement element contextMsg msg
-    -> Application flags route contextModel contextMsg model msg appElement element
-    -> Application flags route contextModel contextMsg model msg appElement element
-usingLayout adapters (Application application) =
-    Application { application | adapters = adapters }
-
-
 createWith :
-    Adapters appElement element contextMsg msg
+    Adapters appElement appAttribute element contextMsg msg
     -> Config flags route contextModel contextMsg model msg appElement element
-    -> Application flags route contextModel contextMsg model msg appElement element
+    -> Application flags route contextModel contextMsg model msg appElement element appAttribute
 createWith adapters config =
     Application
         { adapters = adapters
@@ -132,7 +126,7 @@ createWith adapters config =
 
 
 start :
-    Application flags route contextModel contextMsg model msg appElement element
+    Application flags route contextModel contextMsg model msg appElement element appAttribute
     -> Program flags contextModel contextMsg model msg
 start (Application { adapters, config }) =
     Browser.application
@@ -301,7 +295,7 @@ type alias Document msg =
 
 
 viewWithConfig :
-    Adapters appElement element contextMsg msg
+    Adapters appElement appAttribute element contextMsg msg
     -> Config flags route contextModel contextMsg model msg appElement element
     -> Model flags contextModel model
     -> Document (Msg contextMsg msg)
@@ -320,10 +314,12 @@ viewWithConfig adapters config model =
     in
     { title = bundle_.title
     , body =
-        [ div
+        [ Html.div
             [ Attr.class "app"
             , Attr.style "transition" (transitionProp config.routing.transition)
             , Attr.style "opacity" (Transitionable.layoutOpacity model.page)
+            , Attr.style "height" "100%"
+            , Attr.style "width" "100%"
             ]
             [ adapters.toLayout <|
                 config.layout.view
@@ -331,13 +327,14 @@ viewWithConfig adapters config model =
                     , route = config.routing.fromUrl model.url
                     , toMsg = ContextMsg
                     , viewPage =
-                        adapters.fromHtml <|
-                            div
-                                [ Attr.style "transition" (transitionProp config.routing.transition)
-                                , Attr.style "opacity" (Transitionable.pageOpacity model.page)
-                                ]
-                                [ adapters.map PageMsg bundle_.view
-                                ]
+                        adapters.node
+                            [ adapters.fromAttribute (Attr.style "height" "100%")
+                            , adapters.fromAttribute (Attr.style "width" "100%")
+                            , adapters.fromAttribute (Attr.style "transition" (transitionProp config.routing.transition))
+                            , adapters.fromAttribute (Attr.style "opacity" (Transitionable.pageOpacity model.page))
+                            ]
+                            [ adapters.map PageMsg bundle_.view
+                            ]
                     }
                     model.context
             ]

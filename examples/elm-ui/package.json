@@ -1,0 +1,17 @@
+{
+  "name": "@ryannhg/elm-app-examples-elm-ui",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "parcel index.html"
+  },
+  "author": "Ryan Haskell-Glatz",
+  "license": "ISC",
+  "devDependencies": {
+    "elm": "0.19.0-no-deps",
+    "elm-hot": "^1.1.2",
+    "node-elm-compiler": "^5.0.4",
+    "parcel-bundler": "1.12.4"
+  }
+}
