@@ -1,24 +1,18 @@
 module Application exposing
-    ( create
-    , Application, Config
+    ( Application
+    , Bundle
+    , Config
     , Context
-    , init, update, keep, bundle
-    , Update, Bundle
+    , Program
+    , Update
+    , bundle
+    , create
+    , init
+    , keep
+    , start
+    , update
+    , usingLayout
     )
-
-{-|
-
-@docs create
-
-@docs Application, Config
-
-@docs Context
-
-@docs init, update, keep, bundle
-
-@docs Update, Bundle
-
--}
 
 import Browser
 import Browser.Navigation as Nav
@@ -32,41 +26,22 @@ import Task
 import Url exposing (Url)
 
 
-type alias Application flags contextModel contextMsg model msg =
-    Program flags (Model flags contextModel model) (Msg contextMsg msg)
+type Application flags route contextModel contextMsg model msg appElement element
+    = Application
+        { adapters : Adapters appElement element contextMsg msg
+        , config : Config flags route contextModel contextMsg model msg appElement element
+        }
+
+
+type alias Program flags contextModel contextMsg model msg =
+    Platform.Program flags (Model flags contextModel model) (Msg contextMsg msg)
 
 
 type alias Adapters appElement element contextMsg msg =
     { toLayout : appElement -> Html (Msg contextMsg msg)
     , fromHtml : Html (Msg contextMsg msg) -> appElement
-    , toHtml : (msg -> Msg contextMsg msg) -> element -> appElement
+    , map : (msg -> Msg contextMsg msg) -> element -> Html (Msg contextMsg msg)
     }
-
-
-create :
-    Config flags route contextModel contextMsg model msg (Html (Msg contextMsg msg))
-    -> Application flags contextModel contextMsg model msg
-create =
-    createWith
-        { toLayout = identity
-        , fromHtml = identity
-        , toHtml = Html.map
-        }
-
-
-createWith :
-    Adapters appElement element contextMsg msg
-    -> Config flags route contextModel contextMsg model msg appElement
-    -> Application flags contextModel contextMsg model msg
-createWith adapters config =
-    Browser.application
-        { init = initWithConfig config
-        , update = updateWithConfig config
-        , view = viewWithConfig adapters config
-        , subscriptions = subscriptionsWithConfig config
-        , onUrlChange = UrlChanged
-        , onUrlRequest = UrlRequested
-        }
 
 
 type alias LayoutContext route flags msg =
@@ -76,7 +51,7 @@ type alias LayoutContext route flags msg =
     }
 
 
-type alias Config flags route contextModel contextMsg model msg appElement =
+type alias Config flags route contextModel contextMsg model msg appElement element =
     { layout :
         { init :
             LayoutContext route flags (Msg contextMsg msg)
@@ -112,7 +87,7 @@ type alias Config flags route contextModel contextMsg model msg appElement =
         , bundle :
             model
             -> Context flags route contextModel
-            -> TitleViewSubs msg
+            -> TitleViewSubs msg element
         }
     , routing :
         { transition : Float
@@ -126,8 +101,52 @@ type alias Context flags route contextModel =
     Context.Context flags route contextModel
 
 
+create :
+    Config flags route contextModel contextMsg model msg (Html (Msg contextMsg msg)) (Html msg)
+    -> Application flags route contextModel contextMsg model msg (Html (Msg contextMsg msg)) (Html msg)
+create =
+    createWith
+        { toLayout = identity
+        , fromHtml = identity
+        , map = Html.map
+        }
 
--- ACTUAl STUFF
+
+usingLayout :
+    Adapters appElement element contextMsg msg
+    -> Application flags route contextModel contextMsg model msg appElement element
+    -> Application flags route contextModel contextMsg model msg appElement element
+usingLayout adapters (Application application) =
+    Application { application | adapters = adapters }
+
+
+createWith :
+    Adapters appElement element contextMsg msg
+    -> Config flags route contextModel contextMsg model msg appElement element
+    -> Application flags route contextModel contextMsg model msg appElement element
+createWith adapters config =
+    Application
+        { adapters = adapters
+        , config = config
+        }
+
+
+start :
+    Application flags route contextModel contextMsg model msg appElement element
+    -> Program flags contextModel contextMsg model msg
+start (Application { adapters, config }) =
+    Browser.application
+        { init = initWithConfig config
+        , update = updateWithConfig config
+        , view = viewWithConfig adapters config
+        , subscriptions = subscriptionsWithConfig config
+        , onUrlChange = UrlChanged
+        , onUrlRequest = UrlRequested
+        }
+
+
+
+-- ACTUAL STUFF
 
 
 type alias Model flags contextModel model =
@@ -148,7 +167,7 @@ type Msg contextMsg msg
 
 
 initWithConfig :
-    Config flags route contextModel contextMsg model msg appElement
+    Config flags route contextModel contextMsg model msg appElement element
     -> flags
     -> Url
     -> Nav.Key
@@ -195,7 +214,7 @@ delay ms msg =
 
 
 updateWithConfig :
-    Config flags route contextModel contextMsg model msg appElement
+    Config flags route contextModel contextMsg model msg appElement element
     -> Msg contextMsg msg
     -> Model flags contextModel model
     -> ( Model flags contextModel model, Cmd (Msg contextMsg msg) )
@@ -283,7 +302,7 @@ type alias Document msg =
 
 viewWithConfig :
     Adapters appElement element contextMsg msg
-    -> Config flags route contextModel contextMsg model msg appElement
+    -> Config flags route contextModel contextMsg model msg appElement element
     -> Model flags contextModel model
     -> Document (Msg contextMsg msg)
 viewWithConfig adapters config model =
@@ -295,7 +314,7 @@ viewWithConfig adapters config model =
         ( context, pageModel ) =
             contextAndPage ( config, model )
 
-        bundle_ : TitleViewSubs msg
+        bundle_ : TitleViewSubs msg element
         bundle_ =
             config.pages.bundle pageModel context
     in
@@ -317,7 +336,7 @@ viewWithConfig adapters config model =
                                 [ Attr.style "transition" (transitionProp config.routing.transition)
                                 , Attr.style "opacity" (Transitionable.pageOpacity model.page)
                                 ]
-                                [ Html.map PageMsg bundle_.view
+                                [ adapters.map PageMsg bundle_.view
                                 ]
                     }
                     model.context
@@ -327,7 +346,7 @@ viewWithConfig adapters config model =
 
 
 subscriptionsWithConfig :
-    Config flags route contextModel contextMsg model msg appElement
+    Config flags route contextModel contextMsg model msg appElement element
     -> Model flags contextModel model
     -> Sub (Msg contextMsg msg)
 subscriptionsWithConfig config model =
@@ -356,7 +375,7 @@ subscriptionsWithConfig config model =
 
 
 contextAndPage :
-    ( Config flags route contextModel contextMsg model msg appElement, Model flags contextModel model )
+    ( Config flags route contextModel contextMsg model msg appElement element, Model flags contextModel model )
     -> ( Context flags route contextModel, model )
 contextAndPage ( config, model ) =
     ( { route = config.routing.fromUrl model.url
@@ -368,7 +387,7 @@ contextAndPage ( config, model ) =
 
 
 navigateTo :
-    Config flags route contextModel contextMsg model msg appElement
+    Config flags route contextModel contextMsg model msg appElement element
     -> Url
     -> route
     -> Cmd (Msg contextMsg msg)
@@ -387,8 +406,8 @@ type alias Update flags route contextModel contextMsg appModel appMsg =
     Context flags route contextModel -> ( appModel, Cmd appMsg, Cmd contextMsg )
 
 
-type alias Bundle flags route contextModel appMsg =
-    Context flags route contextModel -> TitleViewSubs appMsg
+type alias Bundle flags route contextModel appMsg appElement =
+    Context flags route contextModel -> TitleViewSubs appMsg appElement
 
 
 init :
@@ -424,20 +443,20 @@ keep model _ =
     ( model, Cmd.none, Cmd.none )
 
 
-type alias TitleViewSubs appMsg =
+type alias TitleViewSubs appMsg appElement =
     { title : String
-    , view : Html appMsg
+    , view : appElement
     , subscriptions : Sub appMsg
     }
 
 
 bundle :
-    ((msg -> appMsg) -> pageElement -> Html appMsg)
+    ((msg -> appMsg) -> pageElement -> appElement)
     ->
         { page : Page route flags contextModel contextMsg model msg appModel appMsg pageElement
         , model : model
         }
-    -> Bundle flags route contextModel appMsg
+    -> Bundle flags route contextModel appMsg appElement
 bundle toHtml config context =
     { title =
         Page.title

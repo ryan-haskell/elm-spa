@@ -10,7 +10,7 @@ import Application
 import Application.Page as Page
 import Flags exposing (Flags)
 import Global
-import Html
+import Html exposing (Html)
 import Pages.Counter
 import Pages.Homepage
 import Pages.NotFound
@@ -177,7 +177,7 @@ update appMsg appModel =
 
 bundle :
     Model
-    -> Application.Bundle Flags Route Global.Model Msg
+    -> Application.Bundle Flags Route Global.Model Msg (Html Msg)
 bundle appModel =
     case appModel of
         HomepageModel model ->
