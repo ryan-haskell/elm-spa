@@ -1,4 +1,4 @@
-module Pages.Homepage exposing (view)
+module Pages.NotFound exposing (view)
 
 import Components.LinkPage
 import Element exposing (..)
@@ -8,9 +8,9 @@ import Route
 view : Element Never
 view =
     Components.LinkPage.view
-        { title = "a homepage!"
+        { title = "yea, sorry that's it."
         , link =
-            { label = "Go somewhere cool"
-            , route = Route.NotFound
+            { label = "back to homepage"
+            , route = Route.Homepage
             }
         }

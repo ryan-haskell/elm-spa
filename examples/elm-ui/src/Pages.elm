@@ -12,6 +12,7 @@ import Element exposing (Element)
 import Flags exposing (Flags)
 import Global
 import Pages.Homepage
+import Pages.NotFound
 import Route exposing (Route)
 
 
@@ -36,12 +37,7 @@ pages =
     , notFound =
         Application.Page.static
             { title = "Page not found"
-            , view =
-                Element.el
-                    [ Element.centerX
-                    , Element.centerY
-                    ]
-                    (Element.text "Page not found...")
+            , view = Pages.NotFound.view
             , toModel = NotFoundModel
             , fromNever = Element.map never
             }
