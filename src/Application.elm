@@ -36,14 +36,33 @@ type alias Application flags contextModel contextMsg model msg =
     Program flags (Model flags contextModel model) (Msg contextMsg msg)
 
 
+type alias Adapters appElement element contextMsg msg =
+    { toLayout : appElement -> Html (Msg contextMsg msg)
+    , fromHtml : Html (Msg contextMsg msg) -> appElement
+    , toHtml : (msg -> Msg contextMsg msg) -> element -> appElement
+    }
+
+
 create :
-    Config flags route contextModel contextMsg model msg
+    Config flags route contextModel contextMsg model msg (Html (Msg contextMsg msg))
     -> Application flags contextModel contextMsg model msg
-create config =
+create =
+    createWith
+        { toLayout = identity
+        , fromHtml = identity
+        , toHtml = Html.map
+        }
+
+
+createWith :
+    Adapters appElement element contextMsg msg
+    -> Config flags route contextModel contextMsg model msg appElement
+    -> Application flags contextModel contextMsg model msg
+createWith adapters config =
     Browser.application
         { init = initWithConfig config
         , update = updateWithConfig config
-        , view = viewWithConfig config
+        , view = viewWithConfig adapters config
         , subscriptions = subscriptionsWithConfig config
         , onUrlChange = UrlChanged
         , onUrlRequest = UrlRequested
@@ -57,7 +76,7 @@ type alias LayoutContext route flags msg =
     }
 
 
-type alias Config flags route contextModel contextMsg model msg =
+type alias Config flags route contextModel contextMsg model msg appElement =
     { layout :
         { init :
             LayoutContext route flags (Msg contextMsg msg)
@@ -75,10 +94,10 @@ type alias Config flags route contextModel contextMsg model msg =
             { flags : flags
             , route : route
             , toMsg : contextMsg -> Msg contextMsg msg
-            , viewPage : Html (Msg contextMsg msg)
+            , viewPage : appElement
             }
             -> contextModel
-            -> Html (Msg contextMsg msg)
+            -> appElement
         }
     , pages :
         { init :
@@ -129,7 +148,7 @@ type Msg contextMsg msg
 
 
 initWithConfig :
-    Config flags route contextModel contextMsg model msg
+    Config flags route contextModel contextMsg model msg appElement
     -> flags
     -> Url
     -> Nav.Key
@@ -176,7 +195,7 @@ delay ms msg =
 
 
 updateWithConfig :
-    Config flags route contextModel contextMsg model msg
+    Config flags route contextModel contextMsg model msg appElement
     -> Msg contextMsg msg
     -> Model flags contextModel model
     -> ( Model flags contextModel model, Cmd (Msg contextMsg msg) )
@@ -263,10 +282,11 @@ type alias Document msg =
 
 
 viewWithConfig :
-    Config flags route contextModel contextMsg model msg
+    Adapters appElement element contextMsg msg
+    -> Config flags route contextModel contextMsg model msg appElement
     -> Model flags contextModel model
     -> Document (Msg contextMsg msg)
-viewWithConfig config model =
+viewWithConfig adapters config model =
     let
         transitionProp : Float -> String
         transitionProp ms =
@@ -275,6 +295,7 @@ viewWithConfig config model =
         ( context, pageModel ) =
             contextAndPage ( config, model )
 
+        bundle_ : TitleViewSubs msg
         bundle_ =
             config.pages.bundle pageModel context
     in
@@ -285,26 +306,28 @@ viewWithConfig config model =
             , Attr.style "transition" (transitionProp config.routing.transition)
             , Attr.style "opacity" (Transitionable.layoutOpacity model.page)
             ]
-            [ config.layout.view
-                { flags = model.flags
-                , route = config.routing.fromUrl model.url
-                , toMsg = ContextMsg
-                , viewPage =
-                    div
-                        [ Attr.style "transition" (transitionProp config.routing.transition)
-                        , Attr.style "opacity" (Transitionable.pageOpacity model.page)
-                        ]
-                        [ Html.map PageMsg bundle_.view
-                        ]
-                }
-                model.context
+            [ adapters.toLayout <|
+                config.layout.view
+                    { flags = model.flags
+                    , route = config.routing.fromUrl model.url
+                    , toMsg = ContextMsg
+                    , viewPage =
+                        adapters.fromHtml <|
+                            div
+                                [ Attr.style "transition" (transitionProp config.routing.transition)
+                                , Attr.style "opacity" (Transitionable.pageOpacity model.page)
+                                ]
+                                [ Html.map PageMsg bundle_.view
+                                ]
+                    }
+                    model.context
             ]
         ]
     }
 
 
 subscriptionsWithConfig :
-    Config flags route contextModel contextMsg model msg
+    Config flags route contextModel contextMsg model msg appElement
     -> Model flags contextModel model
     -> Sub (Msg contextMsg msg)
 subscriptionsWithConfig config model =
@@ -333,7 +356,7 @@ subscriptionsWithConfig config model =
 
 
 contextAndPage :
-    ( Config flags route contextModel contextMsg model msg, Model flags contextModel model )
+    ( Config flags route contextModel contextMsg model msg appElement, Model flags contextModel model )
     -> ( Context flags route contextModel, model )
 contextAndPage ( config, model ) =
     ( { route = config.routing.fromUrl model.url
@@ -345,7 +368,7 @@ contextAndPage ( config, model ) =
 
 
 navigateTo :
-    Config flags route contextModel contextMsg model msg
+    Config flags route contextModel contextMsg model msg appElement
     -> Url
     -> route
     -> Cmd (Msg contextMsg msg)
@@ -369,7 +392,7 @@ type alias Bundle flags route contextModel appMsg =
 
 
 init :
-    { page : Page route flags contextModel contextMsg model msg appModel appMsg
+    { page : Page route flags contextModel contextMsg model msg appModel appMsg element
     }
     -> Update flags route contextModel contextMsg appModel appMsg
 init config context =
@@ -381,7 +404,7 @@ init config context =
 
 
 update :
-    { page : Page route flags contextModel contextMsg model msg appModel appMsg
+    { page : Page route flags contextModel contextMsg model msg appModel appMsg element
     , msg : msg
     , model : model
     }
@@ -409,8 +432,9 @@ type alias TitleViewSubs appMsg =
 
 
 bundle :
-    { page : Page route flags contextModel contextMsg model msg appModel appMsg
+    { page : Page route flags contextModel contextMsg model msg appModel appMsg pageElement
     , model : model
+    , toHtml : (msg -> appMsg) -> pageElement -> Html appMsg
     }
     -> Bundle flags route contextModel appMsg
 bundle config context =
@@ -420,7 +444,7 @@ bundle config context =
             context
             config.model
     , view =
-        Html.map (Page.toMsg config.page) <|
+        config.toHtml (Page.toMsg config.page) <|
             Page.view
                 config.page
                 context

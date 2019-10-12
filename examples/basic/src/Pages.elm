@@ -10,6 +10,7 @@ import Application
 import Application.Page as Page
 import Flags exposing (Flags)
 import Global
+import Html
 import Pages.Counter
 import Pages.Homepage
 import Pages.NotFound
@@ -40,6 +41,7 @@ pages =
             { title = Pages.Homepage.title
             , view = Pages.Homepage.view
             , toModel = HomepageModel
+            , fromNever = Html.map never
             }
     , counter =
         Page.sandbox
@@ -75,6 +77,7 @@ pages =
             { title = Pages.NotFound.title
             , view = Pages.NotFound.view
             , toModel = NotFoundModel
+            , fromNever = Html.map never
             }
     }
 
@@ -176,28 +179,33 @@ bundle appModel =
             Application.bundle
                 { page = pages.homepage
                 , model = model
+                , toHtml = Html.map
                 }
 
         CounterModel model ->
             Application.bundle
                 { page = pages.counter
                 , model = model
+                , toHtml = Html.map
                 }
 
         RandomModel model ->
             Application.bundle
                 { page = pages.random
                 , model = model
+                , toHtml = Html.map
                 }
 
         SignInModel model ->
             Application.bundle
                 { page = pages.signIn
                 , model = model
+                , toHtml = Html.map
                 }
 
         NotFoundModel model ->
             Application.bundle
                 { page = pages.notFound
                 , model = model
+                , toHtml = Html.map
                 }

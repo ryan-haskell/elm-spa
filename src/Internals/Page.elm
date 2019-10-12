@@ -13,20 +13,19 @@ module Internals.Page exposing
     , view
     )
 
-import Html exposing (Html)
 import Internals.Context exposing (Context)
 
 
-type Page route flags contextModel contextMsg model msg appModel appMsg
-    = Page (Page_ route flags contextModel contextMsg model msg appModel appMsg)
+type Page route flags contextModel contextMsg model msg appModel appMsg element
+    = Page (Page_ route flags contextModel contextMsg model msg appModel appMsg element)
 
 
-type alias Page_ route flags contextModel contextMsg model msg appModel appMsg =
+type alias Page_ route flags contextModel contextMsg model msg appModel appMsg element =
     { title : Context flags route contextModel -> model -> String
     , init : Context flags route contextModel -> ( model, Cmd msg, Cmd contextMsg )
     , update : Context flags route contextModel -> msg -> model -> ( model, Cmd msg, Cmd contextMsg )
     , subscriptions : Context flags route contextModel -> model -> Sub msg
-    , view : Context flags route contextModel -> model -> Html msg
+    , view : Context flags route contextModel -> model -> element
     , toMsg : msg -> appMsg
     , toModel : model -> appModel
     }
@@ -38,17 +37,18 @@ type alias Page_ route flags contextModel contextMsg model msg appModel appMsg =
 
 static :
     { title : String
-    , view : Html Never
+    , view : neverElement
     , toModel : () -> appModel
+    , fromNever : neverElement -> element
     }
-    -> Page route flags contextModel contextMsg () Never appModel appMsg
+    -> Page route flags contextModel contextMsg () Never appModel appMsg element
 static config =
     Page
         { title = \c m -> config.title
         , init = \c -> ( (), Cmd.none, Cmd.none )
         , update = \c m model -> ( model, Cmd.none, Cmd.none )
         , subscriptions = \c m -> Sub.none
-        , view = \c m -> Html.map never config.view
+        , view = \c m -> config.fromNever config.view
         , toMsg = never
         , toModel = config.toModel
         }
@@ -58,11 +58,11 @@ sandbox :
     { title : model -> String
     , init : model
     , update : msg -> model -> model
-    , view : model -> Html msg
+    , view : model -> element
     , toMsg : msg -> appMsg
     , toModel : model -> appModel
     }
-    -> Page route flags contextModel contextMsg model msg appModel appMsg
+    -> Page route flags contextModel contextMsg model msg appModel appMsg element
 sandbox config =
     Page
         { title = \c model -> config.title model
@@ -80,11 +80,11 @@ element :
     , init : flags -> ( model, Cmd msg )
     , update : msg -> model -> ( model, Cmd msg )
     , subscriptions : model -> Sub msg
-    , view : model -> Html msg
+    , view : model -> element
     , toMsg : msg -> appMsg
     , toModel : model -> appModel
     }
-    -> Page route flags contextModel contextMsg model msg appModel appMsg
+    -> Page route flags contextModel contextMsg model msg appModel appMsg element
 element config =
     let
         appendCmd ( model, cmd ) =
@@ -106,11 +106,11 @@ page :
     , init : Context flags route contextModel -> ( model, Cmd msg, Cmd contextMsg )
     , update : Context flags route contextModel -> msg -> model -> ( model, Cmd msg, Cmd contextMsg )
     , subscriptions : Context flags route contextModel -> model -> Sub msg
-    , view : Context flags route contextModel -> model -> Html msg
+    , view : Context flags route contextModel -> model -> element
     , toMsg : msg -> appMsg
     , toModel : model -> appModel
     }
-    -> Page route flags contextModel contextMsg model msg appModel appMsg
+    -> Page route flags contextModel contextMsg model msg appModel appMsg element
 page config =
     let
         appendCmd ( model, cmd ) =
@@ -132,7 +132,7 @@ page config =
 
 
 init :
-    Page route flags contextModel contextMsg model msg appModel appMsg
+    Page route flags contextModel contextMsg model msg appModel appMsg element
     -> Context flags route contextModel
     -> ( model, Cmd msg, Cmd contextMsg )
 init (Page page_) =
@@ -140,7 +140,7 @@ init (Page page_) =
 
 
 update :
-    Page route flags contextModel contextMsg model msg appModel appMsg
+    Page route flags contextModel contextMsg model msg appModel appMsg element
     -> Context flags route contextModel
     -> msg
     -> model
@@ -150,7 +150,7 @@ update (Page page_) =
 
 
 title :
-    Page route flags contextModel contextMsg model msg appModel appMsg
+    Page route flags contextModel contextMsg model msg appModel appMsg element
     -> Context flags route contextModel
     -> model
     -> String
@@ -159,16 +159,16 @@ title (Page page_) =
 
 
 view :
-    Page route flags contextModel contextMsg model msg appModel appMsg
+    Page route flags contextModel contextMsg model msg appModel appMsg element
     -> Context flags route contextModel
     -> model
-    -> Html msg
+    -> element
 view (Page page_) =
     page_.view
 
 
 subscriptions :
-    Page route flags contextModel contextMsg model msg appModel appMsg
+    Page route flags contextModel contextMsg model msg appModel appMsg element
     -> Context flags route contextModel
     -> model
     -> Sub msg
@@ -177,7 +177,7 @@ subscriptions (Page page_) =
 
 
 toMsg :
-    Page route flags contextModel contextMsg model msg appModel appMsg
+    Page route flags contextModel contextMsg model msg appModel appMsg element
     -> msg
     -> appMsg
 toMsg (Page page_) =
@@ -185,7 +185,7 @@ toMsg (Page page_) =
 
 
 toModel :
-    Page route flags contextModel contextMsg model msg appModel appMsg
+    Page route flags contextModel contextMsg model msg appModel appMsg element
     -> model
     -> appModel
 toModel (Page page_) =
