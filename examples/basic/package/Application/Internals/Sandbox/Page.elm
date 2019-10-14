@@ -27,13 +27,8 @@ type Page pageModel pageMsg model msg
 type alias Page_ pageModel pageMsg model msg =
     { toModel : pageModel -> model
     , toMsg : pageMsg -> msg
-    , page : Config pageModel pageMsg model msg
+    , page : Sandbox pageModel pageMsg
     }
-
-
-type Config pageModel pageMsg model msg
-    = StaticConfig Static
-    | SandboxConfig (Sandbox pageModel pageMsg)
 
 
 unwrap :
@@ -53,16 +48,21 @@ type alias Static =
 
 
 static :
-    { toModel : () -> model
-    , toMsg : Never -> msg
-    , page : Static
-    }
+    Static
+    ->
+        { toModel : () -> model
+        , toMsg : Never -> msg
+        }
     -> Page () Never model msg
-static page =
+static page { toModel, toMsg } =
     Page
-        { toModel = page.toModel
-        , toMsg = page.toMsg
-        , page = StaticConfig page.page
+        { toModel = toModel
+        , toMsg = toMsg
+        , page =
+            { init = ()
+            , update = always identity
+            , view = \_ -> Html.map never page.view
+            }
         }
 
 
@@ -78,14 +78,15 @@ type alias Sandbox pageModel pageMsg =
 
 
 sandbox :
-    { toModel : pageModel -> model
-    , toMsg : pageMsg -> msg
-    , page : Sandbox pageModel pageMsg
-    }
+    Sandbox pageModel pageMsg
+    ->
+        { toModel : pageModel -> model
+        , toMsg : pageMsg -> msg
+        }
     -> Page pageModel pageMsg model msg
-sandbox page =
+sandbox page { toModel, toMsg } =
     Page
-        { toModel = page.toModel
-        , toMsg = page.toMsg
-        , page = SandboxConfig page.page
+        { toModel = toModel
+        , toMsg = toMsg
+        , page = page
         }

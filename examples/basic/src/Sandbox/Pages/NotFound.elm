@@ -12,10 +12,10 @@ type alias Msg =
     Never
 
 
-page : Application.Static
 page =
-    { view = view
-    }
+    Application.static
+        { view = view
+        }
 
 
 view : Html Msg

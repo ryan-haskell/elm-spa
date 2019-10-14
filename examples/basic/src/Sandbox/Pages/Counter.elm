@@ -15,12 +15,12 @@ type Msg
     | Decrement
 
 
-page : Application.Sandbox Model Msg
 page =
-    { init = init
-    , update = update
-    , view = view
-    }
+    Application.sandbox
+        { init = init
+        , update = update
+        , view = view
+        }
 
 
 init : Model

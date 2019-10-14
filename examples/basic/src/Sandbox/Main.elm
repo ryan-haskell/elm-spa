@@ -50,22 +50,19 @@ type alias Pages =
 pages : Pages
 pages =
     { homepage =
-        Application.static
+        Homepage.page
             { toModel = HomepageModel
             , toMsg = HomepageMsg
-            , page = Homepage.page
             }
     , counter =
-        Application.sandbox
+        Counter.page
             { toModel = CounterModel
             , toMsg = CounterMsg
-            , page = Counter.page
             }
     , notFound =
-        Application.static
+        NotFound.page
             { toModel = NotFoundModel
             , toMsg = NotFoundMsg
-            , page = NotFound.page
             }
     }
 

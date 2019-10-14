@@ -130,20 +130,22 @@ type alias Sandbox pageModel pageMsg =
 
 
 static :
-    { toModel : () -> model
-    , toMsg : Never -> msg
-    , page : Static
-    }
+    Static
+    ->
+        { toModel : () -> model
+        , toMsg : Never -> msg
+        }
     -> Page () Never model msg
 static =
     Page.static
 
 
 sandbox :
-    { toModel : pageModel -> model
-    , toMsg : pageMsg -> msg
-    , page : Sandbox pageModel pageMsg
-    }
+    Sandbox pageModel pageMsg
+    ->
+        { toModel : pageModel -> model
+        , toMsg : pageMsg -> msg
+        }
     -> Page pageModel pageMsg model msg
 sandbox =
     Page.sandbox
