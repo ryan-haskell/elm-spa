@@ -1,8 +1,6 @@
 # examples/basic
-> an intro into an app using `ryannhg/elm-app`
+> a barebones example app made with ryannhg/elm-app
 
-## how to run
+### try it out
 
-1. `npm install`
-
-1. `npm run dev`
+1. `elm reactor`
