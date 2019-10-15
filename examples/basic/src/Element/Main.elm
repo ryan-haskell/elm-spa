@@ -1,6 +1,6 @@
 module Element.Main exposing (main)
 
-import Application.Element as Application
+import Application.Element as Application exposing (Application)
 import Element.Pages.Counter as Counter
 import Element.Pages.Homepage as Homepage
 import Element.Pages.NotFound as NotFound
@@ -18,10 +18,18 @@ type alias Flags =
     ()
 
 
-main : Program Flags Model Msg
+main : Application Route Flags Model Msg
 main =
     Application.create
-        { route = Random
+        { routing =
+            { initial = Random
+            , routes =
+                [ ( "Homepage", Homepage )
+                , ( "Counter", Counter )
+                , ( "Random", Random )
+                , ( "Not Found", NotFound )
+                ]
+            }
         , pages =
             { init = init
             , update = update

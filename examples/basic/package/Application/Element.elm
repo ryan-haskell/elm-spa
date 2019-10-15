@@ -32,6 +32,7 @@ module Application.Element exposing
 import Application.Internals.Element.Bundle as Bundle
 import Application.Internals.Element.Init as Init
 import Application.Internals.Element.Page as Page
+import Application.Internals.Element.Routing as Routing
 import Application.Internals.Element.Update as Update
 import Browser
 
@@ -40,25 +41,42 @@ import Browser
 -- APPLICATION
 
 
-type alias Application flags model msg =
-    Platform.Program flags model msg
+type alias Application route flags model msg =
+    Platform.Program flags (Routing.Model route model msg) (Routing.Msg route msg)
 
 
 create :
-    { route : route
+    { routing :
+        { initial : route
+        , routes : List ( String, route )
+        }
     , pages :
         { init : route -> Init flags model msg
         , update : msg -> model -> Update model msg
         , bundle : model -> Bundle model msg
         }
     }
-    -> Application flags model msg
+    -> Application route flags model msg
 create config =
     Browser.element
-        { init = Init.create (config.pages.init config.route)
-        , update = Update.create config.pages.update
-        , view = Bundle.createView config.pages.bundle
-        , subscriptions = Bundle.createSubscriptions config.pages.bundle
+        { init =
+            Routing.init
+                { init = Init.create config.pages.init
+                , route = config.routing.initial
+                }
+        , update =
+            Routing.update
+                { update = Update.create config.pages.update
+                }
+        , view =
+            Routing.view
+                { view = Bundle.createView config.pages.bundle
+                , routes = config.routing.routes
+                }
+        , subscriptions =
+            Routing.subscriptions
+                { subscriptions = Bundle.createSubscriptions config.pages.bundle
+                }
         }
 
 

@@ -31,8 +31,9 @@ init page =
 
 
 create :
-    Init flags model msg
+    (route -> Init flags model msg)
+    -> route
     -> flags
     -> ( model, Cmd msg )
-create (Init fn) =
-    fn
+create fn route flags =
+    fn route |> (\(Init g) -> g flags)
