@@ -138,30 +138,33 @@ type alias Element flags pageModel pageMsg =
 
 
 static :
-    { toModel : () -> model
-    , toMsg : Never -> msg
-    , page : Static
-    }
+    Static
+    ->
+        { toModel : () -> model
+        , toMsg : Never -> msg
+        }
     -> Page flags () Never model msg
 static =
     Page.static
 
 
 sandbox :
-    { toModel : pageModel -> model
-    , toMsg : pageMsg -> msg
-    , page : Sandbox pageModel pageMsg
-    }
+    Sandbox pageModel pageMsg
+    ->
+        { toModel : pageModel -> model
+        , toMsg : pageMsg -> msg
+        }
     -> Page flags pageModel pageMsg model msg
 sandbox =
     Page.sandbox
 
 
 element :
-    { toModel : pageModel -> model
-    , toMsg : pageMsg -> msg
-    , page : Element flags pageModel pageMsg
-    }
+    Element flags pageModel pageMsg
+    ->
+        { toModel : pageModel -> model
+        , toMsg : pageMsg -> msg
+        }
     -> Page flags pageModel pageMsg model msg
 element =
     Page.element

@@ -28,12 +28,7 @@ type Page flags pageModel pageMsg model msg
 type alias Page_ flags pageModel pageMsg model msg =
     { toModel : pageModel -> model
     , toMsg : pageMsg -> msg
-    , page :
-        { init : flags -> ( pageModel, Cmd pageMsg )
-        , update : pageMsg -> pageModel -> ( pageModel, Cmd pageMsg )
-        , view : pageModel -> Html pageMsg
-        , subscriptions : pageModel -> Sub pageMsg
-        }
+    , page : Element flags pageModel pageMsg
     }
 
 
@@ -54,19 +49,20 @@ type alias Static =
 
 
 static :
-    { toModel : () -> model
-    , toMsg : Never -> msg
-    , page : Static
-    }
+    Static
+    ->
+        { toModel : () -> model
+        , toMsg : Never -> msg
+        }
     -> Page flags () Never model msg
-static page =
+static page { toModel, toMsg } =
     Page
-        { toModel = page.toModel
-        , toMsg = page.toMsg
+        { toModel = toModel
+        , toMsg = toMsg
         , page =
             { init = \_ -> ( (), Cmd.none )
             , update = \_ model -> ( model, Cmd.none )
-            , view = \_ -> Html.map never page.page.view
+            , view = \_ -> Html.map never page.view
             , subscriptions = \_ -> Sub.none
             }
         }
@@ -84,19 +80,20 @@ type alias Sandbox pageModel pageMsg =
 
 
 sandbox :
-    { toModel : pageModel -> model
-    , toMsg : pageMsg -> msg
-    , page : Sandbox pageModel pageMsg
-    }
+    Sandbox pageModel pageMsg
+    ->
+        { toModel : pageModel -> model
+        , toMsg : pageMsg -> msg
+        }
     -> Page flags pageModel pageMsg model msg
-sandbox page =
+sandbox page { toModel, toMsg } =
     Page
-        { toModel = page.toModel
-        , toMsg = page.toMsg
+        { toModel = toModel
+        , toMsg = toMsg
         , page =
-            { init = \_ -> ( page.page.init, Cmd.none )
-            , update = \_ model -> ( model, Cmd.none )
-            , view = page.page.view
+            { init = \_ -> ( page.init, Cmd.none )
+            , update = \msg model -> ( page.update msg model, Cmd.none )
+            , view = page.view
             , subscriptions = \_ -> Sub.none
             }
         }
@@ -115,10 +112,15 @@ type alias Element flags pageModel pageMsg =
 
 
 element :
-    { toModel : pageModel -> model
-    , toMsg : pageMsg -> msg
-    , page : Element flags pageModel pageMsg
-    }
+    Element flags pageModel pageMsg
+    ->
+        { toModel : pageModel -> model
+        , toMsg : pageMsg -> msg
+        }
     -> Page flags pageModel pageMsg model msg
-element =
+element page { toModel, toMsg } =
     Page
+        { toModel = toModel
+        , toMsg = toMsg
+        , page = page
+        }

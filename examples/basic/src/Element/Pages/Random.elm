@@ -18,20 +18,28 @@ type Msg
     | CatResponded (Result Http.Error String)
 
 
-page : Application.Element () Model Msg
 page =
-    { init = init
-    , update = update
-    , view = view
-    , subscriptions = always Sub.none
-    }
+    Application.element
+        { init = init
+        , update = update
+        , view = view
+        , subscriptions = subscriptions
+        }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( { url = Nothing }
-    , Cmd.none
+    , fetchCat
     )
+
+
+fetchCat : Cmd Msg
+fetchCat =
+    Http.get
+        { url = "https://aws.random.cat/meow"
+        , expect = Http.expectJson CatResponded decoder
+        }
 
 
 decoder : Decoder String
@@ -44,10 +52,7 @@ update msg model =
     case msg of
         FetchCat ->
             ( model
-            , Http.get
-                { url = "https://aws.random.cat/meow"
-                , expect = Http.expectJson CatResponded decoder
-                }
+            , fetchCat
             )
 
         CatResponded (Ok url) ->
@@ -77,3 +82,8 @@ view model =
                     text ""
             ]
         ]
+
+
+subscriptions : Model -> Sub Msg
+subscriptions _ =
+    Sub.none

@@ -12,15 +12,15 @@ type alias Msg =
     Never
 
 
-page : Application.Static
 page =
-    { view = view
-    }
+    Application.static
+        { view = view
+        }
 
 
 view : Html Msg
 view =
     div []
         [ h1 [] [ text "Homepage" ]
-        , p [] [ text "How exciting!" ]
+        , p [] [ text "Very boring tho..." ]
         ]
