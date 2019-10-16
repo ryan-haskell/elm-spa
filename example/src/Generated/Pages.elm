@@ -7,6 +7,7 @@ import Pages.Counter as Counter
 import Pages.Homepage as Homepage
 import Pages.NotFound as NotFound
 import Pages.Random as Random
+import Pages.Users.Slug as Users_Slug
 
 
 type Model
@@ -14,6 +15,7 @@ type Model
     | CounterModel Counter.Model
     | RandomModel Random.Model
     | NotFoundModel NotFound.Model
+    | Users_SlugModel Users_Slug.Model
 
 
 type Msg
@@ -21,6 +23,7 @@ type Msg
     | CounterMsg Counter.Msg
     | RandomMsg Random.Msg
     | NotFoundMsg NotFound.Msg
+    | Users_SlugMsg Users_Slug.Msg
 
 
 homepage : Application.Recipe Homepage.Model Homepage.Msg Model Msg
@@ -55,6 +58,14 @@ notFound =
         }
 
 
+users_slug : Application.Recipe Users_Slug.Model Users_Slug.Msg Model Msg
+users_slug =
+    Users_Slug.page
+        { toModel = Users_SlugModel
+        , toMsg = Users_SlugMsg
+        }
+
+
 init : Route -> ( Model, Cmd Msg )
 init route =
     case route of
@@ -69,6 +80,9 @@ init route =
 
         Route.NotFound ->
             notFound.init
+
+        Route.Users_Slug _ ->
+            users_slug.init
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -98,6 +112,12 @@ update appMsg appModel =
         ( NotFoundMsg _, _ ) ->
             Application.keep appModel
 
+        ( Users_SlugMsg msg, Users_SlugModel model ) ->
+            users_slug.update msg model
+
+        ( Users_SlugMsg _, _ ) ->
+            Application.keep appModel
+
 
 bundle : Model -> { view : Html Msg, subscriptions : Sub Msg }
 bundle appModel =
@@ -113,3 +133,6 @@ bundle appModel =
 
         NotFoundModel model ->
             notFound.bundle model
+
+        Users_SlugModel model ->
+            users_slug.bundle model

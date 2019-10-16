@@ -12,6 +12,7 @@ view =
             [ ( "Homepage", Route.Homepage )
             , ( "Counter", Route.Counter )
             , ( "Random", Route.Random )
+            , ( "My user", Route.Users_Slug "ryan" )
             ]
         )
 
