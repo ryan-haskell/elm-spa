@@ -98,17 +98,12 @@ init :
     -> Nav.Key
     -> ( Model flags model, Cmd (Msg msg) )
 init config flags url key =
-    let
-        ( page, cmd ) =
-            url |> config.fromUrl |> config.init
-    in
-    ( { flags = flags
-      , url = url
-      , key = key
-      , page = page
-      }
-    , Cmd.map Page cmd
-    )
+    url
+        |> config.fromUrl
+        |> config.init
+        |> Tuple.mapBoth
+            (\page -> { flags = flags, url = url, key = key, page = page })
+            (Cmd.map Page)
 
 
 
@@ -132,16 +127,12 @@ update :
 update config msg model =
     case msg of
         Url url ->
-            let
-                ( page, cmd ) =
-                    url |> config.fromUrl |> config.init
-            in
-            ( { model
-                | url = url
-                , page = page
-              }
-            , Cmd.map Page cmd
-            )
+            url
+                |> config.fromUrl
+                |> config.init
+                |> Tuple.mapBoth
+                    (\page -> { model | url = url, page = page })
+                    (Cmd.map Page)
 
         Link (Browser.Internal url) ->
             ( model
