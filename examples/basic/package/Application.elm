@@ -1,6 +1,6 @@
 module Application exposing
     ( Application, create
-    , Page, Bundle, keep
+    , Page, Recipe, Bundle, keep
     , Static, static
     , Sandbox, sandbox
     )
@@ -9,7 +9,7 @@ module Application exposing
 
 @docs Application, create
 
-@docs Page, Bundle, keep
+@docs Page, Recipe, Bundle, keep
 
 @docs Static, static
 
@@ -54,6 +54,10 @@ type alias Page pageModel pageMsg model msg =
     Page.Page pageModel pageMsg model msg
 
 
+type alias Recipe pageModel pageMsg model msg =
+    Page.Recipe pageModel pageMsg model msg
+
+
 type alias Bundle msg =
     Page.Bundle msg
 
@@ -73,10 +77,6 @@ type alias Sandbox pageModel pageMsg =
 
 static :
     Static
-    ->
-        { toModel : () -> model
-        , toMsg : Never -> msg
-        }
     -> Page () Never model msg
 static =
     Page.static
@@ -84,10 +84,6 @@ static =
 
 sandbox :
     Sandbox pageModel pageMsg
-    ->
-        { toModel : pageModel -> model
-        , toMsg : pageMsg -> msg
-        }
     -> Page pageModel pageMsg model msg
 sandbox =
     Page.sandbox

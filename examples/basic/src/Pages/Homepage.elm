@@ -1,4 +1,8 @@
-module Pages.Homepage exposing (Model, Msg, page)
+module Pages.Homepage exposing
+    ( Model
+    , Msg
+    , page
+    )
 
 import Application
 import Html exposing (..)
@@ -12,6 +16,7 @@ type alias Msg =
     Never
 
 
+page : Application.Page Model Msg model msg
 page =
     Application.static
         { view = view

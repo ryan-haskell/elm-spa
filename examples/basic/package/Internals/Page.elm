@@ -1,12 +1,12 @@
 module Internals.Page exposing
-    ( Page, Bundle
+    ( Page, Recipe, Bundle
     , Static, static
     , Sandbox, sandbox
     )
 
 {-|
 
-@docs Page, Bundle
+@docs Page, Recipe, Bundle
 
 @docs Static, static
 
@@ -18,9 +18,15 @@ import Html exposing (Html)
 
 
 type alias Page pageModel pageMsg model msg =
+    { toModel : pageModel -> model
+    , toMsg : pageMsg -> msg
+    }
+    -> Recipe pageModel pageMsg model msg
+
+
+type alias Recipe pageModel pageMsg model msg =
     { init : model
     , update : pageMsg -> pageModel -> model
-    , keep : model -> model
     , bundle : pageModel -> Bundle msg
     }
 
@@ -41,15 +47,10 @@ type alias Static =
 
 static :
     Static
-    ->
-        { toModel : () -> model
-        , toMsg : Never -> msg
-        }
     -> Page () Never model msg
 static page { toModel, toMsg } =
     { init = toModel ()
     , update = always toModel
-    , keep = identity
     , bundle =
         always
             { view = Html.map toMsg page.view
@@ -70,15 +71,12 @@ type alias Sandbox pageModel pageMsg =
 
 sandbox :
     Sandbox pageModel pageMsg
-    ->
-        { toModel : pageModel -> model
-        , toMsg : pageMsg -> msg
-        }
     -> Page pageModel pageMsg model msg
 sandbox page { toModel, toMsg } =
     { init = toModel page.init
-    , update = \msg model -> page.update msg model |> toModel
-    , keep = identity
+    , update =
+        \msg model ->
+            page.update msg model |> toModel
     , bundle =
         \model ->
             { view = page.view model |> Html.map toMsg

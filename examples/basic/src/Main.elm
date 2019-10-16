@@ -41,7 +41,7 @@ type Msg
     | NotFoundMsg NotFound.Msg
 
 
-homepage : Application.Page Homepage.Model Homepage.Msg Model Msg
+homepage : Application.Recipe Homepage.Model Homepage.Msg Model Msg
 homepage =
     Homepage.page
         { toModel = HomepageModel
@@ -49,7 +49,7 @@ homepage =
         }
 
 
-counter : Application.Page Counter.Model Counter.Msg Model Msg
+counter : Application.Recipe Counter.Model Counter.Msg Model Msg
 counter =
     Counter.page
         { toModel = CounterModel
@@ -57,7 +57,7 @@ counter =
         }
 
 
-notFound : Application.Page NotFound.Model NotFound.Msg Model Msg
+notFound : Application.Recipe NotFound.Model NotFound.Msg Model Msg
 notFound =
     NotFound.page
         { toModel = NotFoundModel

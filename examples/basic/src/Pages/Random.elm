@@ -18,6 +18,7 @@ type Msg
     | CatResponded (Result Http.Error String)
 
 
+page : Application.Page Model Msg model msg
 page =
     Application.element
         { init = init

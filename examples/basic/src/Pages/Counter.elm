@@ -15,6 +15,7 @@ type Msg
     | Decrement
 
 
+page : Application.Page Model Msg model msg
 page =
     Application.sandbox
         { init = init

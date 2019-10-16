@@ -12,6 +12,7 @@ type alias Msg =
     Never
 
 
+page : Application.Page Model Msg model msg
 page =
     Application.static
         { view = view
