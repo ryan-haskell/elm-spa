@@ -1,16 +1,26 @@
 module Main exposing (main)
 
-import Application
-import Html exposing (Html)
+-- CAN / SHOULD BE GENERATED
+
+import Application exposing (Application)
 import Pages.Counter as Counter
 import Pages.Homepage as Homepage
 import Pages.NotFound as NotFound
+import Pages.Random as Random
+import Route exposing (Route)
 
 
-main : Program () Model Msg
+type alias Flags =
+    ()
+
+
+main : Application Flags Model Msg
 main =
     Application.create
-        { route = Counter
+        { routing =
+            { fromUrl = Route.fromUrl
+            , toPath = Route.toPath
+            }
         , pages =
             { init = init
             , update = update
@@ -19,25 +29,17 @@ main =
         }
 
 
-
--- CAN / SHOULD BE GENERATED
-
-
-type Route
-    = Homepage
-    | Counter
-    | NotFound
-
-
 type Model
     = HomepageModel Homepage.Model
     | CounterModel Counter.Model
+    | RandomModel Random.Model
     | NotFoundModel NotFound.Model
 
 
 type Msg
     = HomepageMsg Homepage.Msg
     | CounterMsg Counter.Msg
+    | RandomMsg Random.Msg
     | NotFoundMsg NotFound.Msg
 
 
@@ -57,6 +59,14 @@ counter =
         }
 
 
+random : Application.Recipe Random.Model Random.Msg Model Msg
+random =
+    Random.page
+        { toModel = RandomModel
+        , toMsg = RandomMsg
+        }
+
+
 notFound : Application.Recipe NotFound.Model NotFound.Msg Model Msg
 notFound =
     NotFound.page
@@ -65,20 +75,23 @@ notFound =
         }
 
 
-init : Route -> Model
+init : Route -> ( Model, Cmd Msg )
 init route =
     case route of
-        Homepage ->
+        Route.Homepage ->
             homepage.init
 
-        Counter ->
+        Route.Counter ->
             counter.init
 
-        NotFound ->
+        Route.Random ->
+            random.init
+
+        Route.NotFound ->
             notFound.init
 
 
-update : Msg -> Model -> Model
+update : Msg -> Model -> ( Model, Cmd Msg )
 update appMsg appModel =
     case ( appMsg, appModel ) of
         ( HomepageMsg msg, HomepageModel model ) ->
@@ -93,6 +106,12 @@ update appMsg appModel =
         ( CounterMsg _, _ ) ->
             Application.keep appModel
 
+        ( RandomMsg msg, RandomModel model ) ->
+            random.update msg model
+
+        ( RandomMsg _, _ ) ->
+            Application.keep appModel
+
         ( NotFoundMsg msg, NotFoundModel model ) ->
             notFound.update msg model
 
@@ -100,7 +119,7 @@ update appMsg appModel =
             Application.keep appModel
 
 
-bundle : Model -> { view : Html Msg }
+bundle : Model -> Application.Bundle Msg
 bundle appModel =
     case appModel of
         HomepageModel model ->
@@ -108,6 +127,9 @@ bundle appModel =
 
         CounterModel model ->
             counter.bundle model
+
+        RandomModel model ->
+            random.bundle model
 
         NotFoundModel model ->
             notFound.bundle model

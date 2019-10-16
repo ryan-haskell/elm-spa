@@ -28,8 +28,8 @@ page =
         }
 
 
-init : () -> ( Model, Cmd Msg )
-init _ =
+init : ( Model, Cmd Msg )
+init =
     ( { url = Nothing }
     , fetchCat
     )

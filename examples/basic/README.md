@@ -1,6 +1,6 @@
-# examples/basic
-> a barebones example app made with ryannhg/elm-app
+# ryannhg/elm-app
+> a package for creating single page apps with Elm!
 
 ### try it out
 
-1. `elm reactor`
+1. `npm run dev`

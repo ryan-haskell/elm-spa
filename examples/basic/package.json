@@ -4,7 +4,7 @@
   "description": "> a barebones example app made with ryannhg/elm-app",
   "main": "index.js",
   "scripts": {
-    "dev:vanilla": "parcel src/Vanilla/index.html"
+    "example": "parcel example/index.html"
   },
   "keywords": [],
   "author": "",
