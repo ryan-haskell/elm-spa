@@ -1,41 +1,33 @@
-module Application.Internals.Sandbox.Page exposing
-    ( Page
+module Internals.Page exposing
+    ( Page, Bundle
     , Static, static
     , Sandbox, sandbox
-    , unwrap
     )
 
 {-|
 
-@docs Page
+@docs Page, Bundle
 
 @docs Static, static
 
 @docs Sandbox, sandbox
-
-@docs unwrap
 
 -}
 
 import Html exposing (Html)
 
 
-type Page pageModel pageMsg model msg
-    = Page (Page_ pageModel pageMsg model msg)
-
-
-type alias Page_ pageModel pageMsg model msg =
-    { toModel : pageModel -> model
-    , toMsg : pageMsg -> msg
-    , page : Sandbox pageModel pageMsg
+type alias Page pageModel pageMsg model msg =
+    { init : model
+    , update : pageMsg -> pageModel -> model
+    , keep : model -> model
+    , bundle : pageModel -> Bundle msg
     }
 
 
-unwrap :
-    Page pageModel pageMsg model msg
-    -> Page_ pageModel pageMsg model msg
-unwrap (Page page) =
-    page
+type alias Bundle msg =
+    { view : Html msg
+    }
 
 
 
@@ -55,15 +47,14 @@ static :
         }
     -> Page () Never model msg
 static page { toModel, toMsg } =
-    Page
-        { toModel = toModel
-        , toMsg = toMsg
-        , page =
-            { init = ()
-            , update = always identity
-            , view = \_ -> Html.map never page.view
+    { init = toModel ()
+    , update = always toModel
+    , keep = identity
+    , bundle =
+        always
+            { view = Html.map toMsg page.view
             }
-        }
+    }
 
 
 
@@ -85,8 +76,11 @@ sandbox :
         }
     -> Page pageModel pageMsg model msg
 sandbox page { toModel, toMsg } =
-    Page
-        { toModel = toModel
-        , toMsg = toMsg
-        , page = page
-        }
+    { init = toModel page.init
+    , update = \msg model -> page.update msg model |> toModel
+    , keep = identity
+    , bundle =
+        \model ->
+            { view = page.view model |> Html.map toMsg
+            }
+    }

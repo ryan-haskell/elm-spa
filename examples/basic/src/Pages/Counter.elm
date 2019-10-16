@@ -1,6 +1,6 @@
-module Element.Pages.Counter exposing (Model, Msg, page)
+module Pages.Counter exposing (Model, Msg, page)
 
-import Application.Element as Application
+import Application
 import Html exposing (..)
 import Html.Events as Events
 

@@ -1,6 +1,6 @@
-module Element.Pages.Homepage exposing (Model, Msg, page)
+module Pages.NotFound exposing (Model, Msg, page)
 
-import Application.Element as Application
+import Application
 import Html exposing (..)
 
 
@@ -21,6 +21,6 @@ page =
 view : Html Msg
 view =
     div []
-        [ h1 [] [ text "Homepage" ]
-        , p [] [ text "Very boring tho..." ]
+        [ h1 [] [ text "Page not found..." ]
+        , p [] [ text "what a shame!" ]
         ]

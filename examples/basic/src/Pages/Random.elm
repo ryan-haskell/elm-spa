@@ -1,6 +1,6 @@
-module Element.Pages.Random exposing (Model, Msg, page)
+module Pages.Random exposing (Model, Msg, page)
 
-import Application.Element as Application
+import Application as Application
 import Html exposing (..)
 import Html.Attributes as Attr
 import Html.Events as Events

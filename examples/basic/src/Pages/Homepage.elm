@@ -1,6 +1,6 @@
-module Sandbox.Pages.NotFound exposing (Model, Msg, page)
+module Pages.Homepage exposing (Model, Msg, page)
 
-import Application.Sandbox as Application
+import Application
 import Html exposing (..)
 
 
@@ -21,6 +21,6 @@ page =
 view : Html Msg
 view =
     div []
-        [ h1 [] [ text "Page not found..." ]
-        , p [] [ text "what a shame!" ]
+        [ h1 [] [ text "Homepage" ]
+        , p [] [ text "Very boring tho..." ]
         ]
