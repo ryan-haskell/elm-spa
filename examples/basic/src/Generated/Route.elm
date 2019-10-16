@@ -1,4 +1,4 @@
-module Route exposing (Route(..), fromUrl, toPath)
+module Generated.Route exposing (Route(..), fromUrl, toPath)
 
 import Url exposing (Url)
 import Url.Parser as Parser
