@@ -2,6 +2,7 @@ module Generated.Pages exposing (Model, Msg, bundle, init, update)
 
 import Application
 import Generated.Route as Route exposing (Route)
+import Html exposing (Html)
 import Pages.Counter as Counter
 import Pages.Homepage as Homepage
 import Pages.NotFound as NotFound
@@ -98,7 +99,7 @@ update appMsg appModel =
             Application.keep appModel
 
 
-bundle : Model -> Application.Bundle Msg
+bundle : Model -> { view : Html Msg, subscriptions : Sub Msg }
 bundle appModel =
     case appModel of
         HomepageModel model ->

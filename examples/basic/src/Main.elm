@@ -6,11 +6,7 @@ import Generated.Route as Route
 import Layout as Layout
 
 
-type alias Flags =
-    ()
-
-
-main : Application Flags Pages.Model Pages.Msg
+main : Application () Pages.Model Pages.Msg
 main =
     Application.create
         { routing =
