@@ -40,14 +40,14 @@ main =
 
 #### supporting code
 
-- [`Generated.Route`](./src/Generated/Route.elm)
+- [`Generated.Route`](./example/src/Generated/Route.elm)
 
-- [`Generated.Pages`](./src/Generated/Pages.elm)
+- [`Generated.Pages`](./example/src/Generated/Pages.elm)
 
-- [`Layout`](./src/Layout.elm)
+- [`Layout`](./example/src/Layout.elm)
 
-- [`Pages.Homepage`](./src/Pages/Homepage.elm) (a static page)
+- [`Pages.Homepage`](./example/src/Pages/Homepage.elm) (a static page)
 
-- [`Pages.Counter`](./src/Pages/Counter.elm) (a sandbox page)
+- [`Pages.Counter`](./example/src/Pages/Counter.elm) (a sandbox page)
 
-- [`Pages.Random`](./src/Pages/Random.elm) (a static page)
+- [`Pages.Random`](./example/src/Pages/Random.elm) (a static page)
