@@ -3,6 +3,7 @@ module Main exposing (main)
 import Application exposing (Application)
 import Generated.Pages as Pages
 import Generated.Route as Route
+import Layout as Layout
 
 
 type alias Flags =
@@ -15,6 +16,9 @@ main =
         { routing =
             { fromUrl = Route.fromUrl
             , toPath = Route.toPath
+            }
+        , layout =
+            { view = Layout.view
             }
         , pages =
             { init = Pages.init

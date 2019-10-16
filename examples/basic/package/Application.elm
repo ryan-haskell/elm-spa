@@ -40,6 +40,9 @@ create :
         { fromUrl : Url -> route
         , toPath : route -> String
         }
+    , layout :
+        { view : { page : Html msg } -> Html msg
+        }
     , pages :
         { init : route -> ( model, Cmd msg )
         , update : msg -> model -> ( model, Cmd msg )
@@ -67,6 +70,7 @@ create config =
         , view =
             view
                 { view = config.pages.bundle >> .view
+                , layout = config.layout.view
                 }
         , onUrlChange = Url
         , onUrlRequest = Link
@@ -173,13 +177,18 @@ subscriptions config model =
 
 
 view :
-    { view : model -> Html msg }
+    { view : model -> Html msg
+    , layout : { page : Html msg } -> Html msg
+    }
     -> Model flags model
     -> Browser.Document (Msg msg)
 view config model =
     { title = "App title"
     , body =
-        [ Html.map Page (config.view model.page)
+        [ Html.map Page <|
+            config.layout
+                { page = config.view model.page
+                }
         ]
     }
 

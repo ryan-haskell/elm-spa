@@ -27,5 +27,5 @@ view : Html Msg
 view =
     div []
         [ h1 [] [ text "Homepage" ]
-        , p [] [ text "Very boring tho..." ]
+        , p [] [ text "How exciting!" ]
         ]
