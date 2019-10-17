@@ -1,19 +1,28 @@
 module Internals.Page exposing
-    ( Page, Recipe, Bundle
+    ( Page, Recipe
+    , PageWithParams, RecipeWithParams
+    , Bundle
     , Static, static
     , Sandbox, sandbox
     , Element, element
+    , ElementWithParams, elementWithParams
     )
 
 {-|
 
-@docs Page, Recipe, Bundle
+@docs Page, Recipe
+
+@docs PageWithParams, RecipeWithParams
+
+@docs Bundle
 
 @docs Static, static
 
 @docs Sandbox, sandbox
 
 @docs Element, element
+
+@docs ElementWithParams, elementWithParams
 
 -}
 
@@ -93,7 +102,7 @@ sandbox page { toModel, toMsg } =
 
 
 
--- SANDBOX
+-- ELEMENT
 
 
 type alias Element pageModel pageMsg =
@@ -108,7 +117,52 @@ element :
     Element pageModel pageMsg
     -> Page pageModel pageMsg model msg
 element page { toModel, toMsg } =
-    { init = page.init |> Tuple.mapBoth toModel (Cmd.map toMsg)
+    { init =
+        page.init |> Tuple.mapBoth toModel (Cmd.map toMsg)
+    , update =
+        \msg model ->
+            page.update msg model
+                |> Tuple.mapBoth toModel (Cmd.map toMsg)
+    , bundle =
+        \model ->
+            { view = page.view model |> Html.map toMsg
+            , subscriptions = Sub.none
+            }
+    }
+
+
+
+-- ELEMENT WITH PARAMS
+
+
+type alias ElementWithParams pageModel pageMsg arg =
+    { init : arg -> ( pageModel, Cmd pageMsg )
+    , update : pageMsg -> pageModel -> ( pageModel, Cmd pageMsg )
+    , view : pageModel -> Html pageMsg
+    , subscriptions : pageModel -> Sub pageMsg
+    }
+
+
+type alias RecipeWithParams pageModel pageMsg model msg arg =
+    { init : arg -> ( model, Cmd msg )
+    , update : pageMsg -> pageModel -> ( model, Cmd msg )
+    , bundle : pageModel -> Bundle msg
+    }
+
+
+type alias PageWithParams pageModel pageMsg model msg arg =
+    { toModel : pageModel -> model
+    , toMsg : pageMsg -> msg
+    }
+    -> RecipeWithParams pageModel pageMsg model msg arg
+
+
+elementWithParams :
+    ElementWithParams pageModel pageMsg arg
+    -> PageWithParams pageModel pageMsg model msg arg
+elementWithParams page { toModel, toMsg } =
+    { init =
+        page.init >> Tuple.mapBoth toModel (Cmd.map toMsg)
     , update =
         \msg model ->
             page.update msg model

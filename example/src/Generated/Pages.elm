@@ -58,7 +58,7 @@ notFound =
         }
 
 
-users_slug : Application.Recipe Users_Slug.Model Users_Slug.Msg Model Msg
+users_slug : Application.RecipeWithParams Users_Slug.Model Users_Slug.Msg Model Msg String
 users_slug =
     Users_Slug.page
         { toModel = Users_SlugModel
@@ -81,8 +81,8 @@ init route =
         Route.NotFound ->
             notFound.init
 
-        Route.Users_Slug _ ->
-            users_slug.init
+        Route.Users_Slug slug ->
+            users_slug.init slug
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )

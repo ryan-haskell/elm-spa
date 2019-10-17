@@ -1,22 +1,29 @@
 module Application exposing
     ( Application, create
-    , Page, Recipe, Bundle, keep
+    , Page, Recipe
+    , PageWithParams, RecipeWithParams
+    , Bundle, keep
     , Static, static
     , Sandbox, sandbox
     , Element, element
+    , ElementWithParams, elementWithParams
     )
 
 {-|
 
 @docs Application, create
 
-@docs Page, Recipe, Bundle, keep
+@docs Page, Recipe
+@docs PageWithParams, RecipeWithParams
+@docs Bundle, keep
 
 @docs Static, static
 
 @docs Sandbox, sandbox
 
 @docs Element, element
+
+@docs ElementWithParams, elementWithParams
 
 -}
 
@@ -196,6 +203,14 @@ type alias Recipe pageModel pageMsg model msg =
     Page.Recipe pageModel pageMsg model msg
 
 
+type alias PageWithParams pageModel pageMsg model msg arg =
+    Page.PageWithParams pageModel pageMsg model msg arg
+
+
+type alias RecipeWithParams pageModel pageMsg model msg arg =
+    Page.RecipeWithParams pageModel pageMsg model msg arg
+
+
 type alias Bundle msg =
     Page.Bundle msg
 
@@ -236,3 +251,14 @@ element :
     -> Page pageModel pageMsg model msg
 element =
     Page.element
+
+
+type alias ElementWithParams pageModel pageMsg arg =
+    Page.ElementWithParams pageModel pageMsg arg
+
+
+elementWithParams :
+    ElementWithParams pageModel pageMsg arg
+    -> PageWithParams pageModel pageMsg model msg arg
+elementWithParams =
+    Page.elementWithParams

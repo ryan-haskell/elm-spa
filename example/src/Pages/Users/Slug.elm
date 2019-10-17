@@ -4,17 +4,18 @@ import Application
 import Html exposing (..)
 
 
-type Model
-    = Model
+type alias Model =
+    { slug : String
+    }
 
 
 type Msg
     = Msg
 
 
-page : Application.Page Model Msg a b
+page : Application.PageWithParams Model Msg a b String
 page =
-    Application.element
+    Application.elementWithParams
         { init = init
         , update = update
         , view = view
@@ -22,9 +23,9 @@ page =
         }
 
 
-init : ( Model, Cmd Msg )
-init =
-    ( Model, Cmd.none )
+init : String -> ( Model, Cmd Msg )
+init slug =
+    ( Model slug, Cmd.none )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -41,4 +42,4 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
-    h1 [] [ text "New Element" ]
+    h1 [] [ text ("New Element for: " ++ model.slug) ]
