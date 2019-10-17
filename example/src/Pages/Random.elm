@@ -1,4 +1,9 @@
-module Pages.Random exposing (Model, Msg, page)
+module Pages.Random exposing
+    ( Model
+    , Msg
+    , Params
+    , page
+    )
 
 import Application as Application
 import Html exposing (..)
@@ -18,10 +23,14 @@ type Msg
     | CatResponded (Result Http.Error String)
 
 
-page : Application.Page Model Msg model msg
+type alias Params =
+    ()
+
+
+page : Application.Page Params Model Msg model msg
 page =
     Application.element
-        { init = init
+        { init = always init
         , update = update
         , view = view
         , subscriptions = subscriptions

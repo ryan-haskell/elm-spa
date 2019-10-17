@@ -9,10 +9,11 @@ view : Html msg
 view =
     header [ Attr.class "navbar" ]
         (List.map viewLink
-            [ ( "Homepage", Route.Homepage )
-            , ( "Counter", Route.Counter )
-            , ( "Random", Route.Random )
+            [ ( "Homepage", Route.Homepage () )
+            , ( "Counter", Route.Counter () )
+            , ( "Random", Route.Random () )
             , ( "My user", Route.Users_Slug "ryan" )
+            , ( "My user's post", Route.Users_Slug_Posts_Slug { user = "ryan", post = 123 } )
             ]
         )
 

@@ -1,44 +1,64 @@
 module Generated.Route exposing (Route(..), fromUrl, toPath)
 
 import Url exposing (Url)
-import Url.Parser as Parser exposing ((</>))
+import Url.Parser as Parser exposing ((</>), Parser)
 
 
 type Route
-    = Homepage
-    | Counter
-    | Random
+    = Homepage ()
+    | Counter ()
+    | Random ()
     | Users_Slug String
-    | NotFound
+    | Users_Slug_Posts_Slug UserPostInfo
+    | NotFound ()
+
+
+type alias UserPostInfo =
+    { user : String
+    , post : Int
+    }
 
 
 fromUrl : Url -> Route
 fromUrl =
     Parser.parse
-        (Parser.oneOf
-            [ Parser.map Homepage Parser.top
-            , Parser.map Counter (Parser.s "counter")
-            , Parser.map Random (Parser.s "random")
-            , Parser.map Users_Slug (Parser.s "users" </> Parser.string)
-            ]
-        )
-        >> Maybe.withDefault NotFound
+        (Parser.oneOf routes)
+        >> Maybe.withDefault (NotFound ())
+
+
+routes : List (Parser (Route -> Route) Route)
+routes =
+    [ Parser.top
+        |> Parser.map (Homepage ())
+    , Parser.s "counter"
+        |> Parser.map (Counter ())
+    , Parser.s "random"
+        |> Parser.map (Random ())
+    , (Parser.s "users" </> Parser.string)
+        |> Parser.map Users_Slug
+    , (Parser.s "users" </> Parser.string </> Parser.s "posts" </> Parser.int)
+        |> Parser.map UserPostInfo
+        |> Parser.map Users_Slug_Posts_Slug
+    ]
 
 
 toPath : Route -> String
 toPath route =
     case route of
-        Homepage ->
+        Homepage _ ->
             "/"
 
-        Counter ->
+        Counter _ ->
             "/counter"
 
-        Random ->
+        Random _ ->
             "/random"
 
-        NotFound ->
+        NotFound _ ->
             "/not-found"
 
         Users_Slug slug ->
             "/users/" ++ slug
+
+        Users_Slug_Posts_Slug { user, post } ->
+            "/users/" ++ user ++ "/posts/" ++ String.fromInt post

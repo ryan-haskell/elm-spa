@@ -7,7 +7,8 @@ import Pages.Counter as Counter
 import Pages.Homepage as Homepage
 import Pages.NotFound as NotFound
 import Pages.Random as Random
-import Pages.Users.Slug_ as Users_Slug
+import Pages.Users.Slug as Users_Slug
+import Pages.Users.Slug.Posts.Slug as Users_Slug_Posts_Slug
 
 
 type Model
@@ -16,6 +17,7 @@ type Model
     | RandomModel Random.Model
     | NotFoundModel NotFound.Model
     | Users_SlugModel Users_Slug.Model
+    | Users_Slug_Posts_SlugModel Users_Slug_Posts_Slug.Model
 
 
 type Msg
@@ -24,9 +26,10 @@ type Msg
     | RandomMsg Random.Msg
     | NotFoundMsg NotFound.Msg
     | Users_SlugMsg Users_Slug.Msg
+    | Users_Slug_Posts_SlugMsg Users_Slug_Posts_Slug.Msg
 
 
-homepage : Application.Recipe Homepage.Model Homepage.Msg Model Msg
+homepage : Application.Recipe Homepage.Params Homepage.Model Homepage.Msg Model Msg
 homepage =
     Homepage.page
         { toModel = HomepageModel
@@ -34,7 +37,7 @@ homepage =
         }
 
 
-counter : Application.Recipe Counter.Model Counter.Msg Model Msg
+counter : Application.Recipe Counter.Params Counter.Model Counter.Msg Model Msg
 counter =
     Counter.page
         { toModel = CounterModel
@@ -42,7 +45,7 @@ counter =
         }
 
 
-random : Application.Recipe Random.Model Random.Msg Model Msg
+random : Application.Recipe Random.Params Random.Model Random.Msg Model Msg
 random =
     Random.page
         { toModel = RandomModel
@@ -50,7 +53,7 @@ random =
         }
 
 
-notFound : Application.Recipe NotFound.Model NotFound.Msg Model Msg
+notFound : Application.Recipe NotFound.Params NotFound.Model NotFound.Msg Model Msg
 notFound =
     NotFound.page
         { toModel = NotFoundModel
@@ -58,7 +61,7 @@ notFound =
         }
 
 
-users_slug : Application.RecipeWithParams Users_Slug.Model Users_Slug.Msg Model Msg String
+users_slug : Application.Recipe Users_Slug.Params Users_Slug.Model Users_Slug.Msg Model Msg
 users_slug =
     Users_Slug.page
         { toModel = Users_SlugModel
@@ -66,23 +69,34 @@ users_slug =
         }
 
 
+users_slug_posts_slug : Application.Recipe Users_Slug_Posts_Slug.Params Users_Slug_Posts_Slug.Model Users_Slug_Posts_Slug.Msg Model Msg
+users_slug_posts_slug =
+    Users_Slug_Posts_Slug.page
+        { toModel = Users_Slug_Posts_SlugModel
+        , toMsg = Users_Slug_Posts_SlugMsg
+        }
+
+
 init : Route -> ( Model, Cmd Msg )
 init route =
     case route of
-        Route.Homepage ->
-            homepage.init
+        Route.Homepage params ->
+            homepage.init params
 
-        Route.Counter ->
-            counter.init
+        Route.Counter params ->
+            counter.init params
 
-        Route.Random ->
-            random.init
+        Route.Random params ->
+            random.init params
 
-        Route.NotFound ->
-            notFound.init
+        Route.NotFound params ->
+            notFound.init params
 
-        Route.Users_Slug slug ->
-            users_slug.init slug
+        Route.Users_Slug params ->
+            users_slug.init params
+
+        Route.Users_Slug_Posts_Slug params ->
+            users_slug_posts_slug.init params
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -118,6 +132,12 @@ update appMsg appModel =
         ( Users_SlugMsg _, _ ) ->
             Application.keep appModel
 
+        ( Users_Slug_Posts_SlugMsg msg, Users_Slug_Posts_SlugModel model ) ->
+            users_slug_posts_slug.update msg model
+
+        ( Users_Slug_Posts_SlugMsg _, _ ) ->
+            Application.keep appModel
+
 
 bundle : Model -> { view : Html Msg, subscriptions : Sub Msg }
 bundle appModel =
@@ -136,3 +156,6 @@ bundle appModel =
 
         Users_SlugModel model ->
             users_slug.bundle model
+
+        Users_Slug_Posts_SlugModel model ->
+            users_slug_posts_slug.bundle model

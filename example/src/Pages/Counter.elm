@@ -1,4 +1,9 @@
-module Pages.Counter exposing (Model, Msg, page)
+module Pages.Counter exposing
+    ( Model
+    , Msg
+    , Params
+    , page
+    )
 
 import Application
 import Html exposing (..)
@@ -15,10 +20,14 @@ type Msg
     | Decrement
 
 
-page : Application.Page Model Msg model msg
+type alias Params =
+    ()
+
+
+page : Application.Page Params Model Msg model msg
 page =
     Application.sandbox
-        { init = init
+        { init = always init
         , update = update
         , view = view
         }

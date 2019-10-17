@@ -1,12 +1,10 @@
 module Application exposing
     ( Application, create
     , Page, Recipe
-    , PageWithParams, RecipeWithParams
     , Bundle, keep
     , Static, static
     , Sandbox, sandbox
     , Element, element
-    , ElementWithParams, elementWithParams
     )
 
 {-|
@@ -14,7 +12,6 @@ module Application exposing
 @docs Application, create
 
 @docs Page, Recipe
-@docs PageWithParams, RecipeWithParams
 @docs Bundle, keep
 
 @docs Static, static
@@ -22,6 +19,8 @@ module Application exposing
 @docs Sandbox, sandbox
 
 @docs Element, element
+
+@docs PageWithParams, RecipeWithParams
 
 @docs ElementWithParams, elementWithParams
 
@@ -195,20 +194,12 @@ view config model =
 -- PAGE API
 
 
-type alias Page pageModel pageMsg model msg =
-    Page.Page pageModel pageMsg model msg
+type alias Page params pageModel pageMsg model msg =
+    Page.Page params pageModel pageMsg model msg
 
 
-type alias Recipe pageModel pageMsg model msg =
-    Page.Recipe pageModel pageMsg model msg
-
-
-type alias PageWithParams pageModel pageMsg model msg arg =
-    Page.PageWithParams pageModel pageMsg model msg arg
-
-
-type alias RecipeWithParams pageModel pageMsg model msg arg =
-    Page.RecipeWithParams pageModel pageMsg model msg arg
+type alias Recipe params pageModel pageMsg model msg =
+    Page.Recipe params pageModel pageMsg model msg
 
 
 type alias Bundle msg =
@@ -226,39 +217,28 @@ type alias Static =
 
 static :
     Static
-    -> Page () Never model msg
+    -> Page params () Never model msg
 static =
     Page.static
 
 
-type alias Sandbox pageModel pageMsg =
-    Page.Sandbox pageModel pageMsg
+type alias Sandbox pageModel pageMsg params =
+    Page.Sandbox pageModel pageMsg params
 
 
 sandbox :
-    Sandbox pageModel pageMsg
-    -> Page pageModel pageMsg model msg
+    Sandbox pageModel pageMsg params
+    -> Page params pageModel pageMsg model msg
 sandbox =
     Page.sandbox
 
 
-type alias Element pageModel pageMsg =
-    Page.Element pageModel pageMsg
+type alias Element pageModel pageMsg params =
+    Page.Element pageModel pageMsg params
 
 
 element :
-    Element pageModel pageMsg
-    -> Page pageModel pageMsg model msg
+    Element pageModel pageMsg params
+    -> Page params pageModel pageMsg model msg
 element =
     Page.element
-
-
-type alias ElementWithParams pageModel pageMsg arg =
-    Page.ElementWithParams pageModel pageMsg arg
-
-
-elementWithParams :
-    ElementWithParams pageModel pageMsg arg
-    -> PageWithParams pageModel pageMsg model msg arg
-elementWithParams =
-    Page.elementWithParams

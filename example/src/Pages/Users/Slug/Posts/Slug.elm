@@ -1,11 +1,12 @@
-module Pages.Users.Slug_ exposing (Model, Msg, page)
+module Pages.Users.Slug.Posts.Slug exposing (Model, Msg, Params, page)
 
 import Application
 import Html exposing (..)
 
 
 type alias Model =
-    { slug : String
+    { user : String
+    , post : Int
     }
 
 
@@ -13,9 +14,15 @@ type Msg
     = Msg
 
 
-page : Application.PageWithParams Model Msg a b String
+type alias Params =
+    { user : String
+    , post : Int
+    }
+
+
+page : Application.Page Params Model Msg a b
 page =
-    Application.elementWithParams
+    Application.element
         { init = init
         , update = update
         , view = view
@@ -23,9 +30,9 @@ page =
         }
 
 
-init : String -> ( Model, Cmd Msg )
-init slug =
-    ( Model slug, Cmd.none )
+init : Params -> ( Model, Cmd Msg )
+init params =
+    ( params, Cmd.none )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -42,4 +49,4 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
-    h1 [] [ text ("New Element for: " ++ model.slug) ]
+    h1 [] [ text ("Post " ++ String.fromInt model.post ++ " for user: " ++ model.user) ]
