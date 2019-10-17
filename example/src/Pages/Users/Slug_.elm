@@ -1,4 +1,4 @@
-module Pages.Users.Slug exposing (Model, Msg, page)
+module Pages.Users.Slug_ exposing (Model, Msg, page)
 
 import Application
 import Html exposing (..)

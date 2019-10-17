@@ -7,7 +7,7 @@ import Pages.Counter as Counter
 import Pages.Homepage as Homepage
 import Pages.NotFound as NotFound
 import Pages.Random as Random
-import Pages.Users.Slug as Users_Slug
+import Pages.Users.Slug_ as Users_Slug
 
 
 type Model
