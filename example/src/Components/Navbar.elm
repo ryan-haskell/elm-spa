@@ -12,8 +12,8 @@ view =
             [ ( "Homepage", Route.Homepage () )
             , ( "Counter", Route.Counter () )
             , ( "Random", Route.Random () )
-            , ( "My user", Route.Users_Slug "ryan" )
-            , ( "My user's post", Route.Users_Slug_Posts_Slug { user = "ryan", post = 123 } )
+            , ( "Dynamic route", Route.Users_Slug "ryan" )
+            , ( "Nested dynamic route", Route.Users_Slug_Posts_Slug { user = "ryan", post = 123 } )
             ]
         )
 
