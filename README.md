@@ -26,6 +26,7 @@ main =
         { routing =
             { fromUrl = Route.fromUrl
             , toPath = Route.toPath
+            , transition = Application.fade 200
             }
         , layout =
             { view = Layout.view
