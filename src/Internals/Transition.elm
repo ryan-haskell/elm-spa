@@ -1,50 +1,27 @@
 module Internals.Transition exposing
-    ( Transitionable(..), unwrap, begin, complete
-    , Strategy, Options, fade, none
+    ( Options
+    , Strategy
+    , Transition(..)
+    , custom
+    , fade
+    , none
     )
-
-{-|
-
-@docs Transitionable, unwrap, begin, complete
-
-@docs Strategy, Options, fade, none
-
--}
 
 import Html exposing (Html, div)
 import Html.Attributes as Attr
 
 
-type Transitionable a
-    = Ready a
-    | Transitioning a
-    | Complete a
-
-
-unwrap : Transitionable a -> a
-unwrap transitionable =
-    case transitionable of
-        Ready value ->
-            value
-
-        Transitioning value ->
-            value
-
-        Complete value ->
-            value
-
-
-begin : Transitionable a -> Transitionable a
-begin =
-    unwrap >> Transitioning
-
-
-complete : Transitionable a -> Transitionable a
-complete =
-    unwrap >> Complete
+type Transition view
+    = Transition (Options view)
 
 
 type alias Options view =
+    { speed : Int
+    , strategy : Strategy view
+    }
+
+
+type alias Strategy view =
     { beforeLoad : Views view -> view
     , leavingPage : Views view -> view
     , enteringPage : Views view -> view
@@ -57,11 +34,7 @@ type alias Views view =
     }
 
 
-type alias Strategy view =
-    Int -> Options view
-
-
-fade : Strategy (Html msg)
+fade : Int -> Transition (Html msg)
 fade speed =
     let
         transition =
@@ -80,37 +53,50 @@ fade speed =
                 ]
             }
     in
-    { beforeLoad =
-        \{ layout, page } ->
-            div styles.invisible
-                [ layout
-                    { page = div styles.invisible [ page ]
-                    }
-                ]
-    , leavingPage =
-        \{ layout, page } ->
-            div styles.visible
-                [ layout
-                    { page = div styles.invisible [ page ]
-                    }
-                ]
-    , enteringPage =
-        \{ layout, page } ->
-            div styles.visible
-                [ layout
-                    { page = div styles.visible [ page ]
-                    }
-                ]
-    }
+    Transition
+        { speed = speed
+        , strategy =
+            { beforeLoad =
+                \{ layout, page } ->
+                    div styles.invisible
+                        [ layout
+                            { page = div styles.invisible [ page ]
+                            }
+                        ]
+            , leavingPage =
+                \{ layout, page } ->
+                    div styles.visible
+                        [ layout
+                            { page = div styles.invisible [ page ]
+                            }
+                        ]
+            , enteringPage =
+                \{ layout, page } ->
+                    div styles.visible
+                        [ layout
+                            { page = div styles.visible [ page ]
+                            }
+                        ]
+            }
+        }
 
 
-none : Strategy a
-none _ =
+none : Transition a
+none =
     let
         view { layout, page } =
             layout { page = page }
     in
-    { beforeLoad = view
-    , leavingPage = view
-    , enteringPage = view
-    }
+    Transition
+        { speed = 0
+        , strategy =
+            { beforeLoad = view
+            , leavingPage = view
+            , enteringPage = view
+            }
+        }
+
+
+custom : Options a -> Transition a
+custom =
+    Transition

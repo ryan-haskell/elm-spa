@@ -36,7 +36,8 @@ import Browser.Dom as Dom
 import Browser.Navigation as Nav
 import Html exposing (Html)
 import Internals.Page as Page
-import Internals.Transition as Transition exposing (Transitionable)
+import Internals.Transition as Transition
+import Internals.Transitionable as Transitionable exposing (Transitionable)
 import Internals.Utils as Utils
 import Task
 import Url exposing (Url)
@@ -68,8 +69,8 @@ create :
     -> Application flags model msg
 create config =
     let
-        transition =
-            unwrap config.routing.transition
+        (Transition.Transition transition) =
+            config.routing.transition
     in
     Browser.application
         { init =
@@ -93,7 +94,7 @@ create config =
             view
                 { view = config.pages.bundle >> .view
                 , layout = config.layout.view
-                , transition = transition.strategy transition.speed
+                , transition = transition.strategy
                 }
         , onUrlChange = Url
         , onUrlRequest = Link
@@ -130,7 +131,7 @@ init config flags url key =
                 { flags = flags
                 , url = url
                 , key = key
-                , page = Transition.Ready page
+                , page = Transitionable.Ready page
                 }
             )
             (\cmd ->
@@ -145,22 +146,22 @@ handleJumpLinks : Url -> Cmd msg -> Cmd (Msg msg)
 handleJumpLinks url cmd =
     Cmd.batch
         [ Cmd.map Page cmd
-        , scrollToHash url
+        , scrollToHash ScrollComplete url
         ]
 
 
-scrollToHash : Url -> Cmd (Msg msg)
-scrollToHash { fragment } =
+scrollToHash : msg -> Url -> Cmd msg
+scrollToHash msg { fragment } =
+    let
+        scrollTo : String -> Cmd msg
+        scrollTo =
+            Dom.getElement
+                >> Task.andThen (\el -> Dom.setViewport 0 el.element.y)
+                >> Task.attempt (\_ -> msg)
+    in
     fragment
         |> Maybe.map scrollTo
         |> Maybe.withDefault Cmd.none
-
-
-scrollTo : String -> Cmd (Msg msg)
-scrollTo =
-    Dom.getElement
-        >> Task.andThen (\el -> Dom.setViewport 0 el.element.y)
-        >> Task.attempt (\_ -> ScrollComplete)
 
 
 
@@ -198,7 +199,7 @@ update config msg model =
                 ( model, Nav.load (Url.toString url) )
 
             else
-                ( { model | page = Transition.begin model.page }
+                ( { model | page = Transitionable.begin model.page }
                 , Utils.delay config.speed (TransitionTo url)
                 )
 
@@ -213,7 +214,7 @@ update config msg model =
             )
 
         TransitionComplete ->
-            ( { model | page = Transition.complete model.page }
+            ( { model | page = Transitionable.complete model.page }
             , Cmd.none
             )
 
@@ -222,14 +223,14 @@ update config msg model =
                 |> config.fromUrl
                 |> config.init
                 |> Tuple.mapBoth
-                    (\page -> { model | url = url, page = Transition.Complete page })
+                    (\page -> { model | url = url, page = Transitionable.Complete page })
                     (handleJumpLinks url)
 
         Page pageMsg ->
             Tuple.mapBoth
-                (\page -> { model | page = Transition.Complete page })
+                (\page -> { model | page = Transitionable.Complete page })
                 (Cmd.map Page)
-                (config.update pageMsg (Transition.unwrap model.page))
+                (config.update pageMsg (Transitionable.unwrap model.page))
 
 
 
@@ -241,7 +242,7 @@ subscriptions :
     -> Model flags model
     -> Sub (Msg msg)
 subscriptions config model =
-    Sub.map Page (config.subscriptions (Transition.unwrap model.page))
+    Sub.map Page (config.subscriptions (Transitionable.unwrap model.page))
 
 
 
@@ -250,7 +251,7 @@ subscriptions config model =
 
 view :
     { view : model -> Html msg
-    , transition : Transition.Options (Html msg)
+    , transition : Transition.Strategy (Html msg)
     , layout : { page : Html msg } -> Html msg
     }
     -> Model flags model
@@ -260,19 +261,19 @@ view config model =
     , body =
         [ Html.map Page <|
             case model.page of
-                Transition.Ready page ->
+                Transitionable.Ready page ->
                     config.transition.beforeLoad
                         { layout = config.layout
                         , page = config.view page
                         }
 
-                Transition.Transitioning page ->
+                Transitionable.Transitioning page ->
                     config.transition.leavingPage
                         { layout = config.layout
                         , page = config.view page
                         }
 
-                Transition.Complete page ->
+                Transitionable.Complete page ->
                     config.transition.enteringPage
                         { layout = config.layout
                         , page = config.view page
@@ -339,37 +340,15 @@ element =
 -- TRANSITIONS
 
 
-type Transition view
-    = Using (TransitionInfo view)
-    | None
-
-
-type alias TransitionInfo view =
-    { speed : Int
-    , strategy : Transition.Strategy view
-    }
-
-
-unwrap : Transition a -> TransitionInfo a
-unwrap transition =
-    case transition of
-        Using value ->
-            value
-
-        None ->
-            { speed = 0
-            , strategy = Transition.none
-            }
+type alias Transition a =
+    Transition.Transition a
 
 
 fade : Int -> Transition (Html msg)
-fade speed =
-    Using
-        { speed = speed
-        , strategy = Transition.fade
-        }
+fade =
+    Transition.fade
 
 
 none : Transition a
 none =
-    None
+    Transition.none
