@@ -184,10 +184,6 @@ update config msg model =
             , Nav.load url
             )
 
-        -- Reload ->
-        --     ( model
-        --     , Nav.reload
-        --     )
         Page pageMsg ->
             Tuple.mapBoth
                 (\page -> { model | page = page })
