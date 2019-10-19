@@ -53,8 +53,8 @@ create :
     { routing :
         { fromUrl : Url -> route
         , toPath : route -> String
+        , transition : Transition (Html msg)
         }
-    , transition : Transition (Html msg)
     , layout :
         { view : { page : Html msg } -> Html msg
         }
@@ -68,7 +68,7 @@ create :
 create config =
     let
         transition =
-            unwrap config.transition
+            unwrap config.routing.transition
     in
     Browser.application
         { init =

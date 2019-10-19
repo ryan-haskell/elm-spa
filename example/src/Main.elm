@@ -9,10 +9,10 @@ import Layout as Layout
 main : Application () Pages.Model Pages.Msg
 main =
     Application.create
-        { transition = Application.fade 200
-        , routing =
+        { routing =
             { fromUrl = Route.fromUrl
             , toPath = Route.toPath
+            , transition = Application.fade 200
             }
         , layout =
             { view = Layout.view
