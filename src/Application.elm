@@ -27,9 +27,11 @@ module Application exposing
 -}
 
 import Browser
+import Browser.Dom as Dom
 import Browser.Navigation as Nav
 import Html exposing (Html)
 import Internals.Page as Page
+import Task
 import Url exposing (Url)
 
 
@@ -109,7 +111,29 @@ init config flags url key =
         |> config.init
         |> Tuple.mapBoth
             (\page -> { flags = flags, url = url, key = key, page = page })
-            (Cmd.map Page)
+            (handleJumpLinks url)
+
+
+handleJumpLinks : Url -> Cmd msg -> Cmd (Msg msg)
+handleJumpLinks url cmd =
+    Cmd.batch
+        [ Cmd.map Page cmd
+        , scrollToHash url
+        ]
+
+
+scrollToHash : Url -> Cmd (Msg msg)
+scrollToHash { fragment } =
+    fragment
+        |> Maybe.map scrollTo
+        |> Maybe.withDefault Cmd.none
+
+
+scrollTo : String -> Cmd (Msg msg)
+scrollTo =
+    Dom.getElement
+        >> Task.andThen (\el -> Dom.setViewport 0 el.element.y)
+        >> Task.attempt (\_ -> ScrollComplete)
 
 
 
@@ -119,6 +143,7 @@ init config flags url key =
 type Msg msg
     = Url Url
     | Link Browser.UrlRequest
+    | ScrollComplete
     | Page msg
 
 
@@ -132,24 +157,37 @@ update :
     -> ( Model flags model, Cmd (Msg msg) )
 update config msg model =
     case msg of
+        ScrollComplete ->
+            ( model, Cmd.none )
+
         Url url ->
             url
                 |> config.fromUrl
                 |> config.init
                 |> Tuple.mapBoth
                     (\page -> { model | url = url, page = page })
-                    (Cmd.map Page)
+                    (handleJumpLinks url)
 
         Link (Browser.Internal url) ->
-            ( model
-            , Nav.pushUrl model.key (Url.toString url)
-            )
+            if url.path == model.url.path then
+                ( model
+                , Nav.load (Url.toString url)
+                )
+
+            else
+                ( model
+                , Nav.pushUrl model.key (Url.toString url)
+                )
 
         Link (Browser.External url) ->
             ( model
             , Nav.load url
             )
 
+        -- Reload ->
+        --     ( model
+        --     , Nav.reload
+        --     )
         Page pageMsg ->
             Tuple.mapBoth
                 (\page -> { model | page = page })

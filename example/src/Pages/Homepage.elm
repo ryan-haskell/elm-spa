@@ -7,6 +7,7 @@ module Pages.Homepage exposing
 
 import Application
 import Html exposing (..)
+import Html.Attributes exposing (href, id, style)
 
 
 type alias Model =
@@ -32,5 +33,9 @@ view : Html Msg
 view =
     div []
         [ h1 [] [ text "Homepage" ]
+        , p [] [ text "How exciting!" ]
+        , a [ href "#section" ] [ text "scroll bois" ]
+        , div [ style "height" "200vh" ] []
+        , h3 [ id "section" ] [ text "hey thur" ]
         , p [] [ text "How exciting!" ]
         ]
