@@ -14,6 +14,7 @@ module Application exposing
 @docs Application, create
 
 @docs Page, Recipe
+
 @docs Bundle, keep
 
 @docs Static, static
@@ -190,8 +191,11 @@ update config msg model =
             ( model, Cmd.none )
 
         Link (Browser.Internal url) ->
-            if url == model.url then
+            if url == model.url && url.fragment == Nothing then
                 ( model, Cmd.none )
+
+            else if url.path == model.url.path then
+                ( model, Nav.load (Url.toString url) )
 
             else
                 ( { model | page = Transition.begin model.page }
@@ -205,11 +209,7 @@ update config msg model =
 
         TransitionTo url ->
             ( model
-            , if url.path == model.url.path then
-                Nav.load (Url.toString url)
-
-              else
-                Nav.pushUrl model.key (Url.toString url)
+            , Nav.pushUrl model.key (Url.toString url)
             )
 
         TransitionComplete ->

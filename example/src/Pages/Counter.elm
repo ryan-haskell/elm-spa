@@ -7,6 +7,7 @@ module Pages.Counter exposing
 
 import Application
 import Html exposing (..)
+import Html.Attributes as Attr
 import Html.Events as Events
 
 
@@ -57,5 +58,8 @@ view model =
             [ button [ Events.onClick Decrement ] [ text "-" ]
             , p [] [ text (String.fromInt model.counter) ]
             , button [ Events.onClick Increment ] [ text "+" ]
+            , p []
+                [ a [ Attr.href "/#section" ] [ text "bottom of homepage" ]
+                ]
             ]
         ]
