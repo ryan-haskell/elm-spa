@@ -5,6 +5,8 @@ module Application exposing
     , Static, static
     , Sandbox, sandbox
     , Element, element
+    , Transition, fade
+    , none
     )
 
 {-|
@@ -24,6 +26,8 @@ module Application exposing
 
 @docs ElementWithParams, elementWithParams
 
+@docs Transition, fade
+
 -}
 
 import Browser
@@ -31,6 +35,8 @@ import Browser.Dom as Dom
 import Browser.Navigation as Nav
 import Html exposing (Html)
 import Internals.Page as Page
+import Internals.Transition as Transition exposing (Transitionable)
+import Internals.Utils as Utils
 import Task
 import Url exposing (Url)
 
@@ -48,6 +54,7 @@ create :
         { fromUrl : Url -> route
         , toPath : route -> String
         }
+    , transition : Transition (Html msg)
     , layout :
         { view : { page : Html msg } -> Html msg
         }
@@ -59,17 +66,23 @@ create :
     }
     -> Application flags model msg
 create config =
+    let
+        transition =
+            unwrap config.transition
+    in
     Browser.application
         { init =
             init
                 { init = config.pages.init
                 , fromUrl = config.routing.fromUrl
+                , speed = transition.speed
                 }
         , update =
             update
                 { fromUrl = config.routing.fromUrl
                 , init = config.pages.init
                 , update = config.pages.update
+                , speed = transition.speed
                 }
         , subscriptions =
             subscriptions
@@ -79,6 +92,7 @@ create config =
             view
                 { view = config.pages.bundle >> .view
                 , layout = config.layout.view
+                , transition = transition.strategy transition.speed
                 }
         , onUrlChange = Url
         , onUrlRequest = Link
@@ -93,13 +107,14 @@ type alias Model flags model =
     { url : Url
     , flags : flags
     , key : Nav.Key
-    , page : model
+    , page : Transitionable model
     }
 
 
 init :
     { fromUrl : Url -> route
     , init : route -> ( model, Cmd msg )
+    , speed : Int
     }
     -> flags
     -> Url
@@ -110,8 +125,19 @@ init config flags url key =
         |> config.fromUrl
         |> config.init
         |> Tuple.mapBoth
-            (\page -> { flags = flags, url = url, key = key, page = page })
-            (handleJumpLinks url)
+            (\page ->
+                { flags = flags
+                , url = url
+                , key = key
+                , page = Transition.Ready page
+                }
+            )
+            (\cmd ->
+                Cmd.batch
+                    [ handleJumpLinks url cmd
+                    , Utils.delay config.speed TransitionComplete
+                    ]
+            )
 
 
 handleJumpLinks : Url -> Cmd msg -> Cmd (Msg msg)
@@ -143,7 +169,9 @@ scrollTo =
 type Msg msg
     = Url Url
     | Link Browser.UrlRequest
+    | TransitionTo Url
     | ScrollComplete
+    | TransitionComplete
     | Page msg
 
 
@@ -151,6 +179,7 @@ update :
     { fromUrl : Url -> route
     , init : route -> ( model, Cmd msg )
     , update : msg -> model -> ( model, Cmd msg )
+    , speed : Int
     }
     -> Msg msg
     -> Model flags model
@@ -160,23 +189,13 @@ update config msg model =
         ScrollComplete ->
             ( model, Cmd.none )
 
-        Url url ->
-            url
-                |> config.fromUrl
-                |> config.init
-                |> Tuple.mapBoth
-                    (\page -> { model | url = url, page = page })
-                    (handleJumpLinks url)
-
         Link (Browser.Internal url) ->
-            if url.path == model.url.path then
-                ( model
-                , Nav.load (Url.toString url)
-                )
+            if url == model.url then
+                ( model, Cmd.none )
 
             else
-                ( model
-                , Nav.pushUrl model.key (Url.toString url)
+                ( { model | page = Transition.begin model.page }
+                , Utils.delay config.speed (TransitionTo url)
                 )
 
         Link (Browser.External url) ->
@@ -184,11 +203,33 @@ update config msg model =
             , Nav.load url
             )
 
+        TransitionTo url ->
+            ( model
+            , if url.path == model.url.path then
+                Nav.load (Url.toString url)
+
+              else
+                Nav.pushUrl model.key (Url.toString url)
+            )
+
+        TransitionComplete ->
+            ( { model | page = Transition.complete model.page }
+            , Cmd.none
+            )
+
+        Url url ->
+            url
+                |> config.fromUrl
+                |> config.init
+                |> Tuple.mapBoth
+                    (\page -> { model | url = url, page = Transition.Complete page })
+                    (handleJumpLinks url)
+
         Page pageMsg ->
             Tuple.mapBoth
-                (\page -> { model | page = page })
+                (\page -> { model | page = Transition.Complete page })
                 (Cmd.map Page)
-                (config.update pageMsg model.page)
+                (config.update pageMsg (Transition.unwrap model.page))
 
 
 
@@ -200,7 +241,7 @@ subscriptions :
     -> Model flags model
     -> Sub (Msg msg)
 subscriptions config model =
-    Sub.map Page (config.subscriptions model.page)
+    Sub.map Page (config.subscriptions (Transition.unwrap model.page))
 
 
 
@@ -209,17 +250,33 @@ subscriptions config model =
 
 view :
     { view : model -> Html msg
+    , transition : Transition.Options (Html msg)
     , layout : { page : Html msg } -> Html msg
     }
     -> Model flags model
     -> Browser.Document (Msg msg)
 view config model =
-    { title = "App title"
+    { title = "elm-app demo"
     , body =
         [ Html.map Page <|
-            config.layout
-                { page = config.view model.page
-                }
+            case model.page of
+                Transition.Ready page ->
+                    config.transition.beforeLoad
+                        { layout = config.layout
+                        , page = config.view page
+                        }
+
+                Transition.Transitioning page ->
+                    config.transition.leavingPage
+                        { layout = config.layout
+                        , page = config.view page
+                        }
+
+                Transition.Complete page ->
+                    config.transition.enteringPage
+                        { layout = config.layout
+                        , page = config.view page
+                        }
         ]
     }
 
@@ -276,3 +333,43 @@ element :
     -> Page params pageModel pageMsg model msg
 element =
     Page.element
+
+
+
+-- TRANSITIONS
+
+
+type Transition view
+    = Using (TransitionInfo view)
+    | None
+
+
+type alias TransitionInfo view =
+    { speed : Int
+    , strategy : Transition.Strategy view
+    }
+
+
+unwrap : Transition a -> TransitionInfo a
+unwrap transition =
+    case transition of
+        Using value ->
+            value
+
+        None ->
+            { speed = 0
+            , strategy = Transition.none
+            }
+
+
+fade : Int -> Transition (Html msg)
+fade speed =
+    Using
+        { speed = speed
+        , strategy = Transition.fade
+        }
+
+
+none : Transition a
+none =
+    None

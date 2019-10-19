@@ -9,7 +9,8 @@ import Layout as Layout
 main : Application () Pages.Model Pages.Msg
 main =
     Application.create
-        { routing =
+        { transition = Application.fade 200
+        , routing =
             { fromUrl = Route.fromUrl
             , toPath = Route.toPath
             }
