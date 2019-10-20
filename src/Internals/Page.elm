@@ -133,24 +133,36 @@ element page { toModel, toMsg } =
 -- LAYOUT
 
 
-type alias Glue route model msg =
-    { layout : Layout msg
-    , pages : Pages route model msg
+type alias Glue params layoutModel layoutMsg =
+    { layout : Layout layoutMsg
+    , pages : Pages params layoutModel layoutMsg
     }
 
 
-type alias Pages route model msg =
-    { init : route -> ( model, Cmd msg )
-    , update : msg -> model -> ( model, Cmd msg )
-    , bundle : model -> Bundle msg
+type alias Pages params layoutModel layoutMsg =
+    { init : params -> ( layoutModel, Cmd layoutMsg )
+    , update : layoutMsg -> layoutModel -> ( layoutModel, Cmd layoutMsg )
+    , bundle : layoutModel -> Bundle layoutMsg
     }
 
 
 glue :
-    Glue route layoutModel layoutMsg
+    Glue params layoutModel layoutMsg
     -> Page params layoutModel layoutMsg model msg
 glue options { toModel, toMsg } =
-    { init = Debug.todo "glue.init"
-    , update = Debug.todo "glue.update"
-    , bundle = Debug.todo "glue.bundle"
+    { init =
+        options.pages.init >> Tuple.mapBoth toModel (Cmd.map toMsg)
+    , update =
+        \msg model ->
+            options.pages.update msg model
+                |> Tuple.mapBoth toModel (Cmd.map toMsg)
+    , bundle =
+        \model ->
+            let
+                page =
+                    options.pages.bundle model
+            in
+            { view = options.layout.view { page = page.view } |> Html.map toMsg
+            , subscriptions = Sub.none
+            }
     }

@@ -354,16 +354,16 @@ element =
     Page.element
 
 
-type alias Glue route layoutModel layoutMsg =
-    Page.Glue route layoutModel layoutMsg
+type alias Glue params layoutModel layoutMsg =
+    Page.Glue params layoutModel layoutMsg
 
 
-type alias Pages route layoutModel layoutMsg =
-    Page.Pages route layoutModel layoutMsg
+type alias Pages params layoutModel layoutMsg =
+    Page.Pages params layoutModel layoutMsg
 
 
 glue :
-    Glue route layoutModel layoutMsg
+    Glue params layoutModel layoutMsg
     -> Page params layoutModel layoutMsg model msg
 glue =
     Page.glue
