@@ -20,8 +20,7 @@ view =
             , ( "Counter", Route.Counter () )
             , ( "Cats", Route.Random () )
             , ( "User", Route.Users_Slug "alice" )
-            , ( "Account settings", Route.Settings (Settings.Account ()) )
-            , ( "User settings", Route.Settings (Settings.User ()) )
+            , ( "Settings", Route.Settings (Settings.Account ()) )
             ]
 
 

@@ -1,11 +1,18 @@
 module Internals.Transition exposing
-    ( Options
-    , Strategy
-    , Transition(..)
-    , custom
-    , fade
-    , none
+    ( Transition, Options, Strategy
+    , fade, custom, none
+    , speed, strategy
     )
+
+{-|
+
+@docs Transition, Options, Strategy
+
+@docs fade, custom, none
+
+@docs speed strategy
+
+-}
 
 import Html exposing (Html, div)
 import Html.Attributes as Attr
@@ -13,6 +20,21 @@ import Html.Attributes as Attr
 
 type Transition view
     = Transition (Options view)
+
+
+unwrap : Transition view -> Options view
+unwrap (Transition options) =
+    options
+
+
+speed : Transition view -> Int
+speed =
+    unwrap >> .speed
+
+
+strategy : Transition view -> Strategy view
+strategy =
+    unwrap >> .strategy
 
 
 type alias Options view =
@@ -35,10 +57,10 @@ type alias Views view =
 
 
 fade : Int -> Transition (Html msg)
-fade speed =
+fade speed_ =
     let
         transition =
-            "opacity " ++ String.fromInt speed ++ "ms"
+            "opacity " ++ String.fromInt speed_ ++ "ms"
 
         styles =
             { invisible =
@@ -54,7 +76,7 @@ fade speed =
             }
     in
     Transition
-        { speed = speed
+        { speed = speed_
         , strategy =
             { beforeLoad =
                 \{ layout, page } ->

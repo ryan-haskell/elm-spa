@@ -1,6 +1,6 @@
 module Internals.Page exposing
     ( Page, Recipe
-    , Bundle
+    , Init, Bundle
     , Static, static
     , Sandbox, sandbox
     , Element, element
@@ -12,7 +12,7 @@ module Internals.Page exposing
 
 @docs Page, Recipe
 
-@docs Bundle
+@docs Init, Bundle
 
 @docs Static, static
 
@@ -26,6 +26,7 @@ module Internals.Page exposing
 
 import Html exposing (Html, div, text)
 import Internals.Layout exposing (Layout)
+import Internals.Transition as Transition
 
 
 type alias Page params pageModel pageMsg model msg =
@@ -36,7 +37,7 @@ type alias Page params pageModel pageMsg model msg =
 
 
 type alias Recipe params pageModel pageMsg model msg =
-    { init : params -> ( model, Cmd msg )
+    { init : params -> Init model msg
     , update : pageMsg -> pageModel -> ( model, Cmd msg )
     , bundle : pageModel -> Bundle msg
     }
@@ -46,6 +47,16 @@ type TransitionStatus
     = Initial
     | Leaving
     | Entering
+
+
+type alias Init model msg =
+    { parentSpeed : Int
+    }
+    ->
+        { model : model
+        , cmd : Cmd msg
+        , speed : Int
+        }
 
 
 type alias Bundle msg =
@@ -69,7 +80,12 @@ static :
     Static
     -> Page params () Never model msg
 static page { toModel, toMsg } =
-    { init = \_ -> ( toModel (), Cmd.none )
+    { init =
+        \_ { parentSpeed } ->
+            { model = toModel ()
+            , cmd = Cmd.none
+            , speed = parentSpeed
+            }
     , update = \_ model -> ( toModel model, Cmd.none )
     , bundle =
         \_ _ ->
@@ -94,7 +110,12 @@ sandbox :
     Sandbox params pageModel pageMsg
     -> Page params pageModel pageMsg model msg
 sandbox page { toModel, toMsg } =
-    { init = \params -> ( toModel (page.init params), Cmd.none )
+    { init =
+        \params { parentSpeed } ->
+            { model = toModel (page.init params)
+            , cmd = Cmd.none
+            , speed = parentSpeed
+            }
     , update =
         \msg model ->
             ( page.update msg model |> toModel
@@ -125,7 +146,14 @@ element :
     -> Page params pageModel pageMsg model msg
 element page { toModel, toMsg } =
     { init =
-        page.init >> Tuple.mapBoth toModel (Cmd.map toMsg)
+        \params { parentSpeed } ->
+            page.init params
+                |> (\( model, cmd ) ->
+                        { model = toModel model
+                        , cmd = Cmd.map toMsg cmd
+                        , speed = parentSpeed
+                        }
+                   )
     , update =
         \msg model ->
             page.update msg model
@@ -149,7 +177,7 @@ type alias Glue params layoutModel layoutMsg =
 
 
 type alias Pages params layoutModel layoutMsg =
-    { init : params -> ( layoutModel, Cmd layoutMsg )
+    { init : params -> Init layoutModel layoutMsg
     , update : layoutMsg -> layoutModel -> ( layoutModel, Cmd layoutMsg )
     , bundle : layoutModel -> Bundle layoutMsg
     }
@@ -160,7 +188,14 @@ glue :
     -> Page params layoutModel layoutMsg model msg
 glue options { toModel, toMsg } =
     { init =
-        options.pages.init >> Tuple.mapBoth toModel (Cmd.map toMsg)
+        \params _ ->
+            options.pages.init params { parentSpeed = Transition.speed options.layout.transition }
+                |> (\page ->
+                        { model = toModel page.model
+                        , cmd = Cmd.map toMsg page.cmd
+                        , speed = page.speed
+                        }
+                   )
     , update =
         \msg model ->
             options.pages.update msg model

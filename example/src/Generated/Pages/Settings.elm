@@ -69,7 +69,7 @@ user =
         }
 
 
-init : Route -> ( Model, Cmd Msg )
+init : Route -> Application.Init Model Msg
 init route =
     case route of
         Route.Account params ->

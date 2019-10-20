@@ -2,7 +2,7 @@ module Application exposing
     ( Application, create
     , Layout
     , Page, Recipe
-    , Bundle, keep
+    , Init, Bundle, keep
     , Static, static
     , Sandbox, sandbox
     , Element, element
@@ -27,7 +27,7 @@ module Application exposing
 
 @docs Page, Recipe
 
-@docs Bundle, keep
+@docs Init, Bundle, keep
 
 @docs Static, static
 
@@ -75,30 +75,26 @@ create :
         , transition : Transition (Html msg)
         }
     , pages :
-        { init : route -> ( model, Cmd msg )
+        { init : route -> Init model msg
         , update : msg -> model -> ( model, Cmd msg )
-        , bundle : model -> Page.Bundle msg
+        , bundle : model -> Bundle msg
         }
     }
     -> Application flags model msg
 create config =
-    let
-        (Transition.Transition transition) =
-            config.layout.transition
-    in
     Browser.application
         { init =
             init
                 { init = config.pages.init
                 , fromUrl = config.routing.fromUrl
-                , speed = transition.speed
+                , speed = Transition.speed config.layout.transition
                 }
         , update =
             update
                 { fromUrl = config.routing.fromUrl
                 , init = config.pages.init
                 , update = config.pages.update
-                , speed = transition.speed
+                , speed = Transition.speed config.layout.transition
                 }
         , subscriptions =
             subscriptions
@@ -112,7 +108,7 @@ create config =
                     \model ->
                         config.pages.bundle model Page.Initial |> .view
                 , layout = config.layout
-                , transition = transition.strategy
+                , transition = Transition.strategy config.layout.transition
                 }
         , onUrlChange = Url
         , onUrlRequest = Link
@@ -128,12 +124,13 @@ type alias Model flags model =
     , flags : flags
     , key : Nav.Key
     , page : Transitionable model
+    , speed : Int
     }
 
 
 init :
     { fromUrl : Url -> route
-    , init : route -> ( model, Cmd msg )
+    , init : route -> Init model msg
     , speed : Int
     }
     -> flags
@@ -143,21 +140,20 @@ init :
 init config flags url key =
     url
         |> config.fromUrl
-        |> config.init
-        |> Tuple.mapBoth
-            (\page ->
-                { flags = flags
-                , url = url
-                , key = key
-                , page = Transitionable.Ready page
-                }
-            )
-            (\cmd ->
-                Cmd.batch
-                    [ handleJumpLinks url cmd
-                    , Utils.delay config.speed TransitionComplete
+        |> (\route -> config.init route { parentSpeed = config.speed })
+        |> (\page ->
+                ( { flags = flags
+                  , url = url
+                  , key = key
+                  , page = Transitionable.Ready page.model
+                  , speed = page.speed
+                  }
+                , Cmd.batch
+                    [ handleJumpLinks url page.cmd
+                    , Utils.delay page.speed TransitionComplete
                     ]
-            )
+                )
+           )
 
 
 handleJumpLinks : Url -> Cmd msg -> Cmd (Msg msg)
@@ -197,7 +193,7 @@ type Msg msg
 
 update :
     { fromUrl : Url -> route
-    , init : route -> ( model, Cmd msg )
+    , init : route -> Init model msg
     , update : msg -> model -> ( model, Cmd msg )
     , speed : Int
     }
@@ -217,15 +213,12 @@ update config msg model =
                 ( model, Nav.load (Url.toString url) )
 
             else
-                ( { model
-                    | page =
-                        if navigatingToNewLayout { old = model.url, new = url } then
-                            Transitionable.begin model.page
+                ( if navigatingToNewLayout { old = model.url, new = url } then
+                    { model | page = Transitionable.begin model.page }
 
-                        else
-                            Transitionable.complete model.page
-                  }
-                , Utils.delay config.speed (TransitionTo url)
+                  else
+                    { model | page = Transitionable.complete model.page }
+                , Utils.delay model.speed (TransitionTo url)
                 )
 
         Link (Browser.External url) ->
@@ -246,10 +239,16 @@ update config msg model =
         Url url ->
             url
                 |> config.fromUrl
-                |> config.init
-                |> Tuple.mapBoth
-                    (\page -> { model | url = url, page = Transitionable.Complete page })
-                    (handleJumpLinks url)
+                |> (\route -> config.init route { parentSpeed = config.speed })
+                |> (\page ->
+                        ( { model
+                            | url = url
+                            , page = Transitionable.Complete page.model
+                            , speed = page.speed
+                          }
+                        , handleJumpLinks url page.cmd
+                        )
+                   )
 
         Page pageMsg ->
             Tuple.mapBoth
@@ -340,6 +339,10 @@ type alias Page params pageModel pageMsg model msg =
 
 type alias Recipe params pageModel pageMsg model msg =
     Page.Recipe params pageModel pageMsg model msg
+
+
+type alias Init model msg =
+    Page.Init model msg
 
 
 type alias Bundle msg =
