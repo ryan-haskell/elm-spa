@@ -69,10 +69,10 @@ create :
     { routing :
         { fromUrl : Url -> route
         , toPath : route -> String
-        , transition : Transition (Html msg)
         }
     , layout :
         { view : { page : Html msg } -> Html msg
+        , transition : Transition (Html msg)
         }
     , pages :
         { init : route -> ( model, Cmd msg )
@@ -84,7 +84,7 @@ create :
 create config =
     let
         (Transition.Transition transition) =
-            config.routing.transition
+            config.layout.transition
     in
     Browser.application
         { init =
@@ -102,11 +102,15 @@ create config =
                 }
         , subscriptions =
             subscriptions
-                { subscriptions = config.pages.bundle >> .subscriptions
+                { subscriptions =
+                    \model ->
+                        config.pages.bundle model Page.Initial |> .subscriptions
                 }
         , view =
             view
-                { view = config.pages.bundle >> .view
+                { view =
+                    \model ->
+                        config.pages.bundle model Page.Initial |> .view
                 , layout = config.layout
                 , transition = transition.strategy
                 }
@@ -213,7 +217,14 @@ update config msg model =
                 ( model, Nav.load (Url.toString url) )
 
             else
-                ( { model | page = Transitionable.begin model.page }
+                ( { model
+                    | page =
+                        if navigatingToNewLayout { old = model.url, new = url } then
+                            Transitionable.begin model.page
+
+                        else
+                            Transitionable.complete model.page
+                  }
                 , Utils.delay config.speed (TransitionTo url)
                 )
 
@@ -245,6 +256,21 @@ update config msg model =
                 (\page -> { model | page = Transitionable.Complete page })
                 (Cmd.map Page)
                 (config.update pageMsg (Transitionable.unwrap model.page))
+
+
+navigatingToNewLayout : { old : Url, new : Url } -> Bool
+navigatingToNewLayout urls =
+    let
+        firstSegment { path } =
+            String.split "/" path |> List.drop 1 |> List.head
+
+        old =
+            firstSegment urls.old
+
+        new =
+            firstSegment urls.new
+    in
+    old /= new || old == Nothing
 
 
 
@@ -297,11 +323,15 @@ view config model =
 
 
 
--- PAGE API
+-- Layouts
 
 
 type alias Layout msg =
     Layout.Layout msg
+
+
+
+-- PAGE API
 
 
 type alias Page params pageModel pageMsg model msg =

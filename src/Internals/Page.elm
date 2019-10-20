@@ -5,6 +5,7 @@ module Internals.Page exposing
     , Sandbox, sandbox
     , Element, element
     , Glue, Pages, glue
+    , TransitionStatus(..)
     )
 
 {-|
@@ -23,7 +24,7 @@ module Internals.Page exposing
 
 -}
 
-import Html exposing (Html)
+import Html exposing (Html, div, text)
 import Internals.Layout exposing (Layout)
 
 
@@ -41,10 +42,18 @@ type alias Recipe params pageModel pageMsg model msg =
     }
 
 
+type TransitionStatus
+    = Initial
+    | Leaving
+    | Entering
+
+
 type alias Bundle msg =
-    { view : Html msg
-    , subscriptions : Sub msg
-    }
+    TransitionStatus
+    ->
+        { view : Html msg
+        , subscriptions : Sub msg
+        }
 
 
 
@@ -63,7 +72,7 @@ static page { toModel, toMsg } =
     { init = \_ -> ( toModel (), Cmd.none )
     , update = \_ model -> ( toModel model, Cmd.none )
     , bundle =
-        \_ ->
+        \_ _ ->
             { view = Html.map toMsg page.view
             , subscriptions = Sub.none
             }
@@ -92,7 +101,7 @@ sandbox page { toModel, toMsg } =
             , Cmd.none
             )
     , bundle =
-        \model ->
+        \model _ ->
             { view = page.view model |> Html.map toMsg
             , subscriptions = Sub.none
             }
@@ -122,7 +131,7 @@ element page { toModel, toMsg } =
             page.update msg model
                 |> Tuple.mapBoth toModel (Cmd.map toMsg)
     , bundle =
-        \model ->
+        \model _ ->
             { view = page.view model |> Html.map toMsg
             , subscriptions = Sub.none
             }
@@ -157,12 +166,20 @@ glue options { toModel, toMsg } =
             options.pages.update msg model
                 |> Tuple.mapBoth toModel (Cmd.map toMsg)
     , bundle =
-        \model ->
+        \model status ->
             let
                 page =
-                    options.pages.bundle model
+                    options.pages.bundle model status
             in
-            { view = options.layout.view { page = page.view } |> Html.map toMsg
+            { view =
+                options.layout.view
+                    { page =
+                        div []
+                            [ text (Debug.toString status)
+                            , page.view
+                            ]
+                    }
+                    |> Html.map toMsg
             , subscriptions = Sub.none
             }
     }

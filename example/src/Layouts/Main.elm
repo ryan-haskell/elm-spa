@@ -9,6 +9,7 @@ import Html.Attributes as Attr
 layout : Application.Layout msg
 layout =
     { view = view
+    , transition = Application.fade 200
     }
 
 

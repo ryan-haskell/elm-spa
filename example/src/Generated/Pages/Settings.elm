@@ -104,7 +104,7 @@ update appMsg appModel =
             Application.keep appModel
 
 
-bundle : Model -> { view : Html Msg, subscriptions : Sub Msg }
+bundle : Model -> Application.Bundle Msg
 bundle appModel =
     case appModel of
         AccountModel model ->
