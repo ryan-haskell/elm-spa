@@ -1,17 +1,29 @@
 module Application exposing
     ( Application, create
+    , Layout
     , Page, Recipe
     , Bundle, keep
     , Static, static
     , Sandbox, sandbox
     , Element, element
-    , Transition, fade
-    , none
+    , Glue, Pages, glue
+    , Transition, fade, none
     )
 
 {-|
 
+
+## Applications
+
 @docs Application, create
+
+
+## Layouts
+
+@docs Layout
+
+
+## Pages
 
 @docs Page, Recipe
 
@@ -23,11 +35,12 @@ module Application exposing
 
 @docs Element, element
 
-@docs PageWithParams, RecipeWithParams
+@docs Glue, Pages, glue
 
-@docs ElementWithParams, elementWithParams
 
-@docs Transition, fade
+## Transitions
+
+@docs Transition, fade, none
 
 -}
 
@@ -35,6 +48,7 @@ import Browser
 import Browser.Dom as Dom
 import Browser.Navigation as Nav
 import Html exposing (Html)
+import Internals.Layout as Layout
 import Internals.Page as Page
 import Internals.Transition as Transition
 import Internals.Transitionable as Transitionable exposing (Transitionable)
@@ -93,7 +107,7 @@ create config =
         , view =
             view
                 { view = config.pages.bundle >> .view
-                , layout = config.layout.view
+                , layout = config.layout
                 , transition = transition.strategy
                 }
         , onUrlChange = Url
@@ -252,7 +266,7 @@ subscriptions config model =
 view :
     { view : model -> Html msg
     , transition : Transition.Strategy (Html msg)
-    , layout : { page : Html msg } -> Html msg
+    , layout : Layout msg
     }
     -> Model flags model
     -> Browser.Document (Msg msg)
@@ -263,19 +277,19 @@ view config model =
             case model.page of
                 Transitionable.Ready page ->
                     config.transition.beforeLoad
-                        { layout = config.layout
+                        { layout = config.layout.view
                         , page = config.view page
                         }
 
                 Transitionable.Transitioning page ->
                     config.transition.leavingPage
-                        { layout = config.layout
+                        { layout = config.layout.view
                         , page = config.view page
                         }
 
                 Transitionable.Complete page ->
                     config.transition.enteringPage
-                        { layout = config.layout
+                        { layout = config.layout.view
                         , page = config.view page
                         }
         ]
@@ -284,6 +298,10 @@ view config model =
 
 
 -- PAGE API
+
+
+type alias Layout msg =
+    Layout.Layout msg
 
 
 type alias Page params pageModel pageMsg model msg =
@@ -314,26 +332,41 @@ static =
     Page.static
 
 
-type alias Sandbox pageModel pageMsg params =
-    Page.Sandbox pageModel pageMsg params
+type alias Sandbox params pageModel pageMsg =
+    Page.Sandbox params pageModel pageMsg
 
 
 sandbox :
-    Sandbox pageModel pageMsg params
+    Sandbox params pageModel pageMsg
     -> Page params pageModel pageMsg model msg
 sandbox =
     Page.sandbox
 
 
-type alias Element pageModel pageMsg params =
-    Page.Element pageModel pageMsg params
+type alias Element params pageModel pageMsg =
+    Page.Element params pageModel pageMsg
 
 
 element :
-    Element pageModel pageMsg params
+    Element params pageModel pageMsg
     -> Page params pageModel pageMsg model msg
 element =
     Page.element
+
+
+type alias Glue route layoutModel layoutMsg =
+    Page.Glue route layoutModel layoutMsg
+
+
+type alias Pages route layoutModel layoutMsg =
+    Page.Pages route layoutModel layoutMsg
+
+
+glue :
+    Glue route layoutModel layoutMsg
+    -> Page params layoutModel layoutMsg model msg
+glue =
+    Page.glue
 
 
 

@@ -3,7 +3,7 @@ module Main exposing (main)
 import Application exposing (Application)
 import Generated.Pages as Pages
 import Generated.Route as Route
-import Layout as Layout
+import Layouts.Main
 
 
 main : Application () Pages.Model Pages.Msg
@@ -14,9 +14,7 @@ main =
             , toPath = Route.toPath
             , transition = Application.fade 200
             }
-        , layout =
-            { view = Layout.view
-            }
+        , layout = Layouts.Main.layout
         , pages =
             { init = Pages.init
             , update = Pages.update

@@ -4,6 +4,7 @@ module Internals.Page exposing
     , Static, static
     , Sandbox, sandbox
     , Element, element
+    , Glue, Pages, glue
     )
 
 {-|
@@ -18,9 +19,12 @@ module Internals.Page exposing
 
 @docs Element, element
 
+@docs Glue, Pages, glue
+
 -}
 
 import Html exposing (Html)
+import Internals.Layout exposing (Layout)
 
 
 type alias Page params pageModel pageMsg model msg =
@@ -70,7 +74,7 @@ static page { toModel, toMsg } =
 -- SANDBOX
 
 
-type alias Sandbox pageModel pageMsg params =
+type alias Sandbox params pageModel pageMsg =
     { init : params -> pageModel
     , update : pageMsg -> pageModel -> pageModel
     , view : pageModel -> Html pageMsg
@@ -78,7 +82,7 @@ type alias Sandbox pageModel pageMsg params =
 
 
 sandbox :
-    Sandbox pageModel pageMsg params
+    Sandbox params pageModel pageMsg
     -> Page params pageModel pageMsg model msg
 sandbox page { toModel, toMsg } =
     { init = \params -> ( toModel (page.init params), Cmd.none )
@@ -99,7 +103,7 @@ sandbox page { toModel, toMsg } =
 -- ELEMENT
 
 
-type alias Element pageModel pageMsg params =
+type alias Element params pageModel pageMsg =
     { init : params -> ( pageModel, Cmd pageMsg )
     , update : pageMsg -> pageModel -> ( pageModel, Cmd pageMsg )
     , view : pageModel -> Html pageMsg
@@ -108,7 +112,7 @@ type alias Element pageModel pageMsg params =
 
 
 element :
-    Element pageModel pageMsg params
+    Element params pageModel pageMsg
     -> Page params pageModel pageMsg model msg
 element page { toModel, toMsg } =
     { init =
@@ -122,4 +126,31 @@ element page { toModel, toMsg } =
             { view = page.view model |> Html.map toMsg
             , subscriptions = Sub.none
             }
+    }
+
+
+
+-- LAYOUT
+
+
+type alias Glue route model msg =
+    { layout : Layout msg
+    , pages : Pages route model msg
+    }
+
+
+type alias Pages route model msg =
+    { init : route -> ( model, Cmd msg )
+    , update : msg -> model -> ( model, Cmd msg )
+    , bundle : model -> Bundle msg
+    }
+
+
+glue :
+    Glue route layoutModel layoutMsg
+    -> Page params layoutModel layoutMsg model msg
+glue options { toModel, toMsg } =
+    { init = Debug.todo "glue.init"
+    , update = Debug.todo "glue.update"
+    , bundle = Debug.todo "glue.bundle"
     }

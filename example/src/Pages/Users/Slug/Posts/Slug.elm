@@ -49,4 +49,6 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
-    h1 [] [ text ("Post " ++ String.fromInt model.post ++ " for user: " ++ model.user) ]
+    h1 []
+        [ text ("Post " ++ String.fromInt model.post ++ " for user: " ++ model.user)
+        ]

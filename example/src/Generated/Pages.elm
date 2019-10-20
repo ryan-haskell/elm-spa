@@ -1,6 +1,7 @@
 module Generated.Pages exposing (Model, Msg, bundle, init, update)
 
 import Application
+import Generated.Pages.Settings as Settings
 import Generated.Route as Route exposing (Route)
 import Html exposing (Html)
 import Pages.Counter as Counter
@@ -16,6 +17,7 @@ type Model
     | CounterModel Counter.Model
     | RandomModel Random.Model
     | NotFoundModel NotFound.Model
+    | SettingsModel Settings.Model
     | Users_SlugModel Users_Slug.Model
     | Users_Slug_Posts_SlugModel Users_Slug_Posts_Slug.Model
 
@@ -24,6 +26,7 @@ type Msg
     = HomepageMsg Homepage.Msg
     | CounterMsg Counter.Msg
     | RandomMsg Random.Msg
+    | SettingsMsg Settings.Msg
     | NotFoundMsg NotFound.Msg
     | Users_SlugMsg Users_Slug.Msg
     | Users_Slug_Posts_SlugMsg Users_Slug_Posts_Slug.Msg
@@ -50,6 +53,14 @@ random =
     Random.page
         { toModel = RandomModel
         , toMsg = RandomMsg
+        }
+
+
+settings : Application.Recipe Settings.Params Settings.Model Settings.Msg Model Msg
+settings =
+    Settings.page
+        { toModel = SettingsModel
+        , toMsg = SettingsMsg
         }
 
 
@@ -89,6 +100,9 @@ init route =
         Route.Random params ->
             random.init params
 
+        Route.Settings params ->
+            settings.init params
+
         Route.NotFound params ->
             notFound.init params
 
@@ -118,6 +132,12 @@ update appMsg appModel =
             random.update msg model
 
         ( RandomMsg _, _ ) ->
+            Application.keep appModel
+
+        ( SettingsMsg msg, SettingsModel model ) ->
+            settings.update msg model
+
+        ( SettingsMsg _, _ ) ->
             Application.keep appModel
 
         ( NotFoundMsg msg, NotFoundModel model ) ->
@@ -150,6 +170,9 @@ bundle appModel =
 
         RandomModel model ->
             random.bundle model
+
+        SettingsModel model ->
+            settings.bundle model
 
         NotFoundModel model ->
             notFound.bundle model
