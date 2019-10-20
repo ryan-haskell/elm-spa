@@ -2,6 +2,7 @@ module Pages.Users.Slug.Posts.Slug exposing (Model, Msg, Params, page)
 
 import Application
 import Html exposing (..)
+import Html.Attributes exposing (href)
 
 
 type alias Model =
@@ -43,12 +44,18 @@ update msg model =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
+subscriptions _ =
     Sub.none
 
 
 view : Model -> Html Msg
 view model =
-    h1 []
-        [ text ("Post " ++ String.fromInt model.post ++ " for user: " ++ model.user)
+    div []
+        [ h1 []
+            [ text ("Post " ++ String.fromInt model.post ++ " for user: " ++ model.user)
+            ]
+        , p []
+            [ a [ href ("/users/" ++ model.user) ]
+                [ text "back to user" ]
+            ]
         ]

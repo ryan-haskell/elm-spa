@@ -2,6 +2,7 @@ module Pages.Users.Slug exposing (Model, Msg, Params, page)
 
 import Application
 import Html exposing (..)
+import Html.Attributes exposing (href)
 
 
 type alias Model =
@@ -46,4 +47,31 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
-    h1 [] [ text ("New Element for: " ++ model.slug) ]
+    div []
+        [ h1 [] [ text ("Now viewing: " ++ model.slug) ]
+        , p [] [ text "Supports dynamic routes!" ]
+        , ul [] <|
+            List.map viewUser
+                [ ( "Alice", "alice" )
+                , ( "Bob", "bob" )
+                , ( "Carol", "carol" )
+                ]
+        ]
+
+
+viewUser : ( String, String ) -> Html msg
+viewUser ( label, slug ) =
+    li []
+        [ h4 [] [ a [ href ("/users/" ++ slug) ] [ text label ] ]
+        , ul []
+            (List.map
+                (\num ->
+                    li []
+                        [ a [ href ("/users/" ++ slug ++ "/posts/" ++ String.fromInt num) ]
+                            [ text ("Post " ++ String.fromInt num)
+                            ]
+                        ]
+                )
+                (List.range 1 3)
+            )
+        ]

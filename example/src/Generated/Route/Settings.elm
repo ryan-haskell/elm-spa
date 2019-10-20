@@ -4,7 +4,7 @@ module Generated.Route.Settings exposing
     , toPath
     )
 
-import Url.Parser as Parser exposing ((</>), Parser)
+import Url.Parser as Parser exposing (Parser)
 
 
 type Route

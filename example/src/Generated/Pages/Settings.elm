@@ -9,10 +9,6 @@ import Pages.Settings.Notifications as Notifications
 import Pages.Settings.User as User
 
 
-
--- TODO : Export Application.layout or something for scaling this trash
-
-
 type Model
     = AccountModel Account.Model
     | NotificationsModel Notifications.Model
