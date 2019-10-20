@@ -36,7 +36,8 @@ parser =
         , Parser.s "random"
             |> Parser.map (Random ())
         , Parser.s "settings"
-            |> (</>) (Parser.map Settings Settings.parser)
+            </> Settings.parser
+            |> Parser.map Settings
         , (Parser.s "users" </> Parser.string)
             |> Parser.map Users_Slug
         , (Parser.s "users" </> Parser.string </> Parser.s "posts" </> Parser.int)
