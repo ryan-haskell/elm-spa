@@ -98,15 +98,11 @@ create config =
                 }
         , subscriptions =
             subscriptions
-                { subscriptions =
-                    \model ->
-                        config.pages.bundle model Page.Initial |> .subscriptions
+                { subscriptions = config.pages.bundle >> .subscriptions
                 }
         , view =
             view
-                { view =
-                    \model ->
-                        config.pages.bundle model Page.Initial |> .view
+                { view = \status model -> (config.pages.bundle model).view status
                 , layout = config.layout
                 , transition = Transition.strategy config.layout.transition
                 }
@@ -120,7 +116,10 @@ create config =
 
 
 type alias Model flags model =
-    { url : Url
+    { urls :
+        { previous : Maybe Url
+        , current : Url
+        }
     , flags : flags
     , key : Nav.Key
     , page : Transitionable model
@@ -143,7 +142,7 @@ init config flags url key =
         |> (\route -> config.init route { parentSpeed = config.speed })
         |> (\page ->
                 ( { flags = flags
-                  , url = url
+                  , urls = { previous = Nothing, current = url }
                   , key = key
                   , page = Transitionable.Ready page.model
                   , speed = page.speed
@@ -206,18 +205,18 @@ update config msg model =
             ( model, Cmd.none )
 
         Link (Browser.Internal url) ->
-            if url == model.url && url.fragment == Nothing then
+            if url == model.urls.current && url.fragment == Nothing then
                 ( model, Cmd.none )
 
-            else if url.path == model.url.path then
+            else if url.path == model.urls.current.path then
                 ( model, Nav.load (Url.toString url) )
 
             else
-                ( if navigatingToNewLayout { old = model.url, new = url } then
-                    { model | page = Transitionable.begin model.page }
+                ( if navigatingWithinLayout { old = model.urls.current, new = url } then
+                    { model | page = Transitionable.complete model.page }
 
                   else
-                    { model | page = Transitionable.complete model.page }
+                    { model | page = Transitionable.begin model.page }
                 , Utils.delay model.speed (TransitionTo url)
                 )
 
@@ -242,7 +241,10 @@ update config msg model =
                 |> (\route -> config.init route { parentSpeed = config.speed })
                 |> (\page ->
                         ( { model
-                            | url = url
+                            | urls =
+                                { previous = Just model.urls.current
+                                , current = url
+                                }
                             , page = Transitionable.Complete page.model
                             , speed = page.speed
                           }
@@ -257,8 +259,8 @@ update config msg model =
                 (config.update pageMsg (Transitionable.unwrap model.page))
 
 
-navigatingToNewLayout : { old : Url, new : Url } -> Bool
-navigatingToNewLayout urls =
+navigatingWithinLayout : { old : Url, new : Url } -> Bool
+navigatingWithinLayout urls =
     let
         firstSegment { path } =
             String.split "/" path |> List.drop 1 |> List.head
@@ -269,7 +271,7 @@ navigatingToNewLayout urls =
         new =
             firstSegment urls.new
     in
-    old /= new || old == Nothing
+    old == new && old /= Nothing
 
 
 
@@ -289,13 +291,26 @@ subscriptions config model =
 
 
 view :
-    { view : model -> Html msg
+    { view : Page.TransitionStatus -> model -> Html msg
     , transition : Transition.Strategy (Html msg)
     , layout : Layout msg
     }
     -> Model flags model
     -> Browser.Document (Msg msg)
 view config model =
+    let
+        isNavigatingWithinLayout =
+            model.urls.previous
+                |> Maybe.map (\previous -> navigatingWithinLayout { old = previous, new = model.urls.current })
+                |> Maybe.withDefault False
+
+        status =
+            if isNavigatingWithinLayout then
+                Page.Leaving
+
+            else
+                Page.Complete
+    in
     { title = "elm-app demo"
     , body =
         [ Html.map Page <|
@@ -303,19 +318,19 @@ view config model =
                 Transitionable.Ready page ->
                     config.transition.beforeLoad
                         { layout = config.layout.view
-                        , page = config.view page
+                        , page = config.view status page
                         }
 
                 Transitionable.Transitioning page ->
                     config.transition.leavingPage
                         { layout = config.layout.view
-                        , page = config.view page
+                        , page = config.view status page
                         }
 
                 Transitionable.Complete page ->
                     config.transition.enteringPage
                         { layout = config.layout.view
-                        , page = config.view page
+                        , page = config.view status page
                         }
         ]
     }

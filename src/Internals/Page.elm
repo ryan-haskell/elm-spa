@@ -46,7 +46,7 @@ type alias Recipe params pageModel pageMsg model msg =
 type TransitionStatus
     = Initial
     | Leaving
-    | Entering
+    | Complete
 
 
 type alias Init model msg =
@@ -60,11 +60,9 @@ type alias Init model msg =
 
 
 type alias Bundle msg =
-    TransitionStatus
-    ->
-        { view : Html msg
-        , subscriptions : Sub msg
-        }
+    { view : TransitionStatus -> Html msg
+    , subscriptions : Sub msg
+    }
 
 
 
@@ -88,8 +86,8 @@ static page { toModel, toMsg } =
             }
     , update = \_ model -> ( toModel model, Cmd.none )
     , bundle =
-        \_ _ ->
-            { view = Html.map toMsg page.view
+        \_ ->
+            { view = \_ -> Html.map toMsg page.view
             , subscriptions = Sub.none
             }
     }
@@ -122,8 +120,8 @@ sandbox page { toModel, toMsg } =
             , Cmd.none
             )
     , bundle =
-        \model _ ->
-            { view = page.view model |> Html.map toMsg
+        \model ->
+            { view = \_ -> page.view model |> Html.map toMsg
             , subscriptions = Sub.none
             }
     }
@@ -159,8 +157,8 @@ element page { toModel, toMsg } =
             page.update msg model
                 |> Tuple.mapBoth toModel (Cmd.map toMsg)
     , bundle =
-        \model _ ->
-            { view = page.view model |> Html.map toMsg
+        \model ->
+            { view = \_ -> page.view model |> Html.map toMsg
             , subscriptions = Sub.none
             }
     }
@@ -201,20 +199,21 @@ glue options { toModel, toMsg } =
             options.pages.update msg model
                 |> Tuple.mapBoth toModel (Cmd.map toMsg)
     , bundle =
-        \model status ->
+        \model ->
             let
                 page =
-                    options.pages.bundle model status
+                    options.pages.bundle model
             in
             { view =
-                options.layout.view
-                    { page =
-                        div []
-                            [ text (Debug.toString status)
-                            , page.view
-                            ]
-                    }
-                    |> Html.map toMsg
+                \status ->
+                    options.layout.view
+                        { page =
+                            div []
+                                [ text (Debug.toString status)
+                                , page.view status
+                                ]
+                        }
+                        |> Html.map toMsg
             , subscriptions = Sub.none
             }
     }

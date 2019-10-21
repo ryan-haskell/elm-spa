@@ -8,7 +8,7 @@ import Html.Attributes exposing (href, style)
 layout : Application.Layout msg
 layout =
     { view = view
-    , transition = Application.fade 1000
+    , transition = Application.none
     }
 
 
