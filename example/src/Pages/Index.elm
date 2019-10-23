@@ -1,4 +1,4 @@
-module Pages.Homepage exposing
+module Pages.Index exposing
     ( Model
     , Msg
     , Params

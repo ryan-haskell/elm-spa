@@ -12,14 +12,14 @@ import Application
 import Generated.Pages.Settings as Settings
 import Html exposing (Html)
 import Pages.Counter as Counter
-import Pages.Homepage as Homepage
+import Pages.Index as Index
 import Pages.NotFound as NotFound
 import Pages.Random as Random
 import Url.Parser as Parser exposing ((</>), Parser)
 
 
 type Route
-    = HomepageRoute Homepage.Params
+    = IndexRoute Index.Params
     | CounterRoute Counter.Params
     | RandomRoute Random.Params
     | SettingsRoute Settings.Params
@@ -27,7 +27,7 @@ type Route
 
 
 type Model
-    = HomepageModel Homepage.Model
+    = IndexModel Index.Model
     | CounterModel Counter.Model
     | RandomModel Random.Model
     | SettingsModel Settings.Model
@@ -35,18 +35,18 @@ type Model
 
 
 type Msg
-    = HomepageMsg Homepage.Msg
+    = IndexMsg Index.Msg
     | CounterMsg Counter.Msg
     | RandomMsg Random.Msg
     | SettingsMsg Settings.Msg
     | NotFoundMsg NotFound.Msg
 
 
-homepage : Application.Recipe Homepage.Params Homepage.Model Homepage.Msg Model Msg
-homepage =
-    Homepage.page
-        { toModel = HomepageModel
-        , toMsg = HomepageMsg
+index : Application.Recipe Index.Params Index.Model Index.Msg Model Msg
+index =
+    Index.page
+        { toModel = IndexModel
+        , toMsg = IndexMsg
         }
 
 
@@ -84,7 +84,7 @@ notFound =
 
 routes : Application.Routes Route
 routes =
-    [ Parser.map HomepageRoute
+    [ Parser.map IndexRoute
         (Parser.top |> Parser.map ())
     , Parser.map CounterRoute
         (Parser.s "counter" |> Parser.map ())
@@ -98,8 +98,8 @@ routes =
 init : Route -> Application.Init Model Msg
 init route =
     case route of
-        HomepageRoute params ->
-            homepage.init params
+        IndexRoute params ->
+            index.init params
 
         CounterRoute params ->
             counter.init params
@@ -117,8 +117,8 @@ init route =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update appMsg appModel =
     case ( appMsg, appModel ) of
-        ( HomepageMsg msg, HomepageModel model ) ->
-            homepage.update msg model
+        ( IndexMsg msg, IndexModel model ) ->
+            index.update msg model
 
         ( CounterMsg msg, CounterModel model ) ->
             counter.update msg model
@@ -139,8 +139,8 @@ update appMsg appModel =
 bundle : Model -> Application.Bundle Msg
 bundle appModel =
     case appModel of
-        HomepageModel model ->
-            homepage.bundle model
+        IndexModel model ->
+            index.bundle model
 
         CounterModel model ->
             counter.bundle model
