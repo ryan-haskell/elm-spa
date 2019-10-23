@@ -1,12 +1,23 @@
-module Generated.Pages.Settings exposing (Model, Msg, Params, page)
+module Generated.Pages.Settings exposing
+    ( Model
+    , Msg
+    , Params
+    , page
+    )
 
 import Application
-import Generated.Route.Settings as Route exposing (Route)
 import Html exposing (..)
 import Layouts.Settings
 import Pages.Settings.Account as Account
 import Pages.Settings.Notifications as Notifications
 import Pages.Settings.User as User
+import Url.Parser as Parser exposing ((</>), Parser)
+
+
+type Route
+    = AccountRoute Account.Params
+    | NotificationsRoute Notifications.Params
+    | UserRoute User.Params
 
 
 type Model
@@ -25,46 +36,55 @@ type alias Params =
     Route
 
 
-page : Application.Page Params Model Msg model msg
+page : Application.Page Params Model Msg route model msg
 page =
-    Application.glue glue
+    Application.glue
+        { route = r
+        , layout = Layouts.Settings.layout
+        , pages =
+            { init = init
+            , update = update
+            , bundle = bundle
+            }
+        }
 
 
-glue : Application.Glue Route Model Msg
-glue =
-    { layout = Layouts.Settings.layout
-    , pages = pages
-    }
+r : Parser (Route -> route) route
+r =
+    Parser.s "settings" </> Parser.oneOf routes |> Parser.map identity
 
 
-pages : Application.Pages Route Model Msg
-pages =
-    { init = init
-    , update = update
-    , bundle = bundle
-    }
+routes : Application.Routes Route
+routes =
+    [ account.route
+    , notifications.route
+    , user.route
+    ]
 
 
-account : Application.Recipe Account.Params Account.Model Account.Msg Model Msg
+account : Application.Recipe Account.Params Account.Model Account.Msg Route Model Msg
 account =
     Account.page
-        { toModel = AccountModel
+        { toRoute = AccountRoute
+        , toModel = AccountModel
         , toMsg = AccountMsg
         }
 
 
-notifications : Application.Recipe Notifications.Params Notifications.Model Notifications.Msg Model Msg
+notifications : Application.Recipe Notifications.Params Notifications.Model Notifications.Msg Route Model Msg
 notifications =
     Notifications.page
-        { toModel = NotificationsModel
+        { toRoute = NotificationsRoute
+        , toModel = NotificationsModel
         , toMsg = NotificationsMsg
         }
 
 
-user : Application.Recipe User.Params User.Model User.Msg Model Msg
+user : Application.Recipe User.Params User.Model User.Msg Route Model Msg
 user =
     User.page
-        { toModel = UserModel
+        { toRoute = UserRoute
+        , toModel = UserModel
         , toMsg = UserMsg
         }
 
@@ -72,13 +92,13 @@ user =
 init : Route -> Application.Init Model Msg
 init route =
     case route of
-        Route.Account params ->
+        AccountRoute params ->
             account.init params
 
-        Route.Notifications params ->
+        NotificationsRoute params ->
             notifications.init params
 
-        Route.User params ->
+        UserRoute params ->
             user.init params
 
 

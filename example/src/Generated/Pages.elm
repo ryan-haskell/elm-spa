@@ -1,25 +1,37 @@
-module Generated.Pages exposing (Model, Msg, bundle, init, update)
+module Generated.Pages exposing
+    ( Model
+    , Msg
+    , Route(..)
+    , bundle
+    , init
+    , routes
+    , update
+    )
 
 import Application
 import Generated.Pages.Settings as Settings
-import Generated.Route as Route exposing (Route)
 import Html exposing (Html)
 import Pages.Counter as Counter
 import Pages.Homepage as Homepage
 import Pages.NotFound as NotFound
 import Pages.Random as Random
-import Pages.Users.Slug as Users_Slug
-import Pages.Users.Slug.Posts.Slug as Users_Slug_Posts_Slug
+import Url.Parser as Parser exposing (Parser, (</>))
+
+
+type Route
+    = HomepageRoute Homepage.Params
+    | CounterRoute Counter.Params
+    | RandomRoute Random.Params
+    | SettingsRoute Settings.Params
+    | NotFoundRoute NotFound.Params 
 
 
 type Model
     = HomepageModel Homepage.Model
     | CounterModel Counter.Model
     | RandomModel Random.Model
-    | NotFoundModel NotFound.Model
     | SettingsModel Settings.Model
-    | Users_SlugModel Users_Slug.Model
-    | Users_Slug_Posts_SlugModel Users_Slug_Posts_Slug.Model
+    | NotFoundModel NotFound.Model
 
 
 type Msg
@@ -28,89 +40,79 @@ type Msg
     | RandomMsg Random.Msg
     | SettingsMsg Settings.Msg
     | NotFoundMsg NotFound.Msg
-    | Users_SlugMsg Users_Slug.Msg
-    | Users_Slug_Posts_SlugMsg Users_Slug_Posts_Slug.Msg
 
 
-homepage : Application.Recipe Homepage.Params Homepage.Model Homepage.Msg Model Msg
-homepage =
+homepage : Application.Recipe Homepage.Params Homepage.Model Homepage.Msg Route Model Msg
+homepage = 
     Homepage.page
-        { toModel = HomepageModel
+        { toRoute = HomepageRoute
+        , toModel = HomepageModel
         , toMsg = HomepageMsg
         }
 
 
-counter : Application.Recipe Counter.Params Counter.Model Counter.Msg Model Msg
+counter : Application.Recipe Counter.Params Counter.Model Counter.Msg Route Model Msg
 counter =
     Counter.page
-        { toModel = CounterModel
+        { toRoute = CounterRoute
+        , toModel = CounterModel
         , toMsg = CounterMsg
         }
+ 
 
-
-random : Application.Recipe Random.Params Random.Model Random.Msg Model Msg
+random : Application.Recipe Random.Params Random.Model Random.Msg Route Model Msg
 random =
     Random.page
-        { toModel = RandomModel
+        { toRoute = RandomRoute
+        , toModel = RandomModel
         , toMsg = RandomMsg
-        }
+        } 
 
 
-settings : Application.Recipe Settings.Params Settings.Model Settings.Msg Model Msg
+settings : Application.Recipe Settings.Params Settings.Model Settings.Msg Route Model Msg
 settings =
     Settings.page
-        { toModel = SettingsModel
+        { toRoute = SettingsRoute
+        , toModel = SettingsModel
         , toMsg = SettingsMsg
         }
 
 
-notFound : Application.Recipe NotFound.Params NotFound.Model NotFound.Msg Model Msg
+notFound : Application.Recipe NotFound.Params NotFound.Model NotFound.Msg Route Model Msg
 notFound =
     NotFound.page
-        { toModel = NotFoundModel
+        { toRoute = NotFoundRoute
+        , toModel = NotFoundModel
         , toMsg = NotFoundMsg
         }
+ 
 
-
-users_slug : Application.Recipe Users_Slug.Params Users_Slug.Model Users_Slug.Msg Model Msg
-users_slug =
-    Users_Slug.page
-        { toModel = Users_SlugModel
-        , toMsg = Users_SlugMsg
-        }
-
-
-users_slug_posts_slug : Application.Recipe Users_Slug_Posts_Slug.Params Users_Slug_Posts_Slug.Model Users_Slug_Posts_Slug.Msg Model Msg
-users_slug_posts_slug =
-    Users_Slug_Posts_Slug.page
-        { toModel = Users_Slug_Posts_SlugModel
-        , toMsg = Users_Slug_Posts_SlugMsg
-        }
+routes : Application.Routes Route
+routes =
+    [ homepage.route
+    , counter.route
+    , random.route
+    , settings.route
+    ]
 
 
 init : Route -> Application.Init Model Msg
 init route =
     case route of
-        Route.Homepage params ->
+        HomepageRoute params ->
             homepage.init params
 
-        Route.Counter params ->
+        CounterRoute params ->
             counter.init params
 
-        Route.Random params ->
+        RandomRoute params ->
             random.init params
 
-        Route.Settings params ->
+        SettingsRoute params ->
             settings.init params
 
-        Route.NotFound params ->
+        NotFoundRoute params ->
             notFound.init params
-
-        Route.Users_Slug params ->
-            users_slug.init params
-
-        Route.Users_Slug_Posts_Slug params ->
-            users_slug_posts_slug.init params
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -119,43 +121,19 @@ update appMsg appModel =
         ( HomepageMsg msg, HomepageModel model ) ->
             homepage.update msg model
 
-        ( HomepageMsg _, _ ) ->
-            Application.keep appModel
-
         ( CounterMsg msg, CounterModel model ) ->
             counter.update msg model
-
-        ( CounterMsg _, _ ) ->
-            Application.keep appModel
 
         ( RandomMsg msg, RandomModel model ) ->
             random.update msg model
 
-        ( RandomMsg _, _ ) ->
-            Application.keep appModel
-
         ( SettingsMsg msg, SettingsModel model ) ->
             settings.update msg model
-
-        ( SettingsMsg _, _ ) ->
-            Application.keep appModel
 
         ( NotFoundMsg msg, NotFoundModel model ) ->
             notFound.update msg model
 
-        ( NotFoundMsg _, _ ) ->
-            Application.keep appModel
-
-        ( Users_SlugMsg msg, Users_SlugModel model ) ->
-            users_slug.update msg model
-
-        ( Users_SlugMsg _, _ ) ->
-            Application.keep appModel
-
-        ( Users_Slug_Posts_SlugMsg msg, Users_Slug_Posts_SlugModel model ) ->
-            users_slug_posts_slug.update msg model
-
-        ( Users_Slug_Posts_SlugMsg _, _ ) ->
+        _ ->
             Application.keep appModel
 
 
@@ -176,9 +154,3 @@ bundle appModel =
 
         NotFoundModel model ->
             notFound.bundle model
-
-        Users_SlugModel model ->
-            users_slug.bundle model
-
-        Users_Slug_Posts_SlugModel model ->
-            users_slug_posts_slug.bundle model

@@ -2,7 +2,7 @@ module Application exposing
     ( Application, create
     , Layout
     , Page, Recipe
-    , Init, Bundle, keep
+    , Routes, Init, Bundle, keep
     , Static, static
     , Sandbox, sandbox
     , Element, element
@@ -27,7 +27,7 @@ module Application exposing
 
 @docs Page, Recipe
 
-@docs Init, Bundle, keep
+@docs Routes, Init, Bundle, keep
 
 @docs Static, static
 
@@ -55,6 +55,7 @@ import Internals.Transitionable as Transitionable exposing (Transitionable)
 import Internals.Utils as Utils
 import Task
 import Url exposing (Url)
+import Url.Parser as Parser exposing (Parser)
 
 
 
@@ -65,10 +66,14 @@ type alias Application flags model msg =
     Platform.Program flags (Model flags model) (Msg msg)
 
 
+type alias Routes route =
+    List (Parser (route -> route) route)
+
+
 create :
     { routing :
-        { fromUrl : Url -> route
-        , toPath : route -> String
+        { routes : Routes route
+        , notFound : route
         }
     , layout :
         { view : { page : Html msg } -> Html msg
@@ -86,12 +91,12 @@ create config =
         { init =
             init
                 { init = config.pages.init
-                , fromUrl = config.routing.fromUrl
+                , fromUrl = fromUrl config.routing
                 , speed = Transition.speed config.layout.transition
                 }
         , update =
             update
-                { fromUrl = config.routing.fromUrl
+                { fromUrl = fromUrl config.routing
                 , init = config.pages.init
                 , update = config.pages.update
                 , speed = Transition.speed config.layout.transition
@@ -109,6 +114,16 @@ create config =
         , onUrlChange = Url
         , onUrlRequest = Link
         }
+
+
+
+-- ROUTING
+
+
+fromUrl : { routes : Routes route, notFound : route } -> Url -> route
+fromUrl config =
+    Parser.parse (Parser.oneOf config.routes)
+        >> Maybe.withDefault config.notFound
 
 
 
@@ -348,12 +363,12 @@ type alias Layout msg =
 -- PAGE API
 
 
-type alias Page params pageModel pageMsg model msg =
-    Page.Page params pageModel pageMsg model msg
+type alias Page params pageModel pageMsg route model msg =
+    Page.Page params pageModel pageMsg route model msg
 
 
-type alias Recipe params pageModel pageMsg model msg =
-    Page.Recipe params pageModel pageMsg model msg
+type alias Recipe params pageModel pageMsg route model msg =
+    Page.Recipe params pageModel pageMsg route model msg
 
 
 type alias Init model msg =
@@ -369,41 +384,41 @@ keep model =
     ( model, Cmd.none )
 
 
-type alias Static =
-    Page.Static
+type alias Static params route =
+    Page.Static params route
 
 
 static :
-    Static
-    -> Page params () Never model msg
+    Static params route
+    -> Page params () Never route model msg
 static =
     Page.static
 
 
-type alias Sandbox params pageModel pageMsg =
-    Page.Sandbox params pageModel pageMsg
+type alias Sandbox params pageModel pageMsg route =
+    Page.Sandbox params pageModel pageMsg route
 
 
 sandbox :
-    Sandbox params pageModel pageMsg
-    -> Page params pageModel pageMsg model msg
+    Sandbox params pageModel pageMsg route
+    -> Page params pageModel pageMsg route model msg
 sandbox =
     Page.sandbox
 
 
-type alias Element params pageModel pageMsg =
-    Page.Element params pageModel pageMsg
+type alias Element params pageModel pageMsg route =
+    Page.Element params pageModel pageMsg route
 
 
 element :
-    Element params pageModel pageMsg
-    -> Page params pageModel pageMsg model msg
+    Element params pageModel pageMsg route
+    -> Page params pageModel pageMsg route model msg
 element =
     Page.element
 
 
-type alias Glue params layoutModel layoutMsg =
-    Page.Glue params layoutModel layoutMsg
+type alias Glue params layoutModel layoutMsg route =
+    Page.Glue params layoutModel layoutMsg route
 
 
 type alias Pages params layoutModel layoutMsg =
@@ -411,8 +426,8 @@ type alias Pages params layoutModel layoutMsg =
 
 
 glue :
-    Glue params layoutModel layoutMsg
-    -> Page params layoutModel layoutMsg model msg
+    Glue params layoutModel layoutMsg route
+    -> Page params layoutModel layoutMsg route model msg
 glue =
     Page.glue
 

@@ -7,7 +7,7 @@ module Pages.Settings.Account exposing
 
 import Application
 import Html exposing (..)
-
+import Url.Parser as Parser
 
 type alias Model =
     ()
@@ -21,10 +21,11 @@ type alias Params =
     ()
 
 
-page : Application.Page Params Model Msg model msg
+page : Application.Page Params Model Msg route model msg
 page =
     Application.static
-        { view = view
+        { route = Parser.s "account" |> Parser.map ()
+        , view = view
         }
 
 

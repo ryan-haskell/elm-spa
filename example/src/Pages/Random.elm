@@ -11,6 +11,7 @@ import Html.Attributes as Attr
 import Html.Events as Events
 import Http
 import Json.Decode as Json exposing (Decoder)
+import Url.Parser as Parser
 
 
 type alias Model =
@@ -27,10 +28,11 @@ type alias Params =
     ()
 
 
-page : Application.Page Params Model Msg model msg
+page : Application.Page Params Model Msg route model msg
 page =
     Application.element
-        { init = always init
+        { route = Parser.s "random" |> Parser.map ()
+        , init = always init
         , update = update
         , view = view
         , subscriptions = subscriptions
