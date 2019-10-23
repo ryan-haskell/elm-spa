@@ -9,13 +9,13 @@ module Generated.Pages exposing
     )
 
 import Application
+import Application.Route as Route
 import Generated.Pages.Settings as Settings
 import Html exposing (Html)
 import Pages.Counter as Counter
 import Pages.Index as Index
 import Pages.NotFound as NotFound
 import Pages.Random as Random
-import Url.Parser as Parser exposing ((</>), Parser)
 
 
 type Route
@@ -84,14 +84,10 @@ notFound =
 
 routes : Application.Routes Route
 routes =
-    [ Parser.map IndexRoute
-        (Parser.top |> Parser.map ())
-    , Parser.map CounterRoute
-        (Parser.s "counter" |> Parser.map ())
-    , Parser.map RandomRoute
-        (Parser.s "random" |> Parser.map ())
-    , Parser.map SettingsRoute
-        (Parser.s "settings" </> Parser.oneOf Settings.routes |> Parser.map identity)
+    [ Route.index IndexRoute
+    , Route.path "counter" CounterRoute
+    , Route.path "random" RandomRoute
+    , Route.folder "settings" SettingsRoute Settings.routes
     ]
 
 

@@ -50,6 +50,7 @@ import Browser.Navigation as Nav
 import Html exposing (Html)
 import Internals.Layout as Layout
 import Internals.Page as Page
+import Internals.Route as Route
 import Internals.Transition as Transition
 import Internals.Transitionable as Transitionable exposing (Transitionable)
 import Internals.Utils as Utils
@@ -64,10 +65,6 @@ import Url.Parser as Parser exposing (Parser)
 
 type alias Application flags model msg =
     Platform.Program flags (Model flags model) (Msg msg)
-
-
-type alias Routes route =
-    List (Parser (route -> route) route)
 
 
 create :
@@ -119,6 +116,9 @@ create config =
 
 -- ROUTING
 
+
+type alias Routes route =
+    List (Route.Route route)
 
 fromUrl : { routes : Routes route, notFound : route } -> Url -> route
 fromUrl config =

@@ -7,12 +7,12 @@ module Generated.Pages.Settings exposing
     )
 
 import Application
+import Application.Route as Route
 import Html exposing (..)
 import Layouts.Settings
 import Pages.Settings.Account as Account
 import Pages.Settings.Notifications as Notifications
 import Pages.Settings.User as User
-import Url.Parser as Parser exposing ((</>), Parser)
 
 
 type Route
@@ -51,12 +51,9 @@ page =
 
 routes : Application.Routes Route
 routes =
-    [ Parser.map AccountRoute
-        (Parser.s "account" |> Parser.map ())
-    , Parser.map NotificationsRoute
-        (Parser.s "notifications" |> Parser.map ())
-    , Parser.map UserRoute
-        (Parser.s "user" |> Parser.map ())
+    [ Route.path "account" AccountRoute
+    , Route.path "notifications" NotificationsRoute
+    , Route.path "user" UserRoute
     ]
 
 
