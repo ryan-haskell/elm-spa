@@ -8,7 +8,6 @@ module Pages.Homepage exposing
 import Application
 import Html exposing (..)
 import Html.Attributes as Attr
-import Url.Parser as Parser
 
 
 type alias Model =
@@ -23,11 +22,10 @@ type alias Params =
     ()
 
 
-page : Application.Page Params Model Msg route model msg
+page : Application.Page Params Model Msg model msg
 page =
     Application.static
-        { route = Parser.top |> Parser.map ()
-        , view = view
+        { view = view
         }
 
 

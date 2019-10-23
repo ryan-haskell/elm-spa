@@ -15,7 +15,7 @@ import Pages.Counter as Counter
 import Pages.Homepage as Homepage
 import Pages.NotFound as NotFound
 import Pages.Random as Random
-import Url.Parser as Parser exposing (Parser, (</>))
+import Url.Parser as Parser exposing ((</>), Parser)
 
 
 type Route
@@ -23,7 +23,7 @@ type Route
     | CounterRoute Counter.Params
     | RandomRoute Random.Params
     | SettingsRoute Settings.Params
-    | NotFoundRoute NotFound.Params 
+    | NotFoundRoute NotFound.Params
 
 
 type Model
@@ -42,57 +42,56 @@ type Msg
     | NotFoundMsg NotFound.Msg
 
 
-homepage : Application.Recipe Homepage.Params Homepage.Model Homepage.Msg Route Model Msg
-homepage = 
+homepage : Application.Recipe Homepage.Params Homepage.Model Homepage.Msg Model Msg
+homepage =
     Homepage.page
-        { toRoute = HomepageRoute
-        , toModel = HomepageModel
+        { toModel = HomepageModel
         , toMsg = HomepageMsg
         }
 
 
-counter : Application.Recipe Counter.Params Counter.Model Counter.Msg Route Model Msg
+counter : Application.Recipe Counter.Params Counter.Model Counter.Msg Model Msg
 counter =
     Counter.page
-        { toRoute = CounterRoute
-        , toModel = CounterModel
+        { toModel = CounterModel
         , toMsg = CounterMsg
         }
- 
 
-random : Application.Recipe Random.Params Random.Model Random.Msg Route Model Msg
+
+random : Application.Recipe Random.Params Random.Model Random.Msg Model Msg
 random =
     Random.page
-        { toRoute = RandomRoute
-        , toModel = RandomModel
+        { toModel = RandomModel
         , toMsg = RandomMsg
-        } 
+        }
 
 
-settings : Application.Recipe Settings.Params Settings.Model Settings.Msg Route Model Msg
+settings : Application.Recipe Settings.Params Settings.Model Settings.Msg Model Msg
 settings =
     Settings.page
-        { toRoute = SettingsRoute
-        , toModel = SettingsModel
+        { toModel = SettingsModel
         , toMsg = SettingsMsg
         }
 
 
-notFound : Application.Recipe NotFound.Params NotFound.Model NotFound.Msg Route Model Msg
+notFound : Application.Recipe NotFound.Params NotFound.Model NotFound.Msg Model Msg
 notFound =
     NotFound.page
-        { toRoute = NotFoundRoute
-        , toModel = NotFoundModel
+        { toModel = NotFoundModel
         , toMsg = NotFoundMsg
         }
- 
+
 
 routes : Application.Routes Route
 routes =
-    [ homepage.route
-    , counter.route
-    , random.route
-    , settings.route
+    [ Parser.map HomepageRoute
+        (Parser.top |> Parser.map ())
+    , Parser.map CounterRoute
+        (Parser.s "counter" |> Parser.map ())
+    , Parser.map RandomRoute
+        (Parser.s "random" |> Parser.map ())
+    , Parser.map SettingsRoute
+        (Parser.s "settings" </> Parser.oneOf Settings.routes |> Parser.map identity)
     ]
 
 

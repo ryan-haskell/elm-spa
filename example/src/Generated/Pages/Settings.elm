@@ -3,6 +3,7 @@ module Generated.Pages.Settings exposing
     , Msg
     , Params
     , page
+    , routes
     )
 
 import Application
@@ -36,11 +37,10 @@ type alias Params =
     Route
 
 
-page : Application.Page Params Model Msg route model msg
+page : Application.Page Params Model Msg model msg
 page =
     Application.glue
-        { route = r
-        , layout = Layouts.Settings.layout
+        { layout = Layouts.Settings.layout
         , pages =
             { init = init
             , update = update
@@ -49,42 +49,37 @@ page =
         }
 
 
-r : Parser (Route -> route) route
-r =
-    Parser.s "settings" </> Parser.oneOf routes |> Parser.map identity
-
-
 routes : Application.Routes Route
 routes =
-    [ account.route
-    , notifications.route
-    , user.route
+    [ Parser.map AccountRoute
+        (Parser.s "account" |> Parser.map ())
+    , Parser.map NotificationsRoute
+        (Parser.s "notifications" |> Parser.map ())
+    , Parser.map UserRoute
+        (Parser.s "user" |> Parser.map ())
     ]
 
 
-account : Application.Recipe Account.Params Account.Model Account.Msg Route Model Msg
+account : Application.Recipe Account.Params Account.Model Account.Msg Model Msg
 account =
     Account.page
-        { toRoute = AccountRoute
-        , toModel = AccountModel
+        { toModel = AccountModel
         , toMsg = AccountMsg
         }
 
 
-notifications : Application.Recipe Notifications.Params Notifications.Model Notifications.Msg Route Model Msg
+notifications : Application.Recipe Notifications.Params Notifications.Model Notifications.Msg Model Msg
 notifications =
     Notifications.page
-        { toRoute = NotificationsRoute
-        , toModel = NotificationsModel
+        { toModel = NotificationsModel
         , toMsg = NotificationsMsg
         }
 
 
-user : Application.Recipe User.Params User.Model User.Msg Route Model Msg
+user : Application.Recipe User.Params User.Model User.Msg Model Msg
 user =
     User.page
-        { toRoute = UserRoute
-        , toModel = UserModel
+        { toModel = UserModel
         , toMsg = UserMsg
         }
 

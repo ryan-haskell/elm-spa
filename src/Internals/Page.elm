@@ -30,21 +30,15 @@ import Internals.Transition as Transition
 import Url.Parser as Parser exposing (Parser)
 
 
-type alias Page params pageModel pageMsg route model msg =
+type alias Page params pageModel pageMsg model msg =
     { toModel : pageModel -> model
     , toMsg : pageMsg -> msg
-    , toRoute : params -> route
     }
-    -> Recipe params pageModel pageMsg route model msg
+    -> Recipe params pageModel pageMsg model msg
 
 
-type alias Route params route =
-    Parser (params -> route) route
-
-
-type alias Recipe params pageModel pageMsg route model msg =
-    { route : Parser (route -> route) route
-    , init : params -> Init model msg
+type alias Recipe params pageModel pageMsg model msg =
+    { init : params -> Init model msg
     , update : pageMsg -> pageModel -> ( model, Cmd msg )
     , bundle : pageModel -> Bundle msg
     }
@@ -76,18 +70,16 @@ type alias Bundle msg =
 -- STATIC
 
 
-type alias Static params route =
+type alias Static =
     { view : Html Never
-    , route : Route params route
     }
 
 
 static :
-    Static params route
-    -> Page params () Never route model msg
-static page { toModel, toMsg, toRoute } =
-    { route = Parser.map toRoute page.route
-    , init =
+    Static
+    -> Page params () Never model msg
+static page { toModel, toMsg } =
+    { init =
         \_ { parentSpeed } ->
             { model = toModel ()
             , cmd = Cmd.none
@@ -106,20 +98,18 @@ static page { toModel, toMsg, toRoute } =
 -- SANDBOX
 
 
-type alias Sandbox params pageModel pageMsg route =
-    { route : Route params route
-    , init : params -> pageModel
+type alias Sandbox params pageModel pageMsg =
+    { init : params -> pageModel
     , update : pageMsg -> pageModel -> pageModel
     , view : pageModel -> Html pageMsg
     }
 
 
 sandbox :
-    Sandbox params pageModel pageMsg route
-    -> Page params pageModel pageMsg route model msg
-sandbox page { toModel, toMsg, toRoute } =
-    { route = Parser.map toRoute page.route
-    , init =
+    Sandbox params pageModel pageMsg
+    -> Page params pageModel pageMsg model msg
+sandbox page { toModel, toMsg } =
+    { init =
         \params { parentSpeed } ->
             { model = toModel (page.init params)
             , cmd = Cmd.none
@@ -142,9 +132,8 @@ sandbox page { toModel, toMsg, toRoute } =
 -- ELEMENT
 
 
-type alias Element params pageModel pageMsg route =
-    { route : Route params route
-    , init : params -> ( pageModel, Cmd pageMsg )
+type alias Element params pageModel pageMsg =
+    { init : params -> ( pageModel, Cmd pageMsg )
     , update : pageMsg -> pageModel -> ( pageModel, Cmd pageMsg )
     , view : pageModel -> Html pageMsg
     , subscriptions : pageModel -> Sub pageMsg
@@ -152,11 +141,10 @@ type alias Element params pageModel pageMsg route =
 
 
 element :
-    Element params pageModel pageMsg route
-    -> Page params pageModel pageMsg route model msg
-element page { toModel, toMsg, toRoute } =
-    { route = Parser.map toRoute page.route
-    , init =
+    Element params pageModel pageMsg
+    -> Page params pageModel pageMsg model msg
+element page { toModel, toMsg } =
+    { init =
         \params { parentSpeed } ->
             page.init params
                 |> (\( model, cmd ) ->
@@ -181,9 +169,8 @@ element page { toModel, toMsg, toRoute } =
 -- LAYOUT
 
 
-type alias Glue params layoutModel layoutMsg route =
-    { route : Route params route
-    , layout : Layout layoutMsg
+type alias Glue params layoutModel layoutMsg =
+    { layout : Layout layoutMsg
     , pages : Pages params layoutModel layoutMsg
     }
 
@@ -196,11 +183,10 @@ type alias Pages params layoutModel layoutMsg =
 
 
 glue :
-    Glue params layoutModel layoutMsg route
-    -> Page params layoutModel layoutMsg route model msg
-glue options { toModel, toMsg, toRoute } =
-    { route = Parser.map toRoute options.route
-    , init =
+    Glue params layoutModel layoutMsg
+    -> Page params layoutModel layoutMsg model msg
+glue options { toModel, toMsg } =
+    { init =
         \params _ ->
             options.pages.init params { parentSpeed = Transition.speed options.layout.transition }
                 |> (\page ->

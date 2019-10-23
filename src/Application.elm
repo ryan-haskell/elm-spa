@@ -363,12 +363,12 @@ type alias Layout msg =
 -- PAGE API
 
 
-type alias Page params pageModel pageMsg route model msg =
-    Page.Page params pageModel pageMsg route model msg
+type alias Page params pageModel pageMsg model msg =
+    Page.Page params pageModel pageMsg model msg
 
 
-type alias Recipe params pageModel pageMsg route model msg =
-    Page.Recipe params pageModel pageMsg route model msg
+type alias Recipe params pageModel pageMsg model msg =
+    Page.Recipe params pageModel pageMsg model msg
 
 
 type alias Init model msg =
@@ -384,41 +384,41 @@ keep model =
     ( model, Cmd.none )
 
 
-type alias Static params route =
-    Page.Static params route
+type alias Static =
+    Page.Static
 
 
 static :
-    Static params route
-    -> Page params () Never route model msg
+    Static
+    -> Page params () Never model msg
 static =
     Page.static
 
 
-type alias Sandbox params pageModel pageMsg route =
-    Page.Sandbox params pageModel pageMsg route
+type alias Sandbox params pageModel pageMsg =
+    Page.Sandbox params pageModel pageMsg
 
 
 sandbox :
-    Sandbox params pageModel pageMsg route
-    -> Page params pageModel pageMsg route model msg
+    Sandbox params pageModel pageMsg
+    -> Page params pageModel pageMsg model msg
 sandbox =
     Page.sandbox
 
 
-type alias Element params pageModel pageMsg route =
-    Page.Element params pageModel pageMsg route
+type alias Element params pageModel pageMsg =
+    Page.Element params pageModel pageMsg
 
 
 element :
-    Element params pageModel pageMsg route
-    -> Page params pageModel pageMsg route model msg
+    Element params pageModel pageMsg
+    -> Page params pageModel pageMsg model msg
 element =
     Page.element
 
 
-type alias Glue params layoutModel layoutMsg route =
-    Page.Glue params layoutModel layoutMsg route
+type alias Glue params layoutModel layoutMsg =
+    Page.Glue params layoutModel layoutMsg
 
 
 type alias Pages params layoutModel layoutMsg =
@@ -426,8 +426,8 @@ type alias Pages params layoutModel layoutMsg =
 
 
 glue :
-    Glue params layoutModel layoutMsg route
-    -> Page params layoutModel layoutMsg route model msg
+    Glue params layoutModel layoutMsg
+    -> Page params layoutModel layoutMsg model msg
 glue =
     Page.glue
 

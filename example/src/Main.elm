@@ -6,7 +6,7 @@ import Layouts.Main
 
 
 main : Application () Pages.Model Pages.Msg
-main =  
+main =
     Application.create
         { routing =
             { routes = Pages.routes
@@ -18,4 +18,4 @@ main =
             , update = Pages.update
             , bundle = Pages.bundle
             }
-        } 
+        }
