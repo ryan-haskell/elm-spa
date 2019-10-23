@@ -16,21 +16,17 @@ module Main exposing (main)
 
 import Application exposing (Application)
 import Generated.Pages as Pages
-import Generated.Route as Route
-import Layout as Layout
+import Layouts.Main
 
 
 main : Application () Pages.Model Pages.Msg
 main =
     Application.create
         { routing =
-            { fromUrl = Route.fromUrl
-            , toPath = Route.toPath
-            , transition = Application.fade 200
+            { routes = Pages.routes
+            , notFound = Pages.NotFoundRoute ()
             }
-        , layout =
-            { view = Layout.view
-            }
+        , layout = Layouts.Main.layout
         , pages =
             { init = Pages.init
             , update = Pages.update
@@ -41,13 +37,11 @@ main =
 
 #### supporting code
 
-- [`Generated.Route`](./example/src/Generated/Route.elm)
-
 - [`Generated.Pages`](./example/src/Generated/Pages.elm)
 
-- [`Layout`](./example/src/Layout.elm)
+- [`Layouts.Main`](./example/src/Layouts/Main.elm)
 
-- [`Pages.Homepage`](./example/src/Pages/Homepage.elm) (a static page)
+- [`Pages.Index`](./example/src/Pages/Index.elm) (a static page)
 
 - [`Pages.Counter`](./example/src/Pages/Counter.elm) (a sandbox page)
 
