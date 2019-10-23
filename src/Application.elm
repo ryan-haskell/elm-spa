@@ -120,6 +120,7 @@ create config =
 type alias Routes route =
     List (Route.Route route)
 
+
 fromUrl : { routes : Routes route, notFound : route } -> Url -> route
 fromUrl config =
     Parser.parse (Parser.oneOf config.routes)
