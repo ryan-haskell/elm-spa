@@ -208,11 +208,7 @@ glue options { toModel, toMsg } =
             { view =
                 \status ->
                     options.layout.view
-                        { page =
-                            div []
-                                [ text (Debug.toString status)
-                                , page.view status
-                                ]
+                        { page = page.view status
                         }
                         |> Html.map toMsg
             , subscriptions = Sub.none
