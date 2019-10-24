@@ -1,7 +1,7 @@
 module Pages.Counter exposing
     ( Model
     , Msg
-    , Params
+    , Route
     , page
     )
 
@@ -21,11 +21,11 @@ type Msg
     | Decrement
 
 
-type alias Params =
+type alias Route =
     ()
 
 
-page : Application.Page Params Model Msg model msg
+page : Application.Page Route Model Msg model msg
 page =
     Application.sandbox
         { init = always init

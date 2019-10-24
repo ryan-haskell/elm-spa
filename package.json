@@ -1,5 +1,5 @@
 {
-  "name": "basic",
+  "name": "elm-spa",
   "version": "1.0.0",
   "description": "> a barebones example app made with ryannhg/elm-app",
   "main": "index.js",
@@ -7,6 +7,7 @@
     "dev": "parcel example/index.html",
     "build": "parcel build example/index.html"
   },
+  "bin": "./cli/index.js",
   "keywords": [],
   "author": "",
   "license": "ISC",

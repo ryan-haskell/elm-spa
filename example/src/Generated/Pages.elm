@@ -11,46 +11,59 @@ module Generated.Pages exposing
 import Application
 import Application.Route as Route
 import Generated.Pages.Settings as Settings
-import Html exposing (Html)
 import Pages.Counter as Counter
 import Pages.Index as Index
 import Pages.NotFound as NotFound
 import Pages.Random as Random
 
 
+
+-- ROUTES
+
+
 type Route
-    = IndexRoute Index.Params
-    | CounterRoute Counter.Params
-    | RandomRoute Random.Params
-    | SettingsRoute Settings.Params
-    | NotFoundRoute NotFound.Params
+    = CounterRoute Counter.Route
+    | IndexRoute Index.Route
+    | NotFoundRoute NotFound.Route
+    | RandomRoute Random.Route
+    | SettingsRoute Settings.Route
+
+
+routes : Application.Routes Route
+routes =
+    [ Route.path "counter" CounterRoute
+    , Route.index IndexRoute
+    , Route.path "not-found" NotFoundRoute
+    , Route.path "random" RandomRoute
+    , Route.folder "settings" SettingsRoute Settings.routes
+    ]
+
+
+
+-- MODEL & MSG
 
 
 type Model
-    = IndexModel Index.Model
-    | CounterModel Counter.Model
+    = CounterModel Counter.Model
+    | IndexModel Index.Model
+    | NotFoundModel NotFound.Model
     | RandomModel Random.Model
     | SettingsModel Settings.Model
-    | NotFoundModel NotFound.Model
 
 
 type Msg
-    = IndexMsg Index.Msg
-    | CounterMsg Counter.Msg
+    = CounterMsg Counter.Msg
+    | IndexMsg Index.Msg
+    | NotFoundMsg NotFound.Msg
     | RandomMsg Random.Msg
     | SettingsMsg Settings.Msg
-    | NotFoundMsg NotFound.Msg
 
 
-index : Application.Recipe Index.Params Index.Model Index.Msg Model Msg
-index =
-    Index.page
-        { toModel = IndexModel
-        , toMsg = IndexMsg
-        }
+
+-- RECIPES
 
 
-counter : Application.Recipe Counter.Params Counter.Model Counter.Msg Model Msg
+counter : Application.Recipe Counter.Route Counter.Model Counter.Msg Model Msg
 counter =
     Counter.page
         { toModel = CounterModel
@@ -58,23 +71,15 @@ counter =
         }
 
 
-random : Application.Recipe Random.Params Random.Model Random.Msg Model Msg
-random =
-    Random.page
-        { toModel = RandomModel
-        , toMsg = RandomMsg
+index : Application.Recipe Index.Route Index.Model Index.Msg Model Msg
+index =
+    Index.page
+        { toModel = IndexModel
+        , toMsg = IndexMsg
         }
 
 
-settings : Application.Recipe Settings.Params Settings.Model Settings.Msg Model Msg
-settings =
-    Settings.page
-        { toModel = SettingsModel
-        , toMsg = SettingsMsg
-        }
-
-
-notFound : Application.Recipe NotFound.Params NotFound.Model NotFound.Msg Model Msg
+notFound : Application.Recipe NotFound.Route NotFound.Model NotFound.Msg Model Msg
 notFound =
     NotFound.page
         { toModel = NotFoundModel
@@ -82,42 +87,60 @@ notFound =
         }
 
 
-routes : Application.Routes Route
-routes =
-    [ Route.index IndexRoute
-    , Route.path "counter" CounterRoute
-    , Route.path "random" RandomRoute
-    , Route.folder "settings" SettingsRoute Settings.routes
-    ]
+random : Application.Recipe Random.Route Random.Model Random.Msg Model Msg
+random =
+    Random.page
+        { toModel = RandomModel
+        , toMsg = RandomMsg
+        }
+
+
+settings : Application.Recipe Settings.Route Settings.Model Settings.Msg Model Msg
+settings =
+    Settings.page
+        { toModel = SettingsModel
+        , toMsg = SettingsMsg
+        }
+
+
+
+-- INIT
 
 
 init : Route -> Application.Init Model Msg
-init route =
-    case route of
-        IndexRoute params ->
-            index.init params
+init route_ =
+    case route_ of
+        CounterRoute route ->
+            counter.init route
 
-        CounterRoute params ->
-            counter.init params
+        IndexRoute route ->
+            index.init route
 
-        RandomRoute params ->
-            random.init params
+        NotFoundRoute route ->
+            notFound.init route
 
-        SettingsRoute params ->
-            settings.init params
+        RandomRoute route ->
+            random.init route
 
-        NotFoundRoute params ->
-            notFound.init params
+        SettingsRoute route ->
+            settings.init route
+
+
+
+-- UPDATE
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update appMsg appModel =
-    case ( appMsg, appModel ) of
+update msg_ model_ =
+    case ( msg_, model_ ) of
+        ( CounterMsg msg, CounterModel model ) ->
+            counter.update msg model
+
         ( IndexMsg msg, IndexModel model ) ->
             index.update msg model
 
-        ( CounterMsg msg, CounterModel model ) ->
-            counter.update msg model
+        ( NotFoundMsg msg, NotFoundModel model ) ->
+            notFound.update msg model
 
         ( RandomMsg msg, RandomModel model ) ->
             random.update msg model
@@ -125,27 +148,28 @@ update appMsg appModel =
         ( SettingsMsg msg, SettingsModel model ) ->
             settings.update msg model
 
-        ( NotFoundMsg msg, NotFoundModel model ) ->
-            notFound.update msg model
-
         _ ->
-            Application.keep appModel
+            Application.keep model_
+
+
+
+-- BUNDLE
 
 
 bundle : Model -> Application.Bundle Msg
-bundle appModel =
-    case appModel of
+bundle model_ =
+    case model_ of
+        CounterModel model ->
+            counter.bundle model
+
         IndexModel model ->
             index.bundle model
 
-        CounterModel model ->
-            counter.bundle model
+        NotFoundModel model ->
+            notFound.bundle model
 
         RandomModel model ->
             random.bundle model
 
         SettingsModel model ->
             settings.bundle model
-
-        NotFoundModel model ->
-            notFound.bundle model

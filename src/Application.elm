@@ -364,12 +364,12 @@ type alias Layout msg =
 -- PAGE API
 
 
-type alias Page params pageModel pageMsg model msg =
-    Page.Page params pageModel pageMsg model msg
+type alias Page pageRoute pageModel pageMsg model msg =
+    Page.Page pageRoute pageModel pageMsg model msg
 
 
-type alias Recipe params pageModel pageMsg model msg =
-    Page.Recipe params pageModel pageMsg model msg
+type alias Recipe pageRoute pageModel pageMsg model msg =
+    Page.Recipe pageRoute pageModel pageMsg model msg
 
 
 type alias Init model msg =
@@ -391,44 +391,44 @@ type alias Static =
 
 static :
     Static
-    -> Page params () Never model msg
+    -> Page pageRoute () Never model msg
 static =
     Page.static
 
 
-type alias Sandbox params pageModel pageMsg =
-    Page.Sandbox params pageModel pageMsg
+type alias Sandbox pageRoute pageModel pageMsg =
+    Page.Sandbox pageRoute pageModel pageMsg
 
 
 sandbox :
-    Sandbox params pageModel pageMsg
-    -> Page params pageModel pageMsg model msg
+    Sandbox pageRoute pageModel pageMsg
+    -> Page pageRoute pageModel pageMsg model msg
 sandbox =
     Page.sandbox
 
 
-type alias Element params pageModel pageMsg =
-    Page.Element params pageModel pageMsg
+type alias Element pageRoute pageModel pageMsg =
+    Page.Element pageRoute pageModel pageMsg
 
 
 element :
-    Element params pageModel pageMsg
-    -> Page params pageModel pageMsg model msg
+    Element pageRoute pageModel pageMsg
+    -> Page pageRoute pageModel pageMsg model msg
 element =
     Page.element
 
 
-type alias Glue params layoutModel layoutMsg =
-    Page.Glue params layoutModel layoutMsg
+type alias Glue pageRoute layoutModel layoutMsg =
+    Page.Glue pageRoute layoutModel layoutMsg
 
 
-type alias Pages params layoutModel layoutMsg =
-    Page.Pages params layoutModel layoutMsg
+type alias Pages pageRoute layoutModel layoutMsg =
+    Page.Pages pageRoute layoutModel layoutMsg
 
 
 glue :
-    Glue params layoutModel layoutMsg
-    -> Page params layoutModel layoutMsg model msg
+    Glue pageRoute layoutModel layoutMsg
+    -> Page pageRoute layoutModel layoutMsg model msg
 glue =
     Page.glue
 

@@ -1,7 +1,7 @@
 module Pages.Random exposing
     ( Model
     , Msg
-    , Params
+    , Route
     , page
     )
 
@@ -23,11 +23,11 @@ type Msg
     | CatResponded (Result Http.Error String)
 
 
-type alias Params =
+type alias Route =
     ()
 
 
-page : Application.Page Params Model Msg model msg
+page : Application.Page Route Model Msg model msg
 page =
     Application.element
         { init = always init

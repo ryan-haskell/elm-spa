@@ -1,7 +1,7 @@
 module Generated.Pages.Settings exposing
     ( Model
     , Msg
-    , Params
+    , Route
     , page
     , routes
     )
@@ -16,9 +16,9 @@ import Pages.Settings.User as User
 
 
 type Route
-    = AccountRoute Account.Params
-    | NotificationsRoute Notifications.Params
-    | UserRoute User.Params
+    = AccountRoute Account.Route
+    | NotificationsRoute Notifications.Route
+    | UserRoute User.Route
 
 
 type Model
@@ -33,11 +33,7 @@ type Msg
     | UserMsg User.Msg
 
 
-type alias Params =
-    Route
-
-
-page : Application.Page Params Model Msg model msg
+page : Application.Page Route Model Msg model msg
 page =
     Application.glue
         { layout = Layouts.Settings.layout
@@ -57,7 +53,7 @@ routes =
     ]
 
 
-account : Application.Recipe Account.Params Account.Model Account.Msg Model Msg
+account : Application.Recipe Account.Route Account.Model Account.Msg Model Msg
 account =
     Account.page
         { toModel = AccountModel
@@ -65,7 +61,7 @@ account =
         }
 
 
-notifications : Application.Recipe Notifications.Params Notifications.Model Notifications.Msg Model Msg
+notifications : Application.Recipe Notifications.Route Notifications.Model Notifications.Msg Model Msg
 notifications =
     Notifications.page
         { toModel = NotificationsModel
@@ -73,7 +69,7 @@ notifications =
         }
 
 
-user : Application.Recipe User.Params User.Model User.Msg Model Msg
+user : Application.Recipe User.Route User.Model User.Msg Model Msg
 user =
     User.page
         { toModel = UserModel
@@ -82,43 +78,37 @@ user =
 
 
 init : Route -> Application.Init Model Msg
-init route =
-    case route of
-        AccountRoute params ->
-            account.init params
+init route_ =
+    case route_ of
+        AccountRoute route ->
+            account.init route
 
-        NotificationsRoute params ->
-            notifications.init params
+        NotificationsRoute route ->
+            notifications.init route
 
-        UserRoute params ->
-            user.init params
+        UserRoute route ->
+            user.init route
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update appMsg appModel =
-    case ( appMsg, appModel ) of
+update msg_ model_ =
+    case ( msg_, model_ ) of
         ( AccountMsg msg, AccountModel model ) ->
             account.update msg model
-
-        ( AccountMsg _, _ ) ->
-            Application.keep appModel
 
         ( NotificationsMsg msg, NotificationsModel model ) ->
             notifications.update msg model
 
-        ( NotificationsMsg _, _ ) ->
-            Application.keep appModel
-
         ( UserMsg msg, UserModel model ) ->
             user.update msg model
 
-        ( UserMsg _, _ ) ->
-            Application.keep appModel
+        _ ->
+            Application.keep model_
 
 
 bundle : Model -> Application.Bundle Msg
-bundle appModel =
-    case appModel of
+bundle model_ =
+    case model_ of
         AccountModel model ->
             account.bundle model
 
