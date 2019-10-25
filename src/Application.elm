@@ -63,14 +63,19 @@ import Url.Parser as Parser exposing (Parser)
 -- APPLICATION
 
 
-type alias Application flags model msg =
-    Platform.Program flags (Model flags model) (Msg msg)
+type alias Application flags globalModel globalMsg model msg =
+    Platform.Program flags (Model flags globalModel model) (Msg globalMsg msg)
 
 
 create :
     { routing :
         { routes : Routes route
         , notFound : route
+        }
+    , global :
+        { init : flags -> ( globalModel, Cmd globalMsg )
+        , update : globalMsg -> globalModel -> ( globalModel, Cmd globalMsg )
+        , subscriptions : globalModel -> Sub globalMsg
         }
     , layout :
         { view : { page : Html msg } -> Html msg
@@ -82,12 +87,15 @@ create :
         , bundle : model -> Bundle msg
         }
     }
-    -> Application flags model msg
+    -> Application flags globalModel globalMsg model msg
 create config =
     Browser.application
         { init =
             init
-                { init = config.pages.init
+                { init =
+                    { global = config.global.init
+                    , pages = config.pages.init
+                    }
                 , fromUrl = fromUrl config.routing
                 , speed = Transition.speed config.layout.transition
                 }
@@ -95,7 +103,10 @@ create config =
             update
                 { fromUrl = fromUrl config.routing
                 , init = config.pages.init
-                , update = config.pages.update
+                , update =
+                    { global = config.global.update
+                    , pages = config.pages.update
+                    }
                 , speed = Transition.speed config.layout.transition
                 }
         , subscriptions =
@@ -131,13 +142,14 @@ fromUrl config =
 -- INIT
 
 
-type alias Model flags model =
+type alias Model flags globalModel model =
     { urls :
         { previous : Maybe Url
         , current : Url
         }
     , flags : flags
     , key : Nav.Key
+    , global : globalModel
     , page : Transitionable model
     , speed : Int
     }
@@ -145,33 +157,42 @@ type alias Model flags model =
 
 init :
     { fromUrl : Url -> route
-    , init : route -> Init model msg
+    , init :
+        { global : flags -> ( globalModel, Cmd globalMsg )
+        , pages : route -> Init model msg
+        }
     , speed : Int
     }
     -> flags
     -> Url
     -> Nav.Key
-    -> ( Model flags model, Cmd (Msg msg) )
+    -> ( Model flags globalModel model, Cmd (Msg globalMsg msg) )
 init config flags url key =
     url
         |> config.fromUrl
-        |> config.init
+        |> config.init.pages
         |> (\( pageModel, pageCmd ) ->
+                let
+                    ( globalModel, globalCmd ) =
+                        config.init.global flags
+                in
                 ( { flags = flags
                   , urls = { previous = Nothing, current = url }
                   , key = key
+                  , global = globalModel
                   , page = Transitionable.Ready pageModel
                   , speed = config.speed
                   }
                 , Cmd.batch
                     [ handleJumpLinks url pageCmd
+                    , Cmd.map Global globalCmd
                     , Utils.delay config.speed TransitionComplete
                     ]
                 )
            )
 
 
-handleJumpLinks : Url -> Cmd msg -> Cmd (Msg msg)
+handleJumpLinks : Url -> Cmd msg -> Cmd (Msg globalMsg msg)
 handleJumpLinks url cmd =
     Cmd.batch
         [ Cmd.map Page cmd
@@ -197,24 +218,28 @@ scrollToHash msg { fragment } =
 -- UPDATE
 
 
-type Msg msg
+type Msg globalMsg msg
     = Url Url
     | Link Browser.UrlRequest
     | TransitionTo Url
     | ScrollComplete
     | TransitionComplete
+    | Global globalMsg
     | Page msg
 
 
 update :
     { fromUrl : Url -> route
     , init : route -> Init model msg
-    , update : msg -> model -> ( model, Cmd msg )
+    , update :
+        { global : globalMsg -> globalModel -> ( globalModel, Cmd globalMsg )
+        , pages : msg -> model -> ( model, Cmd msg )
+        }
     , speed : Int
     }
-    -> Msg msg
-    -> Model flags model
-    -> ( Model flags model, Cmd (Msg msg) )
+    -> Msg globalMsg msg
+    -> Model flags globalModel model
+    -> ( Model flags globalModel model, Cmd (Msg globalMsg msg) )
 update config msg model =
     case msg of
         ScrollComplete ->
@@ -268,11 +293,17 @@ update config msg model =
                         )
                    )
 
+        Global globalMsg ->
+            Tuple.mapBoth
+                (\global -> { model | global = global })
+                (Cmd.map Global)
+                (config.update.global globalMsg model.global)
+
         Page pageMsg ->
             Tuple.mapBoth
                 (\page -> { model | page = Transitionable.Complete page })
                 (Cmd.map Page)
-                (config.update pageMsg (Transitionable.unwrap model.page))
+                (config.update.pages pageMsg (Transitionable.unwrap model.page))
 
 
 navigatingWithinLayout : { old : Url, new : Url } -> Bool
@@ -296,8 +327,8 @@ navigatingWithinLayout urls =
 
 subscriptions :
     { subscriptions : model -> Sub msg }
-    -> Model flags model
-    -> Sub (Msg msg)
+    -> Model flags globalModel model
+    -> Sub (Msg globalMsg msg)
 subscriptions config model =
     Sub.map Page (config.subscriptions (Transitionable.unwrap model.page))
 
@@ -311,8 +342,8 @@ view :
     , transition : Transition.Strategy (Html msg)
     , layout : Layout msg
     }
-    -> Model flags model
-    -> Browser.Document (Msg msg)
+    -> Model flags globalModel model
+    -> Browser.Document (Msg globalMsg msg)
 view config model =
     { title = "elm-app demo"
     , body =
