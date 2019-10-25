@@ -104,7 +104,7 @@ create config =
                 }
         , view =
             view
-                { view = \status model -> (config.pages.bundle model).view status
+                { view = config.pages.bundle >> .view
                 , layout = config.layout
                 , transition = Transition.strategy config.layout.transition
                 }
@@ -155,17 +155,17 @@ init :
 init config flags url key =
     url
         |> config.fromUrl
-        |> (\route -> config.init route { parentSpeed = config.speed })
-        |> (\page ->
+        |> config.init
+        |> (\( pageModel, pageCmd ) ->
                 ( { flags = flags
                   , urls = { previous = Nothing, current = url }
                   , key = key
-                  , page = Transitionable.Ready page.model
-                  , speed = page.speed
+                  , page = Transitionable.Ready pageModel
+                  , speed = config.speed
                   }
                 , Cmd.batch
-                    [ handleJumpLinks url page.cmd
-                    , Utils.delay page.speed TransitionComplete
+                    [ handleJumpLinks url pageCmd
+                    , Utils.delay config.speed TransitionComplete
                     ]
                 )
            )
@@ -254,17 +254,17 @@ update config msg model =
         Url url ->
             url
                 |> config.fromUrl
-                |> (\route -> config.init route { parentSpeed = config.speed })
-                |> (\page ->
+                |> config.init
+                |> (\( pageModel, pageCmd ) ->
                         ( { model
                             | urls =
                                 { previous = Just model.urls.current
                                 , current = url
                                 }
-                            , page = Transitionable.Complete page.model
-                            , speed = page.speed
+                            , page = Transitionable.Complete pageModel
+                            , speed = config.speed
                           }
-                        , handleJumpLinks url page.cmd
+                        , handleJumpLinks url pageCmd
                         )
                    )
 
@@ -307,26 +307,13 @@ subscriptions config model =
 
 
 view :
-    { view : Page.TransitionStatus -> model -> Html msg
+    { view : model -> Html msg
     , transition : Transition.Strategy (Html msg)
     , layout : Layout msg
     }
     -> Model flags model
     -> Browser.Document (Msg msg)
 view config model =
-    let
-        isNavigatingWithinLayout =
-            model.urls.previous
-                |> Maybe.map (\previous -> navigatingWithinLayout { old = previous, new = model.urls.current })
-                |> Maybe.withDefault False
-
-        status =
-            if isNavigatingWithinLayout then
-                Page.Leaving
-
-            else
-                Page.Complete
-    in
     { title = "elm-app demo"
     , body =
         [ Html.map Page <|
@@ -334,19 +321,19 @@ view config model =
                 Transitionable.Ready page ->
                     config.transition.beforeLoad
                         { layout = config.layout.view
-                        , page = config.view status page
+                        , page = config.view page
                         }
 
                 Transitionable.Transitioning page ->
                     config.transition.leavingPage
                         { layout = config.layout.view
-                        , page = config.view status page
+                        , page = config.view page
                         }
 
                 Transitionable.Complete page ->
                     config.transition.enteringPage
                         { layout = config.layout.view
-                        , page = config.view status page
+                        , page = config.view page
                         }
         ]
     }

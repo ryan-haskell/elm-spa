@@ -30,4 +30,4 @@ page =
 
 view : Html Msg
 view =
-    h3 [] [ text "User" ]
+    h2 [] [ text "User" ]

@@ -20,5 +20,5 @@ view { page } =
         , Attr.style "max-width" "720px"
         ]
         [ Components.Navbar.view
-        , page
+        , div [ Attr.style "margin-top" "2rem" ] [ page ]
         ]

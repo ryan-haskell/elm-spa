@@ -30,4 +30,4 @@ page =
 
 view : Html Msg
 view =
-    h3 [] [ text "Notifications" ]
+    h2 [] [ text "Notifications" ]

@@ -5,7 +5,6 @@ module Internals.Page exposing
     , Sandbox, sandbox
     , Element, element
     , Glue, Pages, glue
-    , TransitionStatus(..)
     )
 
 {-|
@@ -24,10 +23,8 @@ module Internals.Page exposing
 
 -}
 
-import Html exposing (Html, div, text)
+import Html exposing (Html)
 import Internals.Layout exposing (Layout)
-import Internals.Transition as Transition
-import Url.Parser as Parser exposing (Parser)
 
 
 type alias Page pageRoute pageModel pageMsg model msg =
@@ -44,24 +41,12 @@ type alias Recipe pageRoute pageModel pageMsg model msg =
     }
 
 
-type TransitionStatus
-    = Initial
-    | Leaving
-    | Complete
-
-
 type alias Init model msg =
-    { parentSpeed : Int
-    }
-    ->
-        { model : model
-        , cmd : Cmd msg
-        , speed : Int
-        }
+    ( model, Cmd msg )
 
 
 type alias Bundle msg =
-    { view : TransitionStatus -> Html msg
+    { view : Html msg
     , subscriptions : Sub msg
     }
 
@@ -79,16 +64,11 @@ static :
     Static
     -> Page pageRoute () Never model msg
 static page { toModel, toMsg } =
-    { init =
-        \_ { parentSpeed } ->
-            { model = toModel ()
-            , cmd = Cmd.none
-            , speed = parentSpeed
-            }
+    { init = \_ -> ( toModel (), Cmd.none )
     , update = \_ model -> ( toModel model, Cmd.none )
     , bundle =
         \_ ->
-            { view = \_ -> Html.map toMsg page.view
+            { view = Html.map toMsg page.view
             , subscriptions = Sub.none
             }
     }
@@ -110,11 +90,8 @@ sandbox :
     -> Page pageRoute pageModel pageMsg model msg
 sandbox page { toModel, toMsg } =
     { init =
-        \pageRoute { parentSpeed } ->
-            { model = toModel (page.init pageRoute)
-            , cmd = Cmd.none
-            , speed = parentSpeed
-            }
+        \pageRoute ->
+            ( toModel (page.init pageRoute), Cmd.none )
     , update =
         \msg model ->
             ( page.update msg model |> toModel
@@ -122,7 +99,7 @@ sandbox page { toModel, toMsg } =
             )
     , bundle =
         \model ->
-            { view = \_ -> page.view model |> Html.map toMsg
+            { view = page.view model |> Html.map toMsg
             , subscriptions = Sub.none
             }
     }
@@ -145,21 +122,15 @@ element :
     -> Page pageRoute pageModel pageMsg model msg
 element page { toModel, toMsg } =
     { init =
-        \pageRoute { parentSpeed } ->
-            page.init pageRoute
-                |> (\( model, cmd ) ->
-                        { model = toModel model
-                        , cmd = Cmd.map toMsg cmd
-                        , speed = parentSpeed
-                        }
-                   )
+        page.init
+            >> Tuple.mapBoth toModel (Cmd.map toMsg)
     , update =
         \msg model ->
             page.update msg model
                 |> Tuple.mapBoth toModel (Cmd.map toMsg)
     , bundle =
         \model ->
-            { view = \_ -> page.view model |> Html.map toMsg
+            { view = page.view model |> Html.map toMsg
             , subscriptions = Sub.none
             }
     }
@@ -187,14 +158,8 @@ glue :
     -> Page pageRoute layoutModel layoutMsg model msg
 glue options { toModel, toMsg } =
     { init =
-        \pageRoute _ ->
-            options.pages.init pageRoute { parentSpeed = Transition.speed options.layout.transition }
-                |> (\page ->
-                        { model = toModel page.model
-                        , cmd = Cmd.map toMsg page.cmd
-                        , speed = page.speed
-                        }
-                   )
+        options.pages.init
+            >> Tuple.mapBoth toModel (Cmd.map toMsg)
     , update =
         \msg model ->
             options.pages.update msg model
@@ -206,11 +171,10 @@ glue options { toModel, toMsg } =
                     options.pages.bundle model
             in
             { view =
-                \status ->
-                    options.layout.view
-                        { page = page.view status
-                        }
-                        |> Html.map toMsg
+                options.layout.view
+                    { page = page.view
+                    }
+                    |> Html.map toMsg
             , subscriptions = Sub.none
             }
     }
