@@ -15,6 +15,7 @@ import Pages.Counter as Counter
 import Pages.Index as Index
 import Pages.NotFound as NotFound
 import Pages.Random as Random
+import Pages.SignIn as SignIn
 
 
 
@@ -26,6 +27,7 @@ type Route
     | IndexRoute Index.Route
     | NotFoundRoute NotFound.Route
     | RandomRoute Random.Route
+    | SignInRoute SignIn.Route
     | SettingsRoute Settings.Route
 
 
@@ -35,6 +37,7 @@ routes =
     , Route.index IndexRoute
     , Route.path "not-found" NotFoundRoute
     , Route.path "random" RandomRoute
+    , Route.path "sign-in" SignInRoute
     , Route.folder "settings" SettingsRoute Settings.routes
     ]
 
@@ -48,6 +51,7 @@ type Model
     | IndexModel Index.Model
     | NotFoundModel NotFound.Model
     | RandomModel Random.Model
+    | SignInModel SignIn.Model
     | SettingsModel Settings.Model
 
 
@@ -56,6 +60,7 @@ type Msg
     | IndexMsg Index.Msg
     | NotFoundMsg NotFound.Msg
     | RandomMsg Random.Msg
+    | SignInMsg SignIn.Msg
     | SettingsMsg Settings.Msg
 
 
@@ -95,6 +100,14 @@ random =
         }
 
 
+signIn : Application.Recipe SignIn.Route SignIn.Model SignIn.Msg Model Msg
+signIn =
+    SignIn.page
+        { toModel = SignInModel
+        , toMsg = SignInMsg
+        }
+
+
 settings : Application.Recipe Settings.Route Settings.Model Settings.Msg Model Msg
 settings =
     Settings.page
@@ -122,6 +135,9 @@ init route_ =
         RandomRoute route ->
             random.init route
 
+        SignInRoute route ->
+            signIn.init route
+
         SettingsRoute route ->
             settings.init route
 
@@ -145,12 +161,13 @@ update msg_ model_ =
         ( RandomMsg msg, RandomModel model ) ->
             random.update msg model
 
+        ( SignInMsg msg, SignInModel model ) ->
+            signIn.update msg model
+
         ( SettingsMsg msg, SettingsModel model ) ->
             settings.update msg model
-
         _ ->
             Application.keep model_
-
 
 
 -- BUNDLE
@@ -170,6 +187,9 @@ bundle model_ =
 
         RandomModel model ->
             random.bundle model
+
+        SignInModel model ->
+            signIn.bundle model
 
         SettingsModel model ->
             settings.bundle model

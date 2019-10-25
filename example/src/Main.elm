@@ -2,10 +2,11 @@ module Main exposing (main)
 
 import Application exposing (Application)
 import Generated.Pages as Pages
+import Global
 import Layouts.Main
 
 
-main : Application () Pages.Model Pages.Msg
+main : Application Global.Flags Pages.Model Pages.Msg
 main =
     Application.create
         { routing =
