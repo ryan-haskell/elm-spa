@@ -1,4 +1,4 @@
-# ryannhg/elm-app
+# ryannhg/elm-spa
 > an experiment for creating single page apps with Elm!
 
 
@@ -51,7 +51,7 @@ main =
 
 ### keep your pages simple
 
-(No need for elm-fork-knife!)
+(Instead of making everything an [elm-fork-knife](https://youtu.be/RN2_NchjrJQ?t=2362)!)
 
 - [`Pages.Index`](./example/src/Pages/Index.elm)
 
