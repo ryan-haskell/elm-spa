@@ -99,8 +99,6 @@ page =
 
 ### _and_ your top level easy to read!
 
-- [`Generated.Pages`](./example/src/Generated/Pages.elm)
-
 ```elm
 init appRoute =
     case appRoute of
