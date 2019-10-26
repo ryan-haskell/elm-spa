@@ -55,7 +55,7 @@ const templates = {
       (items.length > 0)
         ? items.map(name => {
             const variable = camelCase(name)
-            return `${variable} : Application.Recipe ${name}.Route ${name}.Model ${name}.Msg Model Msg
+            return `${variable} : Page.Recipe ${name}.Route ${name}.Model ${name}.Msg Model Msg Global.Model Global.Msg a
 ${variable} =
     ${name}.page
         { toModel = ${name}Model
@@ -71,7 +71,7 @@ ${variable} =
       
 
       return (items.length > 0)
-        ? `routes : Application.Routes Route
+        ? `routes : List (Route.Route Route)
 routes =
     [ ${files.map(name => formatter[name]
         ? formatter[name](name)
@@ -101,9 +101,10 @@ ${items
     , update
     )
 
-import Application
+import Application.Page as Page
 import Application.Route as Route
 ${folders.map(name => `import Generated.Pages.${name} as ${name}`).join('\n')}
+import Global
 ${files.map(name => `import Pages.${name} as ${name}`).join('\n')}
 
 
@@ -142,7 +143,7 @@ ${caseOf({
   name: 'init',
   types: {
     input: 'Route',
-    output: 'Application.Init Model Msg'
+    output: 'Page.Init Model Msg Global.Model Global.Msg'
   },
   inputs: 'route_',
   branch: {
@@ -161,7 +162,7 @@ ${caseOf({
   name: 'update',
   types: {
     input: 'Msg -> Model',
-    output: '( Model, Cmd Msg )'
+    output: 'Page.Update Model Msg Global.Model Global.Msg'
   },
   inputs: 'msg_ model_',
   branch: {
@@ -171,7 +172,7 @@ ${caseOf({
   }
 })}
         _ ->
-            Application.keep model_
+            Page.keep model_
 
 
 -- BUNDLE
@@ -181,7 +182,7 @@ ${caseOf({
   name: 'bundle',
   types: {
     input: 'Model',
-    output: 'Application.Bundle Msg'
+    output: 'Page.Bundle Msg Global.Model Global.Msg a'
   },
   inputs: 'model_',
   branch: {

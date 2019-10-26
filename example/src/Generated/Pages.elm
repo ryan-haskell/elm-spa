@@ -167,10 +167,8 @@ update msg_ model_ =
 
         ( SettingsMsg msg, SettingsModel model ) ->
             settings.update msg model
-
         _ ->
             Page.keep model_
-
 
 
 -- BUNDLE
