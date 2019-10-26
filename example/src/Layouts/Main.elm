@@ -1,4 +1,7 @@
-module Layouts.Main exposing (layout)
+module Layouts.Main exposing
+    ( transition
+    , view
+    )
 
 import Application
 import Components.Navbar
@@ -7,10 +10,9 @@ import Html exposing (..)
 import Html.Attributes as Attr
 
 
-layout =
-    { view = view
-    , transition = Application.fade 200
-    }
+transition : Application.Transition (Html msg)
+transition =
+    Application.fade 200
 
 
 view :

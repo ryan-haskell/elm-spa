@@ -20,8 +20,8 @@ main =
             , subscriptions = Global.subscriptions
             }
         , layout =
-            { view = Layouts.Main.layout.view
-            , transition = Layouts.Main.layout.transition
+            { view = Layouts.Main.view
+            , transition = Layouts.Main.transition
             }
         , pages =
             { init = Pages.init

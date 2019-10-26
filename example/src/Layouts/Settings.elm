@@ -1,15 +1,8 @@
-module Layouts.Settings exposing (layout)
+module Layouts.Settings exposing (view)
 
-import Application
 import Global
 import Html exposing (..)
 import Html.Attributes exposing (href, style)
-
-
-layout =
-    { view = view
-    , transition = Application.none
-    }
 
 
 view : { page : Html msg, global : Global.Model } -> Html msg
