@@ -105,14 +105,6 @@ create config =
         }
 
 
-type alias Layout globalModel globalMsg layoutMsg =
-    { page : Html (Msg globalMsg layoutMsg)
-    , global : globalModel
-    , fromGlobal : globalMsg -> Msg globalMsg layoutMsg
-    }
-    -> Html (Msg globalMsg layoutMsg)
-
-
 private :
     { fromGlobalMsg : globalMsg -> Msg globalMsg layoutMsg
     , fromPageMsg : layoutMsg -> Msg globalMsg layoutMsg

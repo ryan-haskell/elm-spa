@@ -4,7 +4,7 @@ module Pages.Random exposing
     , page
     )
 
-import Application.Page as Application
+import Application.Page as Page exposing (Page)
 import Html exposing (..)
 import Html.Attributes as Attr
 import Html.Events as Events
@@ -22,8 +22,9 @@ type Msg
     | CatResponded (Result Http.Error String)
 
 
+page : Page () Model Msg a b c d e
 page =
-    Application.element
+    Page.element
         { init = always init
         , update = update
         , view = view

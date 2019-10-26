@@ -4,7 +4,7 @@ module Pages.SignIn exposing
     , page
     )
 
-import Application.Page as Application
+import Application.Page as Page exposing (Page)
 import Html exposing (..)
 import Html.Attributes as Attr
 import Html.Events as Events
@@ -26,8 +26,9 @@ type Field
     | Password
 
 
+page : Page () Model Msg a b c d e
 page =
-    Application.sandbox
+    Page.sandbox
         { init = always init
         , update = update
         , view = view

@@ -1,6 +1,6 @@
 module Pages.Users.Slug exposing (Model, Msg, page)
 
-import Application.Page as Page
+import Application.Page as Page exposing (Page)
 import Html exposing (..)
 
 
@@ -12,6 +12,7 @@ type alias Msg =
     Never
 
 
+page : Page String Model Msg a b c d e
 page =
     Page.sandbox
         { init = init

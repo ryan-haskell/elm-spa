@@ -4,7 +4,7 @@ module Pages.Index exposing
     , page
     )
 
-import Application.Page as Application
+import Application.Page as Page exposing (Page)
 import Html exposing (..)
 import Html.Attributes as Attr
 
@@ -17,8 +17,9 @@ type alias Msg =
     Never
 
 
+page : Page () Model Msg a b c d e
 page =
-    Application.static
+    Page.static
         { view = view
         }
 
