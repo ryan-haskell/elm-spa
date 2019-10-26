@@ -1,4 +1,11 @@
-module Generated.Route exposing
+module Templates.TopLevelRoute exposing (contents)
+
+import Item exposing (Item)
+
+
+contents : List Item -> String
+contents items =
+    """module Generated.Route exposing
     ( CounterParams
     , IndexParams
     , NotFoundParams
@@ -89,3 +96,5 @@ toPath route =
 
         Users route_ ->
             "/users" ++ Users.toPath route_
+
+"""

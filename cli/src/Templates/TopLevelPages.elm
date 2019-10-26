@@ -1,4 +1,11 @@
-module Generated.Pages exposing
+module Templates.TopLevelPages exposing (contents)
+
+import Item exposing (Item)
+
+
+contents : List Item -> String
+contents items =
+    """module Generated.Pages exposing
     ( Model
     , Msg
     , bundle
@@ -190,3 +197,5 @@ bundle model_ =
 
         UsersModel model ->
             users.bundle model
+
+"""
