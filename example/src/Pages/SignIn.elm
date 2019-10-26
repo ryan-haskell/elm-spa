@@ -5,9 +5,12 @@ module Pages.SignIn exposing
     )
 
 import Application.Page as Page exposing (Page)
+import Generated.Route as Route
+import Global
 import Html exposing (..)
 import Html.Attributes as Attr
 import Html.Events as Events
+import Utils.Cmd
 
 
 type alias Model =
@@ -26,37 +29,55 @@ type Field
     | Password
 
 
-page : Page () Model Msg a b c d e
+page : Page () Model Msg a b Global.Model Global.Msg c
 page =
-    Page.sandbox
-        { init = always init
+    Page.component
+        { init = init
         , update = update
         , view = view
+        , subscriptions = subscriptions
         }
 
 
-init : Model
-init =
-    { username = ""
-    , password = ""
-    }
+init : Global.Model -> () -> ( Model, Cmd Msg, Cmd Global.Msg )
+init _ _ =
+    ( { username = ""
+      , password = ""
+      }
+    , Cmd.none
+    , Cmd.none
+    )
 
 
-update : Msg -> Model -> Model
-update msg model =
+update : Global.Model -> Msg -> Model -> ( Model, Cmd Msg, Cmd Global.Msg )
+update _ msg model =
     case msg of
         Updated Username username ->
-            { model | username = username }
+            ( { model | username = username }
+            , Cmd.none
+            , Cmd.none
+            )
 
         Updated Password password ->
-            { model | password = password }
+            ( { model | password = password }
+            , Cmd.none
+            , Cmd.none
+            )
 
         FormSubmitted ->
-            model
+            ( model
+            , Cmd.none
+            , Utils.Cmd.send <| Global.NavigateTo (Route.Index ())
+            )
 
 
-view : Model -> Html Msg
-view model =
+subscriptions : Global.Model -> Model -> Sub Msg
+subscriptions _ _ =
+    Sub.none
+
+
+view : Global.Model -> Model -> Html Msg
+view _ model =
     div []
         [ h1 [] [ text "Sign in" ]
         , Html.form

@@ -12,6 +12,7 @@ main =
     Application.create
         { routing =
             { routes = Route.routes
+            , toPath = Route.toPath
             , notFound = Route.NotFound ()
             }
         , global =

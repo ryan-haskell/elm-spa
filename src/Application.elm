@@ -47,11 +47,16 @@ type alias Application flags globalModel globalMsg layoutModel layoutMsg =
 create :
     { routing :
         { routes : Routes route
+        , toPath : route -> String
         , notFound : route
         }
     , global :
         { init : flags -> ( globalModel, Cmd globalMsg )
-        , update : globalMsg -> globalModel -> ( globalModel, Cmd globalMsg )
+        , update :
+            { navigate : route -> Cmd (Msg globalMsg layoutMsg) }
+            -> globalMsg
+            -> globalModel
+            -> ( globalModel, Cmd globalMsg, Cmd (Msg globalMsg layoutMsg) )
         , subscriptions : globalModel -> Sub globalMsg
         }
     , layout :
@@ -82,7 +87,10 @@ create config =
                 }
         , update =
             update
-                { fromUrl = fromUrl config.routing
+                { routing =
+                    { fromUrl = fromUrl config.routing
+                    , toPath = config.routing.toPath
+                    }
                 , init = config.pages.init
                 , update =
                     { global = config.global.update
@@ -123,7 +131,7 @@ type alias Routes route =
     List (Route.Route route)
 
 
-fromUrl : { routes : Routes route, notFound : route } -> Url -> route
+fromUrl : { a | routes : Routes route, notFound : route } -> Url -> route
 fromUrl config =
     Parser.parse (Parser.oneOf config.routes)
         >> Maybe.withDefault config.notFound
@@ -223,11 +231,21 @@ type Msg globalMsg msg
 
 
 update :
-    { fromUrl : Url -> route
+    { routing :
+        { fromUrl : Url -> route
+        , toPath : route -> String
+        }
     , init : route -> Page.Init layoutModel layoutMsg globalModel globalMsg
     , update :
-        { global : globalMsg -> globalModel -> ( globalModel, Cmd globalMsg )
-        , pages : layoutMsg -> layoutModel -> Page.Update layoutModel layoutMsg globalModel globalMsg
+        { global :
+            { navigate : route -> Cmd (Msg globalMsg layoutMsg) }
+            -> globalMsg
+            -> globalModel
+            -> ( globalModel, Cmd globalMsg, Cmd (Msg globalMsg layoutMsg) )
+        , pages :
+            layoutMsg
+            -> layoutModel
+            -> Page.Update layoutModel layoutMsg globalModel globalMsg
         }
     , speed : Int
     }
@@ -272,7 +290,7 @@ update config msg model =
 
         Url url ->
             url
-                |> config.fromUrl
+                |> config.routing.fromUrl
                 |> (\route -> config.init route model.global)
                 |> (\( pageModel, pageCmd, globalCmd ) ->
                         ( { model
@@ -291,21 +309,41 @@ update config msg model =
                    )
 
         Global globalMsg ->
-            Tuple.mapBoth
-                (\global -> { model | global = global })
-                (Cmd.map Global)
-                (config.update.global globalMsg model.global)
+            config.update.global
+                { navigate = navigate config.routing.toPath model.urls.current
+                }
+                globalMsg
+                model.global
+                |> (\( global, globalCmd, cmd ) ->
+                        ( { model | global = global }
+                        , Cmd.batch
+                            [ Cmd.map Global globalCmd
+                            , cmd
+                            ]
+                        )
+                   )
 
         Page pageMsg ->
             config.update.pages pageMsg (Transitionable.unwrap model.page) model.global
-                |> (\( page, cmd, globalCmd ) ->
+                |> (\( page, pageCmd, globalCmd ) ->
                         ( { model | page = Transitionable.Complete page }
                         , Cmd.batch
-                            [ Cmd.map Page cmd
+                            [ Cmd.map Page pageCmd
                             , Cmd.map Global globalCmd
                             ]
                         )
                    )
+
+
+navigate : (route -> String) -> Url -> route -> Cmd (Msg globalMsg layoutMsg)
+navigate toPath url route =
+    toCmd <|
+        Link (Browser.Internal { url | path = toPath route })
+
+
+toCmd : msg -> Cmd msg
+toCmd =
+    Task.succeed >> Task.perform identity
 
 
 navigatingWithinLayout : { old : Url, new : Url } -> Bool
