@@ -8,7 +8,7 @@ import Application.Page as Application
 import Generated.Route.Settings as Route exposing (Route)
 import Global
 import Html exposing (..)
-import Layouts.Settings
+import Layouts.Settings as Layout
 import Pages.Settings.Account as Account
 import Pages.Settings.Notifications as Notifications
 import Pages.Settings.User as User
@@ -29,7 +29,7 @@ type Msg
 page : Application.Page Route Model Msg a b Global.Model Global.Msg c
 page =
     Application.layout
-        { view = Layouts.Settings.view
+        { view = Layout.view
         , pages =
             { init = init
             , update = update

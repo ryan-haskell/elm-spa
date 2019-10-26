@@ -8,6 +8,7 @@ module Generated.Pages exposing
 
 import Application.Page as Page
 import Generated.Pages.Settings as Settings
+import Generated.Pages.Users as Users
 import Generated.Route as Route exposing (Route)
 import Global
 import Pages.Counter as Counter
@@ -28,6 +29,7 @@ type Model
     | RandomModel Random.Model
     | SignInModel SignIn.Model
     | SettingsModel Settings.Model
+    | UsersModel Users.Model
 
 
 type Msg
@@ -37,6 +39,7 @@ type Msg
     | RandomMsg Random.Msg
     | SignInMsg SignIn.Msg
     | SettingsMsg Settings.Msg
+    | UsersMsg Users.Msg
 
 
 
@@ -91,6 +94,14 @@ settings =
         }
 
 
+users : Page.Recipe Route.UsersParams Users.Model Users.Msg Model Msg Global.Model Global.Msg a
+users =
+    Users.page
+        { toModel = UsersModel
+        , toMsg = UsersMsg
+        }
+
+
 
 -- INIT
 
@@ -115,6 +126,9 @@ init route_ =
 
         Route.Settings route ->
             settings.init route
+
+        Route.Users route ->
+            users.init route
 
 
 
@@ -141,6 +155,9 @@ update msg_ model_ =
 
         ( SettingsMsg msg, SettingsModel model ) ->
             settings.update msg model
+
+        ( UsersMsg msg, UsersModel model ) ->
+            users.update msg model
 
         _ ->
             Page.keep model_
@@ -170,3 +187,6 @@ bundle model_ =
 
         SettingsModel model ->
             settings.bundle model
+
+        UsersModel model ->
+            users.bundle model

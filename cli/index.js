@@ -55,7 +55,7 @@ const templates = {
       (items.length > 0)
         ? items.map(name => {
             const variable = camelCase(name)
-            return `${variable} : Page.Recipe ${name}.Route ${name}.Model ${name}.Msg Model Msg Global.Model Global.Msg a
+            return `${variable} : Page.Recipe Route.${name}Params ${name}.Model ${name}.Msg Model Msg Global.Model Global.Msg a
 ${variable} =
     ${name}.page
         { toModel = ${name}Model
@@ -63,25 +63,6 @@ ${variable} =
         }`
         }).join('\n\n\n')
         : ''
-
-    const routes = () => {
-      const formatter = {
-        Index: name => `Route.index IndexRoute`
-      }
-      
-
-      return (items.length > 0)
-        ? `routes : List (Route.Route Route)
-routes =
-    [ ${files.map(name => formatter[name]
-        ? formatter[name](name)
-        : `Route.path "${sluggify(name)}" ${name}Route`
-      ).join('\n    , ')}
-    ${folders.length
-      ? `, ${folders.map(name => `Route.folder "${sluggify(name)}" ${name}Route ${name}.routes`).join('\n    , ') + '\n    '}`
-      : ''}]`
-        : ''
-    }
 
     const caseOf = ({ name, types, inputs, branch }) =>
       `${name} : ${types.input} -> ${types.output}
@@ -94,28 +75,16 @@ ${items
     return `module Generated.Pages exposing
     ( Model
     , Msg
-    , Route(..)
     , bundle
     , init
-    , routes
     , update
     )
 
 import Application.Page as Page
-import Application.Route as Route
+import Generated.Route as Route exposing (Route)
 ${folders.map(name => `import Generated.Pages.${name} as ${name}`).join('\n')}
 import Global
 ${files.map(name => `import Pages.${name} as ${name}`).join('\n')}
-
-
-
--- ROUTES
-
-
-${customType('Route')}
-
-
-${routes()}
 
 
 
@@ -148,7 +117,7 @@ ${caseOf({
   inputs: 'route_',
   branch: {
     input: 'route_',
-    condition: name => `${name}Route route`,
+    condition: name => `Route.${name} route`,
     result: name => `${camelCase(name)}.init route`
   }
 })}

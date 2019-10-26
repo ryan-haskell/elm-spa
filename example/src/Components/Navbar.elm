@@ -1,5 +1,7 @@
 module Components.Navbar exposing (view)
 
+import Generated.Route as Route exposing (Route)
+import Generated.Route.Settings as Settings
 import Html exposing (..)
 import Html.Attributes as Attr
 
@@ -15,21 +17,21 @@ view =
         ]
         [ div [] <|
             List.map viewLink
-                [ ( "Home", "/" )
-                , ( "Counter", "/counter" )
-                , ( "Cats", "/random" )
-                , ( "Settings", "/settings/account" )
+                [ ( "Home", Route.Index () )
+                , ( "Counter", Route.Counter () )
+                , ( "Cats", Route.Random () )
+                , ( "Settings", Route.Settings (Settings.Account ()) )
                 ]
         , div []
-            [ viewLink ( "Sign in", "/sign-in" )
+            [ viewLink ( "Sign in", Route.SignIn () )
             ]
         ]
 
 
-viewLink : ( String, String ) -> Html msg
-viewLink ( label, path ) =
+viewLink : ( String, Route ) -> Html msg
+viewLink ( label, route ) =
     a
-        [ Attr.href path
+        [ Attr.href (Route.toPath route)
         , Attr.style "margin-right" "1rem"
         , Attr.style "white-space" "nowrap"
         ]
