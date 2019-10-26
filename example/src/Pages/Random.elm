@@ -5,7 +5,7 @@ module Pages.Random exposing
     , page
     )
 
-import Application as Application
+import Application.Page as Application
 import Html exposing (..)
 import Html.Attributes as Attr
 import Html.Events as Events
@@ -27,7 +27,6 @@ type alias Route =
     ()
 
 
-page : Application.Page Route Model Msg model msg
 page =
     Application.element
         { init = always init

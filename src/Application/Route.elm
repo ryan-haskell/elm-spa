@@ -1,27 +1,34 @@
-module Application.Route exposing (Route, folder, index, path, slug)
+module Application.Route exposing
+    ( Route
+    , folder
+    , index
+    , path
+    , slug
+    )
 
-import Internals.Route as Route
+import Url.Parser as Parser exposing ((</>), Parser)
 
 
 type alias Route route =
-    Route.Route route
+    Parser (route -> route) route
 
 
 index : (() -> route) -> Route route
-index =
-    Route.index
+index toRoute =
+    Parser.map toRoute (Parser.top |> Parser.map ())
 
 
 slug : (String -> route) -> Route route
-slug =
-    Route.slug
+slug toRoute =
+    Parser.map toRoute Parser.string
 
 
 path : String -> (() -> route) -> Route route
-path =
-    Route.path
+path p toRoute =
+    Parser.map toRoute (Parser.s p |> Parser.map ())
 
 
 folder : String -> (a -> route) -> List (Route a) -> Route route
-folder =
-    Route.folder
+folder p toRoute children =
+    Parser.map toRoute
+        (Parser.s p </> Parser.oneOf children |> Parser.map identity)

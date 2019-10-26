@@ -5,7 +5,8 @@ module Pages.Settings.Notifications exposing
     , page
     )
 
-import Application
+import Application.Page as Application
+import Global
 import Html exposing (..)
 
 
@@ -21,7 +22,6 @@ type alias Route =
     ()
 
 
-page : Application.Page Route Model Msg model msg
 page =
     Application.static
         { view = view

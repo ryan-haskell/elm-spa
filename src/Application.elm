@@ -1,12 +1,5 @@
 module Application exposing
     ( Application, create
-    , Layout
-    , Page, Recipe
-    , Routes, Init, Bundle, keep
-    , Static, static
-    , Sandbox, sandbox
-    , Element, element
-    , Glue, Pages, glue
     , Transition, fade, none
     )
 
@@ -23,48 +16,32 @@ module Application exposing
 @docs Layout
 
 
-## Pages
-
-@docs Page, Recipe
-
-@docs Routes, Init, Bundle, keep
-
-@docs Static, static
-
-@docs Sandbox, sandbox
-
-@docs Element, element
-
-@docs Glue, Pages, glue
-
-
 ## Transitions
 
 @docs Transition, fade, none
 
 -}
 
+import Application.Page as Page
+import Application.Route as Route
 import Browser
 import Browser.Dom as Dom
 import Browser.Navigation as Nav
 import Html exposing (Html)
-import Internals.Layout as Layout
-import Internals.Page as Page
-import Internals.Route as Route
 import Internals.Transition as Transition
 import Internals.Transitionable as Transitionable exposing (Transitionable)
 import Internals.Utils as Utils
 import Task
 import Url exposing (Url)
-import Url.Parser as Parser exposing (Parser)
+import Url.Parser as Parser
 
 
 
 -- APPLICATION
 
 
-type alias Application flags globalModel globalMsg model msg =
-    Platform.Program flags (Model flags globalModel model) (Msg globalMsg msg)
+type alias Application flags globalModel globalMsg layoutModel layoutMsg =
+    Platform.Program flags (Model flags globalModel layoutModel) (Msg globalMsg layoutMsg)
 
 
 create :
@@ -78,16 +55,20 @@ create :
         , subscriptions : globalModel -> Sub globalMsg
         }
     , layout :
-        { view : { page : Html msg } -> Html msg
-        , transition : Transition (Html msg)
+        { transition : Transition (Html (Msg globalMsg layoutMsg))
+        , view :
+            { page : Html (Msg globalMsg layoutMsg)
+            , global : globalModel
+            }
+            -> Html (Msg globalMsg layoutMsg)
         }
     , pages :
-        { init : route -> Init model msg
-        , update : msg -> model -> ( model, Cmd msg )
-        , bundle : model -> Bundle msg
+        { init : route -> Page.Init layoutModel layoutMsg globalModel globalMsg
+        , update : layoutMsg -> layoutModel -> Page.Update layoutModel layoutMsg globalModel globalMsg
+        , bundle : layoutModel -> Page.Bundle layoutMsg globalModel globalMsg (Msg globalMsg layoutMsg)
         }
     }
-    -> Application flags globalModel globalMsg model msg
+    -> Application flags globalModel globalMsg layoutModel layoutMsg
 create config =
     Browser.application
         { init =
@@ -111,17 +92,35 @@ create config =
                 }
         , subscriptions =
             subscriptions
-                { subscriptions = config.pages.bundle >> .subscriptions
+                { bundle = config.pages.bundle
                 }
         , view =
             view
-                { view = config.pages.bundle >> .view
-                , layout = config.layout
+                { bundle = config.pages.bundle
+                , layout = config.layout.view
                 , transition = Transition.strategy config.layout.transition
                 }
         , onUrlChange = Url
         , onUrlRequest = Link
         }
+
+
+type alias Layout globalModel globalMsg layoutMsg =
+    { page : Html (Msg globalMsg layoutMsg)
+    , global : globalModel
+    , fromGlobal : globalMsg -> Msg globalMsg layoutMsg
+    }
+    -> Html (Msg globalMsg layoutMsg)
+
+
+private :
+    { fromGlobalMsg : globalMsg -> Msg globalMsg layoutMsg
+    , fromPageMsg : layoutMsg -> Msg globalMsg layoutMsg
+    }
+private =
+    { fromGlobalMsg = Global
+    , fromPageMsg = Page
+    }
 
 
 
@@ -159,22 +158,24 @@ init :
     { fromUrl : Url -> route
     , init :
         { global : flags -> ( globalModel, Cmd globalMsg )
-        , pages : route -> Init model msg
+        , pages : route -> Page.Init layoutModel layoutMsg globalModel globalMsg
         }
     , speed : Int
     }
     -> flags
     -> Url
     -> Nav.Key
-    -> ( Model flags globalModel model, Cmd (Msg globalMsg msg) )
+    -> ( Model flags globalModel layoutModel, Cmd (Msg globalMsg layoutMsg) )
 init config flags url key =
     url
         |> config.fromUrl
-        |> config.init.pages
-        |> (\( pageModel, pageCmd ) ->
+        |> (\route ->
                 let
                     ( globalModel, globalCmd ) =
                         config.init.global flags
+
+                    ( pageModel, pageCmd, pageGlobalCmd ) =
+                        config.init.pages route globalModel
                 in
                 ( { flags = flags
                   , urls = { previous = Nothing, current = url }
@@ -186,6 +187,7 @@ init config flags url key =
                 , Cmd.batch
                     [ handleJumpLinks url pageCmd
                     , Cmd.map Global globalCmd
+                    , Cmd.map Global pageGlobalCmd
                     , Utils.delay config.speed TransitionComplete
                     ]
                 )
@@ -230,16 +232,16 @@ type Msg globalMsg msg
 
 update :
     { fromUrl : Url -> route
-    , init : route -> Init model msg
+    , init : route -> Page.Init layoutModel layoutMsg globalModel globalMsg
     , update :
         { global : globalMsg -> globalModel -> ( globalModel, Cmd globalMsg )
-        , pages : msg -> model -> ( model, Cmd msg )
+        , pages : layoutMsg -> layoutModel -> Page.Update layoutModel layoutMsg globalModel globalMsg
         }
     , speed : Int
     }
-    -> Msg globalMsg msg
-    -> Model flags globalModel model
-    -> ( Model flags globalModel model, Cmd (Msg globalMsg msg) )
+    -> Msg globalMsg layoutMsg
+    -> Model flags globalModel layoutModel
+    -> ( Model flags globalModel layoutModel, Cmd (Msg globalMsg layoutMsg) )
 update config msg model =
     case msg of
         ScrollComplete ->
@@ -279,8 +281,8 @@ update config msg model =
         Url url ->
             url
                 |> config.fromUrl
-                |> config.init
-                |> (\( pageModel, pageCmd ) ->
+                |> (\route -> config.init route model.global)
+                |> (\( pageModel, pageCmd, globalCmd ) ->
                         ( { model
                             | urls =
                                 { previous = Just model.urls.current
@@ -289,7 +291,10 @@ update config msg model =
                             , page = Transitionable.Complete pageModel
                             , speed = config.speed
                           }
-                        , handleJumpLinks url pageCmd
+                        , Cmd.batch
+                            [ handleJumpLinks url pageCmd
+                            , Cmd.map Global globalCmd
+                            ]
                         )
                    )
 
@@ -300,10 +305,15 @@ update config msg model =
                 (config.update.global globalMsg model.global)
 
         Page pageMsg ->
-            Tuple.mapBoth
-                (\page -> { model | page = Transitionable.Complete page })
-                (Cmd.map Page)
-                (config.update.pages pageMsg (Transitionable.unwrap model.page))
+            config.update.pages pageMsg (Transitionable.unwrap model.page) model.global
+                |> (\( page, cmd, globalCmd ) ->
+                        ( { model | page = Transitionable.Complete page }
+                        , Cmd.batch
+                            [ Cmd.map Page cmd
+                            , Cmd.map Global globalCmd
+                            ]
+                        )
+                   )
 
 
 navigatingWithinLayout : { old : Url, new : Url } -> Bool
@@ -326,11 +336,12 @@ navigatingWithinLayout urls =
 
 
 subscriptions :
-    { subscriptions : model -> Sub msg }
-    -> Model flags globalModel model
-    -> Sub (Msg globalMsg msg)
+    { bundle : layoutModel -> Page.Bundle layoutMsg globalModel globalMsg (Msg globalMsg layoutMsg)
+    }
+    -> Model flags globalModel layoutModel
+    -> Sub (Msg globalMsg layoutMsg)
 subscriptions config model =
-    Sub.map Page (config.subscriptions (Transitionable.unwrap model.page))
+    (config.bundle (Transitionable.unwrap model.page) model.global private).subscriptions
 
 
 
@@ -338,117 +349,50 @@ subscriptions config model =
 
 
 view :
-    { view : model -> Html msg
-    , transition : Transition.Strategy (Html msg)
-    , layout : Layout msg
+    { bundle : layoutModel -> Page.Bundle layoutMsg globalModel globalMsg (Msg globalMsg layoutMsg)
+    , transition : Transition.Strategy (Html (Msg globalMsg layoutMsg))
+    , layout :
+        { page : Html (Msg globalMsg layoutMsg)
+        , global : globalModel
+        }
+        -> Html (Msg globalMsg layoutMsg)
     }
-    -> Model flags globalModel model
-    -> Browser.Document (Msg globalMsg msg)
+    -> Model flags globalModel layoutModel
+    -> Browser.Document (Msg globalMsg layoutMsg)
 view config model =
+    let
+        fromPage :
+            layoutModel
+            ->
+                { layout :
+                    { page : Html (Msg globalMsg layoutMsg)
+                    }
+                    -> Html (Msg globalMsg layoutMsg)
+                , page : Html (Msg globalMsg layoutMsg)
+                }
+        fromPage layoutModel =
+            let
+                page : Html (Msg globalMsg layoutMsg)
+                page =
+                    (config.bundle layoutModel model.global private).view
+            in
+            { layout = \data -> config.layout { page = data.page, global = model.global }
+            , page = page
+            }
+    in
     { title = "elm-app demo"
     , body =
-        [ Html.map Page <|
-            case model.page of
-                Transitionable.Ready page ->
-                    config.transition.beforeLoad
-                        { layout = config.layout.view
-                        , page = config.view page
-                        }
+        [ case model.page of
+            Transitionable.Ready layoutModel ->
+                config.transition.beforeLoad (fromPage layoutModel)
 
-                Transitionable.Transitioning page ->
-                    config.transition.leavingPage
-                        { layout = config.layout.view
-                        , page = config.view page
-                        }
+            Transitionable.Transitioning layoutModel ->
+                config.transition.leavingPage (fromPage layoutModel)
 
-                Transitionable.Complete page ->
-                    config.transition.enteringPage
-                        { layout = config.layout.view
-                        , page = config.view page
-                        }
+            Transitionable.Complete layoutModel ->
+                config.transition.enteringPage (fromPage layoutModel)
         ]
     }
-
-
-
--- Layouts
-
-
-type alias Layout msg =
-    Layout.Layout msg
-
-
-
--- PAGE API
-
-
-type alias Page pageRoute pageModel pageMsg model msg =
-    Page.Page pageRoute pageModel pageMsg model msg
-
-
-type alias Recipe pageRoute pageModel pageMsg model msg =
-    Page.Recipe pageRoute pageModel pageMsg model msg
-
-
-type alias Init model msg =
-    Page.Init model msg
-
-
-type alias Bundle msg =
-    Page.Bundle msg
-
-
-keep : model -> ( model, Cmd msg )
-keep model =
-    ( model, Cmd.none )
-
-
-type alias Static =
-    Page.Static
-
-
-static :
-    Static
-    -> Page pageRoute () Never model msg
-static =
-    Page.static
-
-
-type alias Sandbox pageRoute pageModel pageMsg =
-    Page.Sandbox pageRoute pageModel pageMsg
-
-
-sandbox :
-    Sandbox pageRoute pageModel pageMsg
-    -> Page pageRoute pageModel pageMsg model msg
-sandbox =
-    Page.sandbox
-
-
-type alias Element pageRoute pageModel pageMsg =
-    Page.Element pageRoute pageModel pageMsg
-
-
-element :
-    Element pageRoute pageModel pageMsg
-    -> Page pageRoute pageModel pageMsg model msg
-element =
-    Page.element
-
-
-type alias Glue pageRoute layoutModel layoutMsg =
-    Page.Glue pageRoute layoutModel layoutMsg
-
-
-type alias Pages pageRoute layoutModel layoutMsg =
-    Page.Pages pageRoute layoutModel layoutMsg
-
-
-glue :
-    Glue pageRoute layoutModel layoutMsg
-    -> Page pageRoute layoutModel layoutMsg model msg
-glue =
-    Page.glue
 
 
 

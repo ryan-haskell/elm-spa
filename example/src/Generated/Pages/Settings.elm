@@ -6,8 +6,9 @@ module Generated.Pages.Settings exposing
     , routes
     )
 
-import Application
+import Application.Page as Application
 import Application.Route as Route
+import Global
 import Html exposing (..)
 import Layouts.Settings
 import Pages.Settings.Account as Account
@@ -33,10 +34,10 @@ type Msg
     | UserMsg User.Msg
 
 
-page : Application.Page Route Model Msg model msg
+page : Application.Page Route Model Msg a b Global.Model Global.Msg c
 page =
-    Application.glue
-        { layout = Layouts.Settings.layout
+    Application.layout
+        { view = Layouts.Settings.layout.view
         , pages =
             { init = init
             , update = update
@@ -45,7 +46,7 @@ page =
         }
 
 
-routes : Application.Routes Route
+routes : List (Route.Route Route)
 routes =
     [ Route.path "account" AccountRoute
     , Route.path "notifications" NotificationsRoute
@@ -53,7 +54,7 @@ routes =
     ]
 
 
-account : Application.Recipe Account.Route Account.Model Account.Msg Model Msg
+account : Application.Recipe Account.Route Account.Model Account.Msg Model Msg Global.Model Global.Msg a
 account =
     Account.page
         { toModel = AccountModel
@@ -61,7 +62,7 @@ account =
         }
 
 
-notifications : Application.Recipe Notifications.Route Notifications.Model Notifications.Msg Model Msg
+notifications : Application.Recipe Notifications.Route Notifications.Model Notifications.Msg Model Msg Global.Model Global.Msg a
 notifications =
     Notifications.page
         { toModel = NotificationsModel
@@ -69,7 +70,7 @@ notifications =
         }
 
 
-user : Application.Recipe User.Route User.Model User.Msg Model Msg
+user : Application.Recipe User.Route User.Model User.Msg Model Msg Global.Model Global.Msg a
 user =
     User.page
         { toModel = UserModel
@@ -77,7 +78,7 @@ user =
         }
 
 
-init : Route -> Application.Init Model Msg
+init : Route -> Application.Init Model Msg Global.Model Global.Msg
 init route_ =
     case route_ of
         AccountRoute route ->
@@ -90,7 +91,7 @@ init route_ =
             user.init route
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
+update : Msg -> Model -> Application.Update Model Msg Global.Model Global.Msg
 update msg_ model_ =
     case ( msg_, model_ ) of
         ( AccountMsg msg, AccountModel model ) ->
@@ -106,7 +107,7 @@ update msg_ model_ =
             Application.keep model_
 
 
-bundle : Model -> Application.Bundle Msg
+bundle : Model -> Application.Bundle Msg Global.Model Global.Msg msg
 bundle model_ =
     case model_ of
         AccountModel model ->

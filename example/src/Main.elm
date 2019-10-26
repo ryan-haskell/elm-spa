@@ -18,7 +18,10 @@ main =
             , update = Global.update
             , subscriptions = Global.subscriptions
             }
-        , layout = Layouts.Main.layout
+        , layout =
+            { view = Layouts.Main.layout.view
+            , transition = Layouts.Main.layout.transition
+            }
         , pages =
             { init = Pages.init
             , update = Pages.update

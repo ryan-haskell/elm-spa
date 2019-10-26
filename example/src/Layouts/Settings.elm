@@ -1,18 +1,18 @@
 module Layouts.Settings exposing (layout)
 
 import Application
+import Global
 import Html exposing (..)
 import Html.Attributes exposing (href, style)
 
 
-layout : Application.Layout msg
 layout =
     { view = view
     , transition = Application.none
     }
 
 
-view : { page : Html msg } -> Html msg
+view : { page : Html msg, global : Global.Model } -> Html msg
 view { page } =
     div
         [ style "display" "flex", style "margin-top" "-1.25rem" ]

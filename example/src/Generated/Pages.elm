@@ -8,9 +8,10 @@ module Generated.Pages exposing
     , update
     )
 
-import Application
+import Application.Page as Page
 import Application.Route as Route
 import Generated.Pages.Settings as Settings
+import Global
 import Pages.Counter as Counter
 import Pages.Index as Index
 import Pages.NotFound as NotFound
@@ -31,7 +32,7 @@ type Route
     | SettingsRoute Settings.Route
 
 
-routes : Application.Routes Route
+routes : List (Route.Route Route)
 routes =
     [ Route.path "counter" CounterRoute
     , Route.index IndexRoute
@@ -68,7 +69,7 @@ type Msg
 -- RECIPES
 
 
-counter : Application.Recipe Counter.Route Counter.Model Counter.Msg Model Msg
+counter : Page.Recipe Counter.Route Counter.Model Counter.Msg Model Msg Global.Model Global.Msg a
 counter =
     Counter.page
         { toModel = CounterModel
@@ -76,7 +77,7 @@ counter =
         }
 
 
-index : Application.Recipe Index.Route Index.Model Index.Msg Model Msg
+index : Page.Recipe Index.Route Index.Model Index.Msg Model Msg Global.Model Global.Msg a
 index =
     Index.page
         { toModel = IndexModel
@@ -84,7 +85,7 @@ index =
         }
 
 
-notFound : Application.Recipe NotFound.Route NotFound.Model NotFound.Msg Model Msg
+notFound : Page.Recipe NotFound.Route NotFound.Model NotFound.Msg Model Msg Global.Model Global.Msg a
 notFound =
     NotFound.page
         { toModel = NotFoundModel
@@ -92,7 +93,7 @@ notFound =
         }
 
 
-random : Application.Recipe Random.Route Random.Model Random.Msg Model Msg
+random : Page.Recipe Random.Route Random.Model Random.Msg Model Msg Global.Model Global.Msg a
 random =
     Random.page
         { toModel = RandomModel
@@ -100,7 +101,7 @@ random =
         }
 
 
-signIn : Application.Recipe SignIn.Route SignIn.Model SignIn.Msg Model Msg
+signIn : Page.Recipe SignIn.Route SignIn.Model SignIn.Msg Model Msg Global.Model Global.Msg a
 signIn =
     SignIn.page
         { toModel = SignInModel
@@ -108,7 +109,7 @@ signIn =
         }
 
 
-settings : Application.Recipe Settings.Route Settings.Model Settings.Msg Model Msg
+settings : Page.Recipe Settings.Route Settings.Model Settings.Msg Model Msg Global.Model Global.Msg a
 settings =
     Settings.page
         { toModel = SettingsModel
@@ -120,7 +121,7 @@ settings =
 -- INIT
 
 
-init : Route -> Application.Init Model Msg
+init : Route -> Page.Init Model Msg Global.Model Global.Msg
 init route_ =
     case route_ of
         CounterRoute route ->
@@ -146,7 +147,7 @@ init route_ =
 -- UPDATE
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
+update : Msg -> Model -> Page.Update Model Msg Global.Model Global.Msg
 update msg_ model_ =
     case ( msg_, model_ ) of
         ( CounterMsg msg, CounterModel model ) ->
@@ -166,14 +167,16 @@ update msg_ model_ =
 
         ( SettingsMsg msg, SettingsModel model ) ->
             settings.update msg model
+
         _ ->
-            Application.keep model_
+            Page.keep model_
+
 
 
 -- BUNDLE
 
 
-bundle : Model -> Application.Bundle Msg
+bundle : Model -> Page.Bundle Msg Global.Model Global.Msg a
 bundle model_ =
     case model_ of
         CounterModel model ->

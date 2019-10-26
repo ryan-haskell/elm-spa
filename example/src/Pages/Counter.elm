@@ -5,7 +5,7 @@ module Pages.Counter exposing
     , page
     )
 
-import Application
+import Application.Page as Application
 import Html exposing (..)
 import Html.Attributes as Attr
 import Html.Events as Events
@@ -25,7 +25,6 @@ type alias Route =
     ()
 
 
-page : Application.Page Route Model Msg model msg
 page =
     Application.sandbox
         { init = always init
