@@ -337,13 +337,8 @@ update config msg model =
 
 navigate : (route -> String) -> Url -> route -> Cmd (Msg globalMsg layoutMsg)
 navigate toPath url route =
-    toCmd <|
+    Utils.send <|
         Link (Browser.Internal { url | path = toPath route })
-
-
-toCmd : msg -> Cmd msg
-toCmd =
-    Task.succeed >> Task.perform identity
 
 
 navigatingWithinLayout : { old : Url, new : Url } -> Bool
