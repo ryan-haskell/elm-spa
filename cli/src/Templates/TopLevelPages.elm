@@ -1,6 +1,7 @@
 module Templates.TopLevelPages exposing (contents)
 
 import Item exposing (Item)
+import Templates.Shared as Shared
 
 
 contents : List Item -> String
@@ -14,157 +15,41 @@ contents items =
     )
 
 import Application.Page as Page
-import Generated.Pages.Settings as Settings
-import Generated.Pages.Users as Users
+{{folderImports}}
 import Generated.Route as Route exposing (Route)
 import Global
-import Pages.Counter as Counter
-import Pages.Index as Index
-import Pages.NotFound as NotFound
-import Pages.Random as Random
-import Pages.SignIn as SignIn
+{{fileImports}}
 
 
 
 -- MODEL & MSG
 
 
-type Model
-    = CounterModel Counter.Model
-    | IndexModel Index.Model
-    | NotFoundModel NotFound.Model
-    | RandomModel Random.Model
-    | SignInModel SignIn.Model
-    | SettingsModel Settings.Model
-    | UsersModel Users.Model
+{{models}}
 
 
-type Msg
-    = CounterMsg Counter.Msg
-    | IndexMsg Index.Msg
-    | NotFoundMsg NotFound.Msg
-    | RandomMsg Random.Msg
-    | SignInMsg SignIn.Msg
-    | SettingsMsg Settings.Msg
-    | UsersMsg Users.Msg
+{{msgs}}
 
 
 
 -- RECIPES
 
 
-counter : Page.Recipe Route.CounterParams Counter.Model Counter.Msg Model Msg Global.Model Global.Msg a
-counter =
-    Counter.page
-        { toModel = CounterModel
-        , toMsg = CounterMsg
-        }
-
-
-index : Page.Recipe Route.IndexParams Index.Model Index.Msg Model Msg Global.Model Global.Msg a
-index =
-    Index.page
-        { toModel = IndexModel
-        , toMsg = IndexMsg
-        }
-
-
-notFound : Page.Recipe Route.NotFoundParams NotFound.Model NotFound.Msg Model Msg Global.Model Global.Msg a
-notFound =
-    NotFound.page
-        { toModel = NotFoundModel
-        , toMsg = NotFoundMsg
-        }
-
-
-random : Page.Recipe Route.RandomParams Random.Model Random.Msg Model Msg Global.Model Global.Msg a
-random =
-    Random.page
-        { toModel = RandomModel
-        , toMsg = RandomMsg
-        }
-
-
-signIn : Page.Recipe Route.SignInParams SignIn.Model SignIn.Msg Model Msg Global.Model Global.Msg a
-signIn =
-    SignIn.page
-        { toModel = SignInModel
-        , toMsg = SignInMsg
-        }
-
-
-settings : Page.Recipe Route.SettingsParams Settings.Model Settings.Msg Model Msg Global.Model Global.Msg a
-settings =
-    Settings.page
-        { toModel = SettingsModel
-        , toMsg = SettingsMsg
-        }
-
-
-users : Page.Recipe Route.UsersParams Users.Model Users.Msg Model Msg Global.Model Global.Msg a
-users =
-    Users.page
-        { toModel = UsersModel
-        , toMsg = UsersMsg
-        }
+{{recipes}}
 
 
 
 -- INIT
 
 
-init : Route -> Page.Init Model Msg Global.Model Global.Msg
-init route_ =
-    case route_ of
-        Route.Counter route ->
-            counter.init route
-
-        Route.Index route ->
-            index.init route
-
-        Route.NotFound route ->
-            notFound.init route
-
-        Route.Random route ->
-            random.init route
-
-        Route.SignIn route ->
-            signIn.init route
-
-        Route.Settings route ->
-            settings.init route
-
-        Route.Users route ->
-            users.init route
+{{init}}
 
 
 
 -- UPDATE
 
 
-update : Msg -> Model -> Page.Update Model Msg Global.Model Global.Msg
-update msg_ model_ =
-    case ( msg_, model_ ) of
-        ( CounterMsg msg, CounterModel model ) ->
-            counter.update msg model
-
-        ( IndexMsg msg, IndexModel model ) ->
-            index.update msg model
-
-        ( NotFoundMsg msg, NotFoundModel model ) ->
-            notFound.update msg model
-
-        ( RandomMsg msg, RandomModel model ) ->
-            random.update msg model
-
-        ( SignInMsg msg, SignInModel model ) ->
-            signIn.update msg model
-
-        ( SettingsMsg msg, SettingsModel model ) ->
-            settings.update msg model
-
-        ( UsersMsg msg, UsersModel model ) ->
-            users.update msg model
+{{update}}
 
         _ ->
             Page.keep model_
@@ -174,28 +59,209 @@ update msg_ model_ =
 -- BUNDLE
 
 
-bundle : Model -> Page.Bundle Msg Global.Model Global.Msg a
-bundle model_ =
-    case model_ of
-        CounterModel model ->
-            counter.bundle model
-
-        IndexModel model ->
-            index.bundle model
-
-        NotFoundModel model ->
-            notFound.bundle model
-
-        RandomModel model ->
-            random.bundle model
-
-        SignInModel model ->
-            signIn.bundle model
-
-        SettingsModel model ->
-            settings.bundle model
-
-        UsersModel model ->
-            users.bundle model
+{{bundle}}
 
 """
+        |> String.replace "{{fileImports}}" (fileImports items)
+        |> String.replace "{{folderImports}}" (folderImports items)
+        |> String.replace "{{models}}" (Shared.customTypes "Model" items)
+        |> String.replace "{{msgs}}" (Shared.customTypes "Msg" items)
+        |> String.replace "{{recipes}}" (recipes items)
+        |> String.replace "{{init}}"
+            (topLevelFunction
+                { name = "init"
+                , types =
+                    { input = "Route"
+                    , output = "Page.Init Model Msg Global.Model Global.Msg"
+                    }
+                , inputs = "route_"
+                , caseExpression =
+                    { value = "route_"
+                    , condition = \name -> String.concat [ "Route.", name, " route" ]
+                    , result = \name -> String.concat [ camelCase name, ".init route" ]
+                    }
+                }
+                items
+            )
+        |> String.replace "{{update}}"
+            (topLevelFunction
+                { name = "update"
+                , types =
+                    { input = "Msg -> Model"
+                    , output = "Page.Update Model Msg Global.Model Global.Msg"
+                    }
+                , inputs = "msg_ model_"
+                , caseExpression =
+                    { value = "( msg_, model_ )"
+                    , condition = \name -> String.concat [ "( ", name, "Msg msg, ", name, "Model model )" ]
+                    , result = \name -> String.concat [ camelCase name, ".update msg model" ]
+                    }
+                }
+                items
+            )
+        |> String.replace "{{bundle}}"
+            (topLevelFunction
+                { name = "bundle"
+                , types =
+                    { input = "Model"
+                    , output = "Page.Bundle Msg Global.Model Global.Msg a"
+                    }
+                , inputs = "model_"
+                , caseExpression =
+                    { value = "model_"
+                    , condition = \name -> String.concat [ name, "Model model" ]
+                    , result = \name -> String.concat [ camelCase name, ".bundle model" ]
+                    }
+                }
+                items
+            )
+
+
+{-| fileImports
+
+    import Pages.Counter as Counter
+    import Pages.Index as Index
+    import Pages.NotFound as NotFound
+    import Pages.Random as Random
+    import Pages.SignIn as SignIn
+
+-}
+fileImports : List Item -> String
+fileImports items =
+    Item.files items
+        |> List.map (\file -> String.concat [ "import Pages.", file.name, " as ", file.name ])
+        |> String.join "\n"
+
+
+{-| folderImports
+
+    import Generated.Pages.Settings as Settings
+    import Generated.Pages.Users as Users
+
+-}
+folderImports : List Item -> String
+folderImports items =
+    Item.folders items
+        |> List.map (\folder -> String.concat [ "import Generated.Pages.", folder.name, " as ", folder.name ])
+        |> String.join "\n"
+
+
+recipes : List Item -> String
+recipes items =
+    items
+        |> List.map Item.name
+        |> List.map recipe
+        |> String.join "\n\n\n"
+
+
+{-| recipe "Counter"
+
+    counter : Page.Recipe Route.CounterParams Counter.Model Counter.Msg Model Msg Global.Model Global.Msg msg
+    counter =
+        Counter.page
+            { toModel = CounterModel
+            , toMsg = CounterMsg
+            }
+
+-}
+recipe : String -> String
+recipe name =
+    """{{camelCase}} : Page.Recipe Route.{{name}}Params {{name}}.Model {{name}}.Msg Model Msg Global.Model Global.Msg msg
+{{camelCase}} =
+    {{name}}.page
+        { toModel = {{name}}Model
+        , toMsg = {{name}}Msg
+        }"""
+        |> String.replace "{{camelCase}}" (camelCase name)
+        |> String.replace "{{name}}" name
+
+
+{-| camelCase "NotFound"
+
+    "notFound"
+
+-}
+camelCase : String -> String
+camelCase name =
+    case String.toList name of
+        first :: rest ->
+            String.fromList (Char.toLower first :: rest)
+
+        _ ->
+            name
+
+
+type alias TopLevelFunctionOptions =
+    { name : String
+    , types :
+        { input : String
+        , output : String
+        }
+    , inputs : String
+    , caseExpression : CaseExpression
+    }
+
+
+type alias CaseExpression =
+    { value : String
+    , condition : String -> String
+    , result : String -> String
+    }
+
+
+{-| topLevelFunction
+
+    topLevelFunction
+        { name = "update"
+        , types =
+            { input = "Msg -> Model"
+            , output = "Page.Update Model Msg Global.Model Global.Msg"
+            }
+        , inputs = "msg_ model_"
+        , caseExpression =
+            { value = "( msg_, model_ )"
+            , condition = \name -> String.concat [ "( ", name, "Msg msg, ", name, "Model model )" ]
+            , result = \name -> String.concat [ camelCase name, ".update msg model" ]
+            }
+        }
+        [ "Counter", "Index", "NotFound" ]
+
+    update : Msg -> Model -> Page.Update Model Msg Global.Model Global.Msg
+    update msg_ model_ =
+        case ( msg_, model_ ) of
+            ( CounterMsg msg, CounterModel model ) ->
+                counter.update msg model
+
+            ( IndexMsg msg, IndexModel model ) ->
+                index.update msg model
+
+            ( NotFoundMsg msg, NotFoundModel model ) ->
+                notFound.update msg model
+
+-}
+topLevelFunction : TopLevelFunctionOptions -> List Item -> String
+topLevelFunction options items =
+    """{{name}} : {{types.input}} -> {{types.output}}
+{{name}} {{inputs}} =
+    case {{caseExpression.value}} of
+        {{conditions}}"""
+        |> String.replace "{{name}}" options.name
+        |> String.replace "{{types.input}}" options.types.input
+        |> String.replace "{{types.output}}" options.types.output
+        |> String.replace "{{inputs}}" options.inputs
+        |> String.replace "{{caseExpression.value}}" options.caseExpression.value
+        |> String.replace "{{conditions}}" (conditions options.caseExpression items)
+
+
+conditions : CaseExpression -> List Item -> String
+conditions caseExpression items =
+    items
+        |> List.map Item.name
+        |> List.map
+            (\name ->
+                """{{condition}} ->
+            {{result}}"""
+                    |> String.replace "{{condition}}" (caseExpression.condition name)
+                    |> String.replace "{{result}}" (caseExpression.result name)
+            )
+        |> String.join "\n\n        "

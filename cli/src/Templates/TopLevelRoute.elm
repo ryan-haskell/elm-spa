@@ -1,100 +1,178 @@
 module Templates.TopLevelRoute exposing (contents)
 
 import Item exposing (Item)
+import Templates.Shared as Shared
 
 
 contents : List Item -> String
 contents items =
     """module Generated.Route exposing
-    ( CounterParams
-    , IndexParams
-    , NotFoundParams
-    , RandomParams
-    , Route(..)
-    , SettingsParams
-    , SignInParams
-    , UsersParams
+    ( Route(..)
     , routes
     , toPath
+    , {{exports}}
     )
 
+{-|
+
+@docs Route
+@docs routes
+@docs toPath
+
+-}
+
 import Application.Route as Route
-import Generated.Route.Settings as Settings
-import Generated.Route.Users as Users
+{{folderImports}}
 
 
-type alias CounterParams =
-    ()
+{{fileParams}}
 
 
-type alias IndexParams =
-    ()
+{{folderParams}}
 
-
-type alias NotFoundParams =
-    ()
-
-
-type alias RandomParams =
-    ()
-
-
-type alias SignInParams =
-    ()
-
-
-type alias SettingsParams =
-    Settings.Route
-
-
-type alias UsersParams =
-    Users.Route
-
-
-type Route
-    = Counter CounterParams
-    | Index IndexParams
-    | NotFound NotFoundParams
-    | Random RandomParams
-    | SignIn SignInParams
-    | Settings SettingsParams
-    | Users UsersParams
+ 
+{{routeTypes}}
 
 
 routes : List (Route.Route Route)
 routes =
-    [ Route.path "counter" Counter
-    , Route.index Index
-    , Route.path "not-found" NotFound
-    , Route.path "random" Random
-    , Route.path "sign-in" SignIn
-    , Route.folder "settings" Settings Settings.routes
-    , Route.folder "users" Users Users.routes
+    [ {{routes}}
     ]
 
 
 toPath : Route -> String
 toPath route =
     case route of
-        Counter _ ->
-            "/counter"
-
-        Index _ ->
-            "/"
-
-        NotFound _ ->
-            "/not-found"
-
-        Random _ ->
-            "/random"
-
-        SignIn _ ->
-            "/sign-in"
-
-        Settings route_ ->
-            "/settings" ++ Settings.toPath route_
-
-        Users route_ ->
-            "/users" ++ Users.toPath route_
+        {{toPath}}
 
 """
+        |> String.replace "{{exports}}" (exports items)
+        |> String.replace "{{folderImports}}" (folderImports items)
+        |> String.replace "{{fileParams}}" (fileParams items)
+        |> String.replace "{{folderParams}}" (folderParams items)
+        |> String.replace "{{routeTypes}}"
+            (Shared.specialCustomTypes
+                { first = "Route"
+                , second = ""
+                , third = "Params"
+                }
+                items
+            )
+        |> String.replace "{{routes}}" (routes items)
+        |> String.replace "{{toPath}}" (toPath items)
+
+
+exports : List Item -> String
+exports items =
+    items
+        |> List.map Item.name
+        |> List.map (\name -> String.concat [ name, "Params" ])
+        |> String.join "\n    , "
+
+
+folderImports : List Item -> String
+folderImports items =
+    Item.folders items
+        |> List.map (\{ name } -> String.concat [ "import Generated.Route.", name, " as ", name ])
+        |> String.join "\n"
+
+
+fileParams : List Item -> String
+fileParams items =
+    Item.files items
+        |> List.map
+            (\{ name } ->
+                String.concat
+                    [ "type alias "
+                    , name
+                    , "Params =\n    "
+                    , if name == "Slug" then
+                        "String"
+
+                      else
+                        "()"
+                    ]
+            )
+        |> String.join "\n\n\n"
+
+
+folderParams : List Item -> String
+folderParams items =
+    Item.folders items
+        |> List.map
+            (\{ name } ->
+                String.concat
+                    [ "type alias "
+                    , name
+                    , "Params =\n    "
+                    , name
+                    , ".Route"
+                    ]
+            )
+        |> String.join "\n\n\n"
+
+
+routes : List Item -> String
+routes items =
+    List.concat
+        [ Item.files items
+            |> List.map
+                (\{ name } ->
+                    if name == "Index" then
+                        "Route.index Index"
+
+                    else
+                        String.concat [ "Route.path \"", path name, "\" ", name ]
+                )
+        , Item.folders items
+            |> List.map (\{ name } -> String.concat [ "Route.folder \"", path name, "\" ", name, " ", name, ".routes" ])
+        ]
+        |> String.join "\n    , "
+
+
+path : String -> String
+path name =
+    name
+        |> String.toList
+        |> List.map
+            (\c ->
+                if Char.isUpper c then
+                    "-" ++ String.fromChar c
+
+                else
+                    String.fromChar c
+            )
+        |> (String.concat >> String.dropLeft 1 >> String.toLower)
+
+
+toPath : List Item -> String
+toPath items =
+    List.concat
+        [ Item.files items
+            |> List.map
+                (\{ name } ->
+                    if name == "Index" then
+                        "Index _ ->\n            \"/\""
+
+                    else
+                        String.concat
+                            [ name
+                            , " _ ->\n            \"/"
+                            , path name
+                            , "\""
+                            ]
+                )
+        , Item.folders items
+            |> List.map
+                (\{ name } ->
+                    String.concat
+                        [ name
+                        , " route_ ->\n            \"/"
+                        , path name
+                        , "\" ++ "
+                        , name
+                        , ".toPath route_"
+                        ]
+                )
+        ]
+        |> String.join "\n\n        "

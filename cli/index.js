@@ -18,17 +18,19 @@ const generate = ([ relative = '.' ] = []) =>
   dir(path.join(cwd, relative, 'src', 'Pages'))
     .then(passToElm)
     .then(utils.all(writeToFolder(path.join(cwd, relative, 'src'))))
-    .then(files =>
-      console.info(`\n${utils.bold('elm-spa generated:')}\n${files.map(file => `${utils.bold(' 🌳 ')} ${file}`).join('\n')}\n`)
-    )
+    .then(files => {
+      const lines = files.map(file => `${utils.bold(' 🌳 ')} ${file}`).join('\n')
+      console.info(`${utils.bold('elm-spa generated:')}\n${lines}\n`)
+    })
     .catch(console.error)
 
 const dir = (filepath) => {
   const tag = (item) =>
     item.endsWith('.elm')
       ? Promise.resolve({ type: 'file', name: item })
-      : dir(path.join(filepath, item))
-          .then(children => ({ type: 'folder', name: item, children }))
+      : dir(path.join(filepath, item)).then(children =>
+          ({ type: 'folder', name: item, children })
+        )
 
   return new Promise((resolve, reject)=>
     fs.readdir(filepath, (err, files) => err ? reject(err) : resolve(files))
