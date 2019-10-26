@@ -119,31 +119,16 @@ init appRoute =
 
 ### the folder structure
 
-```
+- [Example](./example/src)
+
+```elm
 src/
-    Api/
-        Users.elm
-        (...)
-    Components/
-        Navbar.elm
-        (...)
-    Data/
-        User.elm
-        (...)
-    Layouts/
-        Main.elm
-        Settings.elm
-        (...)
-    Pages/
-        Index.elm
-        Counter.elm
-        Settings/
-            Account.elm
-            (...)
-        (...)
-    Utils/
-        Cmd.elm
-        (...)
-    Main.elm
-    Global.elm
+  Api/        -- for backend things
+  Components/ -- reusable ui
+  Data/       -- types used everywhere
+  Layouts/    -- shared views
+  Pages/      -- all your pages
+  Utils/      -- helpers
+  Global.elm  -- shared app state
+  Main.elm    -- the entrypoint
 ```
