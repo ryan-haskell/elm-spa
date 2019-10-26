@@ -1,46 +1,20 @@
 module Generated.Pages exposing
     ( Model
     , Msg
-    , Route(..)
     , bundle
     , init
-    , routes
     , update
     )
 
 import Application.Page as Page
-import Application.Route as Route
 import Generated.Pages.Settings as Settings
+import Generated.Route as Route exposing (Route)
 import Global
 import Pages.Counter as Counter
 import Pages.Index as Index
 import Pages.NotFound as NotFound
 import Pages.Random as Random
 import Pages.SignIn as SignIn
-
-
-
--- ROUTES
-
-
-type Route
-    = CounterRoute Counter.Route
-    | IndexRoute Index.Route
-    | NotFoundRoute NotFound.Route
-    | RandomRoute Random.Route
-    | SignInRoute SignIn.Route
-    | SettingsRoute Settings.Route
-
-
-routes : List (Route.Route Route)
-routes =
-    [ Route.path "counter" CounterRoute
-    , Route.index IndexRoute
-    , Route.path "not-found" NotFoundRoute
-    , Route.path "random" RandomRoute
-    , Route.path "sign-in" SignInRoute
-    , Route.folder "settings" SettingsRoute Settings.routes
-    ]
 
 
 
@@ -69,7 +43,7 @@ type Msg
 -- RECIPES
 
 
-counter : Page.Recipe Counter.Route Counter.Model Counter.Msg Model Msg Global.Model Global.Msg a
+counter : Page.Recipe Route.CounterParams Counter.Model Counter.Msg Model Msg Global.Model Global.Msg a
 counter =
     Counter.page
         { toModel = CounterModel
@@ -77,7 +51,7 @@ counter =
         }
 
 
-index : Page.Recipe Index.Route Index.Model Index.Msg Model Msg Global.Model Global.Msg a
+index : Page.Recipe Route.IndexParams Index.Model Index.Msg Model Msg Global.Model Global.Msg a
 index =
     Index.page
         { toModel = IndexModel
@@ -85,7 +59,7 @@ index =
         }
 
 
-notFound : Page.Recipe NotFound.Route NotFound.Model NotFound.Msg Model Msg Global.Model Global.Msg a
+notFound : Page.Recipe Route.NotFoundParams NotFound.Model NotFound.Msg Model Msg Global.Model Global.Msg a
 notFound =
     NotFound.page
         { toModel = NotFoundModel
@@ -93,7 +67,7 @@ notFound =
         }
 
 
-random : Page.Recipe Random.Route Random.Model Random.Msg Model Msg Global.Model Global.Msg a
+random : Page.Recipe Route.RandomParams Random.Model Random.Msg Model Msg Global.Model Global.Msg a
 random =
     Random.page
         { toModel = RandomModel
@@ -101,7 +75,7 @@ random =
         }
 
 
-signIn : Page.Recipe SignIn.Route SignIn.Model SignIn.Msg Model Msg Global.Model Global.Msg a
+signIn : Page.Recipe Route.SignInParams SignIn.Model SignIn.Msg Model Msg Global.Model Global.Msg a
 signIn =
     SignIn.page
         { toModel = SignInModel
@@ -109,7 +83,7 @@ signIn =
         }
 
 
-settings : Page.Recipe Settings.Route Settings.Model Settings.Msg Model Msg Global.Model Global.Msg a
+settings : Page.Recipe Route.SettingsParams Settings.Model Settings.Msg Model Msg Global.Model Global.Msg a
 settings =
     Settings.page
         { toModel = SettingsModel
@@ -124,22 +98,22 @@ settings =
 init : Route -> Page.Init Model Msg Global.Model Global.Msg
 init route_ =
     case route_ of
-        CounterRoute route ->
+        Route.Counter route ->
             counter.init route
 
-        IndexRoute route ->
+        Route.Index route ->
             index.init route
 
-        NotFoundRoute route ->
+        Route.NotFound route ->
             notFound.init route
 
-        RandomRoute route ->
+        Route.Random route ->
             random.init route
 
-        SignInRoute route ->
+        Route.SignIn route ->
             signIn.init route
 
-        SettingsRoute route ->
+        Route.Settings route ->
             settings.init route
 
 
@@ -167,8 +141,10 @@ update msg_ model_ =
 
         ( SettingsMsg msg, SettingsModel model ) ->
             settings.update msg model
+
         _ ->
             Page.keep model_
+
 
 
 -- BUNDLE

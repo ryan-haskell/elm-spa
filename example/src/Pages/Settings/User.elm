@@ -1,7 +1,6 @@
 module Pages.Settings.User exposing
     ( Model
     , Msg
-    , Route
     , page
     )
 
@@ -15,10 +14,6 @@ type alias Model =
 
 type alias Msg =
     Never
-
-
-type alias Route =
-    ()
 
 
 page =

@@ -1,7 +1,6 @@
 module Pages.Counter exposing
     ( Model
     , Msg
-    , Route
     , page
     )
 
@@ -19,10 +18,6 @@ type alias Model =
 type Msg
     = Increment
     | Decrement
-
-
-type alias Route =
-    ()
 
 
 page =

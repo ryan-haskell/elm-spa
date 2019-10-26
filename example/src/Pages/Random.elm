@@ -1,7 +1,6 @@
 module Pages.Random exposing
     ( Model
     , Msg
-    , Route
     , page
     )
 
@@ -21,10 +20,6 @@ type alias Model =
 type Msg
     = FetchCat
     | CatResponded (Result Http.Error String)
-
-
-type alias Route =
-    ()
 
 
 page =

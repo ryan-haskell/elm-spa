@@ -2,6 +2,7 @@ module Main exposing (main)
 
 import Application exposing (Application)
 import Generated.Pages as Pages
+import Generated.Route as Route
 import Global
 import Layouts.Main
 
@@ -10,8 +11,8 @@ main : Application Global.Flags Global.Model Global.Msg Pages.Model Pages.Msg
 main =
     Application.create
         { routing =
-            { routes = Pages.routes
-            , notFound = Pages.NotFoundRoute ()
+            { routes = Route.routes
+            , notFound = Route.NotFound ()
             }
         , global =
             { init = Global.init

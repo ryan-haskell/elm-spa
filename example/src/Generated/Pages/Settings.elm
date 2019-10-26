@@ -1,25 +1,17 @@
 module Generated.Pages.Settings exposing
     ( Model
     , Msg
-    , Route
     , page
-    , routes
     )
 
 import Application.Page as Application
-import Application.Route as Route
+import Generated.Route.Settings as Route exposing (Route)
 import Global
 import Html exposing (..)
 import Layouts.Settings
 import Pages.Settings.Account as Account
 import Pages.Settings.Notifications as Notifications
 import Pages.Settings.User as User
-
-
-type Route
-    = AccountRoute Account.Route
-    | NotificationsRoute Notifications.Route
-    | UserRoute User.Route
 
 
 type Model
@@ -46,15 +38,7 @@ page =
         }
 
 
-routes : List (Route.Route Route)
-routes =
-    [ Route.path "account" AccountRoute
-    , Route.path "notifications" NotificationsRoute
-    , Route.path "user" UserRoute
-    ]
-
-
-account : Application.Recipe Account.Route Account.Model Account.Msg Model Msg Global.Model Global.Msg a
+account : Application.Recipe Route.AccountParams Account.Model Account.Msg Model Msg Global.Model Global.Msg a
 account =
     Account.page
         { toModel = AccountModel
@@ -62,7 +46,7 @@ account =
         }
 
 
-notifications : Application.Recipe Notifications.Route Notifications.Model Notifications.Msg Model Msg Global.Model Global.Msg a
+notifications : Application.Recipe Route.NotificationsParams Notifications.Model Notifications.Msg Model Msg Global.Model Global.Msg a
 notifications =
     Notifications.page
         { toModel = NotificationsModel
@@ -70,7 +54,7 @@ notifications =
         }
 
 
-user : Application.Recipe User.Route User.Model User.Msg Model Msg Global.Model Global.Msg a
+user : Application.Recipe Route.UserParams User.Model User.Msg Model Msg Global.Model Global.Msg a
 user =
     User.page
         { toModel = UserModel
@@ -81,13 +65,13 @@ user =
 init : Route -> Application.Init Model Msg Global.Model Global.Msg
 init route_ =
     case route_ of
-        AccountRoute route ->
+        Route.Account route ->
             account.init route
 
-        NotificationsRoute route ->
+        Route.Notifications route ->
             notifications.init route
 
-        UserRoute route ->
+        Route.User route ->
             user.init route
 
 

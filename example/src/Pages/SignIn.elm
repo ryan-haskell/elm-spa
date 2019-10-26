@@ -1,4 +1,8 @@
-module Pages.SignIn exposing (Model, Msg, Route, page)
+module Pages.SignIn exposing
+    ( Model
+    , Msg
+    , page
+    )
 
 import Application.Page as Application
 import Html exposing (..)
@@ -20,10 +24,6 @@ type Msg
 type Field
     = Username
     | Password
-
-
-type alias Route =
-    ()
 
 
 page =

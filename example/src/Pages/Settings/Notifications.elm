@@ -1,12 +1,10 @@
 module Pages.Settings.Notifications exposing
     ( Model
     , Msg
-    , Route
     , page
     )
 
 import Application.Page as Application
-import Global
 import Html exposing (..)
 
 
@@ -16,10 +14,6 @@ type alias Model =
 
 type alias Msg =
     Never
-
-
-type alias Route =
-    ()
 
 
 page =
