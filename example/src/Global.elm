@@ -27,9 +27,13 @@ type Msg
     | NavigateTo Route
 
 
-init : Flags -> ( Model, Cmd Msg )
-init _ =
+init :
+    { navigate : Route -> Cmd msg }
+    -> Flags
+    -> ( Model, Cmd Msg, Cmd msg )
+init _ _ =
     ( { user = Nothing }
+    , Cmd.none
     , Cmd.none
     )
 

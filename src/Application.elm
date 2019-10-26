@@ -51,7 +51,10 @@ create :
         , notFound : route
         }
     , global :
-        { init : flags -> ( globalModel, Cmd globalMsg )
+        { init :
+            { navigate : route -> Cmd (Msg globalMsg layoutMsg) }
+            -> flags
+            -> ( globalModel, Cmd globalMsg, Cmd (Msg globalMsg layoutMsg) )
         , update :
             { navigate : route -> Cmd (Msg globalMsg layoutMsg) }
             -> globalMsg
@@ -82,7 +85,10 @@ create config =
                     { global = config.global.init
                     , pages = config.pages.init
                     }
-                , fromUrl = fromUrl config.routing
+                , routing =
+                    { fromUrl = fromUrl config.routing
+                    , toPath = config.routing.toPath
+                    }
                 , speed = Transition.speed config.layout.transition
                 }
         , update =
@@ -155,9 +161,15 @@ type alias Model flags globalModel model =
 
 
 init :
-    { fromUrl : Url -> route
+    { routing :
+        { fromUrl : Url -> route
+        , toPath : route -> String
+        }
     , init :
-        { global : flags -> ( globalModel, Cmd globalMsg )
+        { global :
+            { navigate : route -> Cmd (Msg globalMsg layoutMsg) }
+            -> flags
+            -> ( globalModel, Cmd globalMsg, Cmd (Msg globalMsg layoutMsg) )
         , pages : route -> Page.Init layoutModel layoutMsg globalModel globalMsg
         }
     , speed : Int
@@ -168,11 +180,14 @@ init :
     -> ( Model flags globalModel layoutModel, Cmd (Msg globalMsg layoutMsg) )
 init config flags url key =
     url
-        |> config.fromUrl
+        |> config.routing.fromUrl
         |> (\route ->
                 let
-                    ( globalModel, globalCmd ) =
-                        config.init.global flags
+                    ( globalModel, globalCmd, cmd ) =
+                        config.init.global
+                            { navigate = navigate config.routing.toPath url
+                            }
+                            flags
 
                     ( pageModel, pageCmd, pageGlobalCmd ) =
                         config.init.pages route globalModel
@@ -189,6 +204,7 @@ init config flags url key =
                     , Cmd.map Global globalCmd
                     , Cmd.map Global pageGlobalCmd
                     , Utils.delay config.speed TransitionComplete
+                    , cmd
                     ]
                 )
            )
@@ -361,12 +377,18 @@ navigatingWithinLayout urls =
 
 
 subscriptions :
-    { bundle : layoutModel -> Page.Bundle layoutMsg globalModel globalMsg (Msg globalMsg layoutMsg)
+    { bundle :
+        layoutModel
+        -> Page.Bundle layoutMsg globalModel globalMsg (Msg globalMsg layoutMsg)
     }
     -> Model flags globalModel layoutModel
     -> Sub (Msg globalMsg layoutMsg)
 subscriptions config model =
-    (config.bundle (Transitionable.unwrap model.page) model.global private).subscriptions
+    (config.bundle
+        (Transitionable.unwrap model.page)
+        model.global
+        private
+    ).subscriptions
 
 
 
@@ -374,7 +396,9 @@ subscriptions config model =
 
 
 view :
-    { bundle : layoutModel -> Page.Bundle layoutMsg globalModel globalMsg (Msg globalMsg layoutMsg)
+    { bundle :
+        layoutModel
+        -> Page.Bundle layoutMsg globalModel globalMsg (Msg globalMsg layoutMsg)
     , transition : Transition.Strategy (Html (Msg globalMsg layoutMsg))
     , layout :
         { page : Html (Msg globalMsg layoutMsg)
@@ -401,7 +425,9 @@ view config model =
                 page =
                     (config.bundle layoutModel model.global private).view
             in
-            { layout = \data -> config.layout { page = data.page, global = model.global }
+            { layout =
+                \data ->
+                    config.layout { page = data.page, global = model.global }
             , page = page
             }
     in
