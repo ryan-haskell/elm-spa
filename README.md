@@ -11,38 +11,139 @@
 
 ### overview
 
+a wrapper around `Browser.application` (that handles routing and page transitions!)
+
 ```elm
 module Main exposing (main)
 
 import Application exposing (Application)
 import Generated.Pages as Pages
+import Generated.Route as Route
+import Global
 import Layouts.Main
 
 
-main : Application () Pages.Model Pages.Msg
+main : Application Global.Flags Global.Model Global.Msg Pages.Model Pages.Msg
 main =
     Application.create
         { routing =
-            { routes = Pages.routes
-            , notFound = Pages.NotFoundRoute ()
+            { routes = Route.routes
+            , toPath = Route.toPath
+            , notFound = Route.NotFound ()
             }
-        , layout = Layouts.Main.layout
+        , global =
+            { init = Global.init
+            , update = Global.update
+            , subscriptions = Global.subscriptions
+            }
+        , layout =
+            { view = Layouts.Main.view
+            , transition = Application.fade 200
+            }
         , pages =
             { init = Pages.init
             , update = Pages.update
             , bundle = Pages.bundle
             }
         }
+
 ```
 
-#### supporting code
+### keep your pages simple
+
+(No need for elm-fork-knife!)
+
+- [`Pages.Index`](./example/src/Pages/Index.elm)
+
+```elm
+page =
+    Page.static
+        { view = view
+        }
+```
+
+- [`Pages.Counter`](./example/src/Pages/Counter.elm)
+
+```elm
+page =
+    Page.sandbox
+        { init = init
+        , update = update
+        , view = view
+        }
+```
+
+- [`Pages.Random`](./example/src/Pages/Random.elm)
+
+```elm
+page =
+    Page.element
+        { init = init
+        , update = update
+        , subscriptions = subscriptions
+        , view = view
+        }
+```
+
+- [`Pages.SignIn`](./example/src/Pages/SignIn.elm)
+
+```elm
+page =
+    Page.component
+        { init = init
+        , update = update
+        , subscriptions = subscriptions
+        , view = view
+        }
+```
+
+### _and_ your top level easy to read!
 
 - [`Generated.Pages`](./example/src/Generated/Pages.elm)
 
-- [`Layouts.Main`](./example/src/Layouts/Main.elm)
+```elm
+init appRoute =
+    case appRoute of
+        Route.Index route ->
+            index.init route
 
-- [`Pages.Index`](./example/src/Pages/Index.elm) (a static page)
+        Route.Counter route ->
+            counter.init route
 
-- [`Pages.Counter`](./example/src/Pages/Counter.elm) (a sandbox page)
+        Route.Random route ->
+            random.init route
+```
 
-- [`Pages.Random`](./example/src/Pages/Random.elm) (a static page)
+( It's like magic, but actually it's just functions. )
+
+
+### the folder structure
+
+```
+src/
+    Api/
+        Users.elm
+        (...)
+    Components/
+        Navbar.elm
+        (...)
+    Data/
+        User.elm
+        (...)
+    Layouts/
+        Main.elm
+        Settings.elm
+        (...)
+    Pages/
+        Index.elm
+        Counter.elm
+        Settings/
+            Account.elm
+            (...)
+        (...)
+    Utils/
+        Cmd.elm
+        (...)
+    Main.elm
+    Global.elm
+```
