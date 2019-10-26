@@ -1,4 +1,4 @@
-# ryannhg/elm-app
+# ryannhg/elm-spa
 > an experiment for creating single page apps with Elm!
 
 
