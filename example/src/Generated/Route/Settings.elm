@@ -4,6 +4,7 @@ module Generated.Route.Settings exposing
     , Route(..)
     , UserParams
     , routes
+    , shouldTransition
     , toPath
     )
 
@@ -47,3 +48,13 @@ toPath route =
 
         User _ ->
             "/user"
+
+
+shouldTransition : List String -> List String -> Bool
+shouldTransition current next =
+    case ( current, next ) of
+        ( "settings" :: _, "settings" :: _ ) ->
+            True
+
+        _ ->
+            False

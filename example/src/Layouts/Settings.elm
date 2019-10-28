@@ -1,8 +1,17 @@
-module Layouts.Settings exposing (view)
+module Layouts.Settings exposing (layout)
 
+import Application.Page as Page
+import Application.Transition as Transition
 import Global
 import Html exposing (..)
 import Html.Attributes exposing (href, style)
+
+
+layout : Page.LayoutOptions Global.Model msg
+layout =
+    { transition = Transition.fade 200
+    , view = view
+    }
 
 
 view : { page : Html msg, global : Global.Model } -> Html msg

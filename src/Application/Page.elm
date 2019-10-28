@@ -5,7 +5,7 @@ module Application.Page exposing
     , Sandbox, sandbox
     , Element, element
     , Component, component
-    , Layout, layout
+    , Layout, LayoutOptions, layout
     )
 
 {-|
@@ -22,10 +22,11 @@ module Application.Page exposing
 
 @docs Component, component
 
-@docs Layout, layout
+@docs Layout, LayoutOptions, layout
 
 -}
 
+import Application.Transition exposing (Transition)
 import Html exposing (Html)
 
 
@@ -49,7 +50,8 @@ type alias Init layoutModel layoutMsg globalModel globalMsg =
 
 
 type alias Update layoutModel layoutMsg globalModel globalMsg =
-    Init layoutModel layoutMsg globalModel globalMsg
+    globalModel
+    -> ( layoutModel, Cmd layoutMsg, Cmd globalMsg )
 
 
 keep : layoutModel -> Update layoutModel layoutMsg globalModel globalMsg
@@ -164,16 +166,18 @@ element page { toModel, toMsg } =
 
 
 type alias Layout pageRoute pageModel pageMsg globalModel globalMsg msg =
-    { view :
+    { layout : LayoutOptions globalModel msg
+    , pages : Recipe pageRoute pageModel pageMsg pageModel pageMsg globalModel globalMsg msg
+    }
+
+
+type alias LayoutOptions globalModel msg =
+    { transition : Transition (Html msg)
+    , view :
         { page : Html msg
         , global : globalModel
         }
         -> Html msg
-    , pages :
-        { init : pageRoute -> Init pageModel pageMsg globalModel globalMsg
-        , update : pageMsg -> pageModel -> Update pageModel pageMsg globalModel globalMsg
-        , bundle : pageModel -> Bundle pageMsg globalModel globalMsg msg
-        }
     }
 
 
@@ -201,7 +205,7 @@ layout options { toModel, toMsg } =
                         }
             in
             { view =
-                options.view
+                options.layout.view
                     { page = bundle.view
                     , global = global
                     }

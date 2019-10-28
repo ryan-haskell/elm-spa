@@ -9,15 +9,14 @@ contents items =
     """module Generated.Pages exposing
     ( Model
     , Msg
-    , bundle
-    , init
-    , update
+    , page
     )
 
-import Application.Page as Page
+import Application.Page as Page exposing (Page)
 {{folderImports}}
 import Generated.Route as Route exposing (Route)
 import Global
+import Layouts.Main as Layout
 {{fileImports}}
 
 
@@ -29,6 +28,18 @@ import Global
 
 
 {{msgs}}
+
+
+page : Page Route Model Msg a b Global.Model Global.Msg c
+page =
+    Page.layout
+        { view = Layout.view
+        , pages =
+            { init = init
+            , update = update
+            , bundle = bundle
+            }
+        }
 
 
 

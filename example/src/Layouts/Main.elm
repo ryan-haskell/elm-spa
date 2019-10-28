@@ -1,18 +1,18 @@
-module Layouts.Main exposing
-    ( transition
-    , view
-    )
+module Layouts.Main exposing (layout)
 
-import Application
+import Application.Page as Page
+import Application.Transition as Transition
 import Components.Navbar
 import Global
 import Html exposing (..)
 import Html.Attributes as Attr
 
 
-transition : Application.Transition (Html msg)
-transition =
-    Application.fade 200
+layout : Page.LayoutOptions Global.Model msg
+layout =
+    { transition = Transition.fade 200
+    , view = view
+    }
 
 
 view :

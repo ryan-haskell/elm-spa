@@ -1,7 +1,4 @@
-module Application exposing
-    ( Application, create
-    , Transition, fade, none
-    )
+module Application exposing (Application, create)
 
 {-|
 
@@ -24,14 +21,10 @@ module Application exposing
 
 import Application.Page as Page
 import Application.Route as Route
+import Application.Transition exposing (Transition)
 import Browser
-import Browser.Dom as Dom
 import Browser.Navigation as Nav
-import Html exposing (Html)
-import Internals.Transition as Transition
-import Internals.Transitionable as Transitionable exposing (Transitionable)
 import Internals.Utils as Utils
-import Task
 import Url exposing (Url)
 import Url.Parser as Parser
 
@@ -62,60 +55,52 @@ create :
             -> ( globalModel, Cmd globalMsg, Cmd (Msg globalMsg layoutMsg) )
         , subscriptions : globalModel -> Sub globalMsg
         }
-    , layout :
-        { transition : Transition (Html (Msg globalMsg layoutMsg))
-        , view :
-            { page : Html (Msg globalMsg layoutMsg)
-            , global : globalModel
-            }
-            -> Html (Msg globalMsg layoutMsg)
-        }
-    , pages :
-        { init : route -> Page.Init layoutModel layoutMsg globalModel globalMsg
-        , update : layoutMsg -> layoutModel -> Page.Update layoutModel layoutMsg globalModel globalMsg
-        , bundle : layoutModel -> Page.Bundle layoutMsg globalModel globalMsg (Msg globalMsg layoutMsg)
-        }
+    , page : Page.Page route layoutModel layoutMsg layoutModel layoutMsg globalModel globalMsg (Msg globalMsg layoutMsg)
     }
     -> Application flags globalModel globalMsg layoutModel layoutMsg
 create config =
+    let
+        page =
+            config.page
+                { toModel = identity
+                , toMsg = identity
+                }
+    in
     Browser.application
         { init =
             init
                 { init =
                     { global = config.global.init
-                    , pages = config.pages.init
+                    , pages = page.init
                     }
                 , routing =
                     { fromUrl = fromUrl config.routing
                     , toPath = config.routing.toPath
                     }
-                , speed = Transition.speed config.layout.transition
                 }
         , update =
             update
                 { routing =
                     { fromUrl = fromUrl config.routing
                     , toPath = config.routing.toPath
+                    , routes = config.routing.routes
                     }
-                , init = config.pages.init
+                , init = page.init
                 , update =
                     { global = config.global.update
-                    , pages = config.pages.update
+                    , pages = page.update
                     }
-                , speed = Transition.speed config.layout.transition
                 }
         , subscriptions =
             subscriptions
-                { bundle = config.pages.bundle
+                { bundle = page.bundle
                 }
         , view =
             view
-                { bundle = config.pages.bundle
-                , layout = config.layout.view
-                , transition = Transition.strategy config.layout.transition
+                { bundle = page.bundle
                 }
-        , onUrlChange = Url
-        , onUrlRequest = Link
+        , onUrlChange = ChangedUrl
+        , onUrlRequest = ClickedLink
         }
 
 
@@ -139,7 +124,7 @@ type alias Routes route =
 
 fromUrl : { a | routes : Routes route, notFound : route } -> Url -> route
 fromUrl config =
-    Parser.parse (Parser.oneOf config.routes)
+    Parser.parse (Parser.oneOf (List.map .parser config.routes))
         >> Maybe.withDefault config.notFound
 
 
@@ -148,15 +133,11 @@ fromUrl config =
 
 
 type alias Model flags globalModel model =
-    { urls :
-        { previous : Maybe Url
-        , current : Url
-        }
+    { url : Url
     , flags : flags
     , key : Nav.Key
     , global : globalModel
-    , page : Transitionable model
-    , speed : Int
+    , page : model
     }
 
 
@@ -172,7 +153,6 @@ init :
             -> ( globalModel, Cmd globalMsg, Cmd (Msg globalMsg layoutMsg) )
         , pages : route -> Page.Init layoutModel layoutMsg globalModel globalMsg
         }
-    , speed : Int
     }
     -> flags
     -> Url
@@ -193,43 +173,19 @@ init config flags url key =
                         config.init.pages route globalModel
                 in
                 ( { flags = flags
-                  , urls = { previous = Nothing, current = url }
+                  , url = url
                   , key = key
                   , global = globalModel
-                  , page = Transitionable.Ready pageModel
-                  , speed = config.speed
+                  , page = pageModel
                   }
                 , Cmd.batch
-                    [ handleJumpLinks url pageCmd
-                    , Cmd.map Global globalCmd
+                    [ Cmd.map Page pageCmd
                     , Cmd.map Global pageGlobalCmd
-                    , Utils.delay config.speed TransitionComplete
+                    , Cmd.map Global globalCmd
                     , cmd
                     ]
                 )
            )
-
-
-handleJumpLinks : Url -> Cmd msg -> Cmd (Msg globalMsg msg)
-handleJumpLinks url cmd =
-    Cmd.batch
-        [ Cmd.map Page cmd
-        , scrollToHash ScrollComplete url
-        ]
-
-
-scrollToHash : msg -> Url -> Cmd msg
-scrollToHash msg { fragment } =
-    let
-        scrollTo : String -> Cmd msg
-        scrollTo =
-            Dom.getElement
-                >> Task.andThen (\el -> Dom.setViewport 0 el.element.y)
-                >> Task.attempt (\_ -> msg)
-    in
-    fragment
-        |> Maybe.map scrollTo
-        |> Maybe.withDefault Cmd.none
 
 
 
@@ -237,11 +193,9 @@ scrollToHash msg { fragment } =
 
 
 type Msg globalMsg msg
-    = Url Url
-    | Link Browser.UrlRequest
-    | TransitionTo Url
-    | ScrollComplete
-    | TransitionComplete
+    = ChangedUrl Url
+    | ClickedLink Browser.UrlRequest
+    | TransitionedTo Url
     | Global globalMsg
     | Page msg
 
@@ -250,6 +204,7 @@ update :
     { routing :
         { fromUrl : Url -> route
         , toPath : route -> String
+        , routes : Routes route
         }
     , init : route -> Page.Init layoutModel layoutMsg globalModel globalMsg
     , update :
@@ -263,62 +218,49 @@ update :
             -> layoutModel
             -> Page.Update layoutModel layoutMsg globalModel globalMsg
         }
-    , speed : Int
     }
     -> Msg globalMsg layoutMsg
     -> Model flags globalModel layoutModel
     -> ( Model flags globalModel layoutModel, Cmd (Msg globalMsg layoutMsg) )
 update config msg model =
     case msg of
-        ScrollComplete ->
-            ( model, Cmd.none )
-
-        Link (Browser.Internal url) ->
-            if url == model.urls.current && url.fragment == Nothing then
+        ClickedLink (Browser.Internal url) ->
+            if url.path == model.url.path && url.fragment == model.url.fragment then
                 ( model, Cmd.none )
 
-            else if url.path == model.urls.current.path then
-                ( model, Nav.load (Url.toString url) )
-
             else
-                ( if navigatingWithinLayout { old = model.urls.current, new = url } then
-                    { model | page = Transitionable.complete model.page }
+                case transitionFrom config.routing.routes { current = model.url, next = url } of
+                    Just transition ->
+                        ( model
+                        , Utils.delay transition.speed (TransitionedTo url)
+                        )
 
-                  else
-                    { model | page = Transitionable.begin model.page }
-                , Utils.delay model.speed (TransitionTo url)
-                )
+                    Nothing ->
+                        ( model
+                        , Nav.pushUrl model.key (Url.toString url)
+                        )
 
-        Link (Browser.External url) ->
+        ClickedLink (Browser.External url) ->
             ( model
             , Nav.load url
             )
 
-        TransitionTo url ->
+        TransitionedTo url ->
             ( model
             , Nav.pushUrl model.key (Url.toString url)
             )
 
-        TransitionComplete ->
-            ( { model | page = Transitionable.complete model.page }
-            , Cmd.none
-            )
-
-        Url url ->
+        ChangedUrl url ->
             url
                 |> config.routing.fromUrl
                 |> (\route -> config.init route model.global)
                 |> (\( pageModel, pageCmd, globalCmd ) ->
                         ( { model
-                            | urls =
-                                { previous = Just model.urls.current
-                                , current = url
-                                }
-                            , page = Transitionable.Complete pageModel
-                            , speed = config.speed
+                            | url = url
+                            , page = pageModel
                           }
                         , Cmd.batch
-                            [ handleJumpLinks url pageCmd
+                            [ Cmd.map Page pageCmd
                             , Cmd.map Global globalCmd
                             ]
                         )
@@ -326,7 +268,7 @@ update config msg model =
 
         Global globalMsg ->
             config.update.global
-                { navigate = navigate config.routing.toPath model.urls.current
+                { navigate = navigate config.routing.toPath model.url
                 }
                 globalMsg
                 model.global
@@ -340,9 +282,9 @@ update config msg model =
                    )
 
         Page pageMsg ->
-            config.update.pages pageMsg (Transitionable.unwrap model.page) model.global
+            config.update.pages pageMsg model.page model.global
                 |> (\( page, pageCmd, globalCmd ) ->
-                        ( { model | page = Transitionable.Complete page }
+                        ( { model | page = page }
                         , Cmd.batch
                             [ Cmd.map Page pageCmd
                             , Cmd.map Global globalCmd
@@ -354,22 +296,49 @@ update config msg model =
 navigate : (route -> String) -> Url -> route -> Cmd (Msg globalMsg layoutMsg)
 navigate toPath url route =
     Utils.send <|
-        Link (Browser.Internal { url | path = toPath route })
+        ClickedLink (Browser.Internal { url | path = toPath route })
 
 
-navigatingWithinLayout : { old : Url, new : Url } -> Bool
-navigatingWithinLayout urls =
+
+-- transitions
+
+
+transitionFrom : Routes routes -> { current : Url, next : Url } -> Maybe (Transition a)
+transitionFrom routes { current, next } =
     let
-        firstSegment { path } =
-            String.split "/" path |> List.drop 1 |> List.head
+        toSegments =
+            .path >> String.split "/" >> List.drop 1
 
-        old =
-            firstSegment urls.old
+        segments =
+            { current = toSegments current
+            , next = toSegments next
+            }
 
-        new =
-            firstSegment urls.new
+        helper : Route.Route route -> Maybe String -> Maybe String
+        helper route transition =
+            case transition of
+                Just _ ->
+                    transition
+
+                Nothing ->
+                    if
+                        route.shouldTransition
+                            |> Maybe.map (\fn -> fn segments.current segments.next)
+                            |> Maybe.withDefault False
+                    then
+                        Just route.label
+
+                    else
+                        Nothing
+
+        _ =
+            -- TODO: Should be recursive
+            routes
+                |> List.filter (\r -> r.shouldTransition /= Nothing)
+                |> List.foldl helper Nothing
+                |> Debug.log "routes"
     in
-    old == new && old /= Nothing
+    Nothing
 
 
 
@@ -385,7 +354,7 @@ subscriptions :
     -> Sub (Msg globalMsg layoutMsg)
 subscriptions config model =
     (config.bundle
-        (Transitionable.unwrap model.page)
+        model.page
         model.global
         private
     ).subscriptions
@@ -399,66 +368,12 @@ view :
     { bundle :
         layoutModel
         -> Page.Bundle layoutMsg globalModel globalMsg (Msg globalMsg layoutMsg)
-    , transition : Transition.Strategy (Html (Msg globalMsg layoutMsg))
-    , layout :
-        { page : Html (Msg globalMsg layoutMsg)
-        , global : globalModel
-        }
-        -> Html (Msg globalMsg layoutMsg)
     }
     -> Model flags globalModel layoutModel
     -> Browser.Document (Msg globalMsg layoutMsg)
 view config model =
-    let
-        fromPage :
-            layoutModel
-            ->
-                { layout :
-                    { page : Html (Msg globalMsg layoutMsg)
-                    }
-                    -> Html (Msg globalMsg layoutMsg)
-                , page : Html (Msg globalMsg layoutMsg)
-                }
-        fromPage layoutModel =
-            let
-                page : Html (Msg globalMsg layoutMsg)
-                page =
-                    (config.bundle layoutModel model.global private).view
-            in
-            { layout =
-                \data ->
-                    config.layout { page = data.page, global = model.global }
-            , page = page
-            }
-    in
     { title = "elm-app demo"
     , body =
-        [ case model.page of
-            Transitionable.Ready layoutModel ->
-                config.transition.beforeLoad (fromPage layoutModel)
-
-            Transitionable.Transitioning layoutModel ->
-                config.transition.leavingPage (fromPage layoutModel)
-
-            Transitionable.Complete layoutModel ->
-                config.transition.enteringPage (fromPage layoutModel)
+        [ config.bundle model.page model.global private |> .view
         ]
     }
-
-
-
--- TRANSITIONS
-
-
-type alias Transition a =
-    Transition.Transition a
-
-
-fade : Int -> Transition (Html msg)
-fade =
-    Transition.fade
-
-
-none : Transition a
-none =
-    Transition.none

@@ -2,6 +2,7 @@ module Generated.Route.Users exposing
     ( Route(..)
     , SlugParams
     , routes
+    , shouldTransition
     , toPath
     )
 
@@ -27,3 +28,13 @@ toPath route =
     case route of
         Slug slug ->
             "/" ++ slug
+
+
+shouldTransition : List String -> List String -> Bool
+shouldTransition current next =
+    case ( current, next ) of
+        ( "users" :: _, "users" :: _ ) ->
+            True
+
+        _ ->
+            False
