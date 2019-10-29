@@ -4,4 +4,4 @@ dist
 elm-stuff
 node_modules
 
-example/src/Generated/*.elm
+# example/src/Generated/*.elm
