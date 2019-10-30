@@ -4,8 +4,8 @@
   "description": "> a barebones example app made with ryannhg/elm-app",
   "main": "index.js",
   "scripts": {
-    "dev": "npm run generate && parcel example/index.html",
-    "build": "npm run generate && npm run build:example",
+    "dev": "parcel example/index.html",
+    "build": "npm run build:example",
     "build:generator": "(cd cli && elm make src/Main.elm --optimize --output dist/elm.compiled.js > /dev/null)",
     "build:example": "parcel build example/index.html",
     "generate": "npm run build:generator && node ./cli/index.js run example"
