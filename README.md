@@ -11,8 +11,6 @@
 
 ### overview
 
-a wrapper around `Browser.application` (that handles routing and page transitions!)
-
 ```elm
 module Main exposing (main)
 
@@ -20,7 +18,6 @@ import Application exposing (Application)
 import Generated.Pages as Pages
 import Generated.Route as Route
 import Global
-import Layouts.Main
 
 
 main : Application Global.Flags Global.Model Global.Msg Pages.Model Pages.Msg
@@ -36,17 +33,8 @@ main =
             , update = Global.update
             , subscriptions = Global.subscriptions
             }
-        , layout =
-            { view = Layouts.Main.view
-            , transition = Application.fade 200
-            }
-        , pages =
-            { init = Pages.init
-            , update = Pages.update
-            , bundle = Pages.bundle
-            }
+        , page = Pages.page
         }
-
 ```
 
 ### keep your pages simple
