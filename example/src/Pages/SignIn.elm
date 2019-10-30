@@ -32,7 +32,8 @@ type Field
 page : Page () Model Msg a b Global.Model Global.Msg c
 page =
     Page.component
-        { init = init
+        { title = title
+        , init = init
         , update = update
         , view = view
         , subscriptions = subscriptions
@@ -74,6 +75,16 @@ update _ msg model =
 subscriptions : Global.Model -> Model -> Sub Msg
 subscriptions _ _ =
     Sub.none
+
+
+title : Global.Model -> Model -> String
+title global _ =
+    case global.user of
+        Just _ ->
+            "Sign out"
+
+        Nothing ->
+            "Sign in"
 
 
 view : Global.Model -> Model -> Html Msg

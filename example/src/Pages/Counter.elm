@@ -22,7 +22,8 @@ type Msg
 page : Page () Model Msg a b c d e
 page =
     Page.sandbox
-        { init = always init
+        { title = always "Counter"
+        , init = always init
         , update = update
         , view = view
         }

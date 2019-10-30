@@ -309,13 +309,17 @@ view :
     -> Model flags globalModel layoutModel
     -> Browser.Document (Msg globalMsg layoutMsg)
 view config model =
-    { title = "elm-app demo"
+    let
+        bundle =
+            config.bundle
+                model.page
+                { fromGlobalMsg = Global
+                , fromPageMsg = Page
+                , global = model.global
+                }
+    in
+    { title = bundle.title
     , body =
-        [ config.bundle model.page
-            { fromGlobalMsg = Global
-            , fromPageMsg = Page
-            , global = model.global
-            }
-            |> .view
+        [ bundle.view
         ]
     }

@@ -64,7 +64,8 @@ type alias Bundle layoutMsg globalModel globalMsg msg =
     , fromPageMsg : layoutMsg -> msg
     }
     ->
-        { view : Html msg
+        { title : String
+        , view : Html msg
         , subscriptions : Sub msg
         }
 
@@ -74,7 +75,8 @@ type alias Bundle layoutMsg globalModel globalMsg msg =
 
 
 type alias Static =
-    { view : Html Never
+    { title : String
+    , view : Html Never
     }
 
 
@@ -86,7 +88,8 @@ static page { toModel, toMsg } =
     , update = \_ model _ -> ( toModel model, Cmd.none, Cmd.none )
     , bundle =
         \_ context ->
-            { view = page.view |> Html.map (toMsg >> context.fromPageMsg)
+            { title = page.title
+            , view = page.view |> Html.map (toMsg >> context.fromPageMsg)
             , subscriptions = Sub.none
             }
     }
@@ -97,7 +100,8 @@ static page { toModel, toMsg } =
 
 
 type alias Sandbox pageRoute pageModel pageMsg =
-    { init : pageRoute -> pageModel
+    { title : pageModel -> String
+    , init : pageRoute -> pageModel
     , update : pageMsg -> pageModel -> pageModel
     , view : pageModel -> Html pageMsg
     }
@@ -121,7 +125,8 @@ sandbox page { toModel, toMsg } =
             )
     , bundle =
         \model context ->
-            { view = page.view model |> Html.map (toMsg >> context.fromPageMsg)
+            { title = page.title model
+            , view = page.view model |> Html.map (toMsg >> context.fromPageMsg)
             , subscriptions = Sub.none
             }
     }
@@ -132,7 +137,8 @@ sandbox page { toModel, toMsg } =
 
 
 type alias Element pageRoute pageModel pageMsg =
-    { init : pageRoute -> ( pageModel, Cmd pageMsg )
+    { title : pageModel -> String
+    , init : pageRoute -> ( pageModel, Cmd pageMsg )
     , update : pageMsg -> pageModel -> ( pageModel, Cmd pageMsg )
     , view : pageModel -> Html pageMsg
     , subscriptions : pageModel -> Sub pageMsg
@@ -153,7 +159,8 @@ element page { toModel, toMsg } =
                 |> upgrade toModel toMsg
     , bundle =
         \model context ->
-            { view = page.view model |> Html.map (toMsg >> context.fromPageMsg)
+            { title = page.title model
+            , view = page.view model |> Html.map (toMsg >> context.fromPageMsg)
             , subscriptions = page.subscriptions model |> Sub.map (toMsg >> context.fromPageMsg)
             }
     }
@@ -188,7 +195,7 @@ layout options { toModel, toMsg } =
     , bundle =
         \model context ->
             let
-                bundle : { view : Html msg, subscriptions : Sub msg }
+                bundle : { title : String, view : Html msg, subscriptions : Sub msg }
                 bundle =
                     options.pages.bundle
                         model
@@ -197,7 +204,8 @@ layout options { toModel, toMsg } =
                         , global = context.global
                         }
             in
-            { view =
+            { title = bundle.title
+            , view =
                 options.layout
                     { page = bundle.view
                     , global = context.global
@@ -212,7 +220,8 @@ layout options { toModel, toMsg } =
 
 
 type alias Component pageRoute pageModel pageMsg globalModel globalMsg =
-    { init : globalModel -> pageRoute -> ( pageModel, Cmd pageMsg, Cmd globalMsg )
+    { title : globalModel -> pageModel -> String
+    , init : globalModel -> pageRoute -> ( pageModel, Cmd pageMsg, Cmd globalMsg )
     , update : globalModel -> pageMsg -> pageModel -> ( pageModel, Cmd pageMsg, Cmd globalMsg )
     , subscriptions : globalModel -> pageModel -> Sub pageMsg
     , view : globalModel -> pageModel -> Html pageMsg
@@ -233,7 +242,8 @@ component page { toModel, toMsg } =
                 |> truple toModel toMsg
     , bundle =
         \model context ->
-            { view = page.view context.global model |> Html.map (toMsg >> context.fromPageMsg)
+            { title = page.title context.global model
+            , view = page.view context.global model |> Html.map (toMsg >> context.fromPageMsg)
             , subscriptions = page.subscriptions context.global model |> Sub.map (toMsg >> context.fromPageMsg)
             }
     }

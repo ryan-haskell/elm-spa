@@ -25,7 +25,8 @@ type Msg
 page : Page () Model Msg a b c d e
 page =
     Page.element
-        { init = always init
+        { title = always "Random"
+        , init = always init
         , update = update
         , view = view
         , subscriptions = subscriptions

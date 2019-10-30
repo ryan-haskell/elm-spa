@@ -15,7 +15,8 @@ type alias Msg =
 page : Page String Model Msg a b c d e
 page =
     Page.sandbox
-        { init = init
+        { title = title
+        , init = init
         , update = update
         , view = view
         }
@@ -30,6 +31,21 @@ init slug =
 update : Msg -> Model -> Model
 update _ model =
     model
+
+
+title : Model -> String
+title model =
+    capitalize model.slug
+
+
+capitalize : String -> String
+capitalize word =
+    case String.toList word of
+        first :: rest ->
+            String.fromList (Char.toUpper first :: rest)
+
+        _ ->
+            word
 
 
 view : Model -> Html msg

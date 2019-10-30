@@ -19,7 +19,8 @@ type alias Msg =
 page : Page () Model Msg a b c d e
 page =
     Page.static
-        { view = view
+        { title = "Homepage"
+        , view = view
         }
 
 
