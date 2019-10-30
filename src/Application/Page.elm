@@ -5,7 +5,7 @@ module Application.Page exposing
     , Sandbox, sandbox
     , Element, element
     , Component, component
-    , Layout, LayoutOptions, layout
+    , Layout, layout
     )
 
 {-|
@@ -22,11 +22,10 @@ module Application.Page exposing
 
 @docs Component, component
 
-@docs Layout, LayoutOptions, layout
+@docs Layout, layout
 
 -}
 
-import Application.Transition exposing (Transition)
 import Html exposing (Html)
 
 
@@ -45,12 +44,12 @@ type alias Recipe pageRoute pageModel pageMsg layoutModel layoutMsg globalModel 
 
 
 type alias Init layoutModel layoutMsg globalModel globalMsg =
-    globalModel
+    { global : globalModel }
     -> ( layoutModel, Cmd layoutMsg, Cmd globalMsg )
 
 
 type alias Update layoutModel layoutMsg globalModel globalMsg =
-    globalModel
+    { global : globalModel }
     -> ( layoutModel, Cmd layoutMsg, Cmd globalMsg )
 
 
@@ -60,11 +59,10 @@ keep model =
 
 
 type alias Bundle layoutMsg globalModel globalMsg msg =
-    globalModel
-    ->
-        { fromGlobalMsg : globalMsg -> msg
-        , fromPageMsg : layoutMsg -> msg
-        }
+    { global : globalModel
+    , fromGlobalMsg : globalMsg -> msg
+    , fromPageMsg : layoutMsg -> msg
+    }
     ->
         { view : Html msg
         , subscriptions : Sub msg
@@ -87,8 +85,8 @@ static page { toModel, toMsg } =
     { init = \_ _ -> ( toModel (), Cmd.none, Cmd.none )
     , update = \_ model _ -> ( toModel model, Cmd.none, Cmd.none )
     , bundle =
-        \_ _ private ->
-            { view = page.view |> Html.map (toMsg >> private.fromPageMsg)
+        \_ context ->
+            { view = page.view |> Html.map (toMsg >> context.fromPageMsg)
             , subscriptions = Sub.none
             }
     }
@@ -122,8 +120,8 @@ sandbox page { toModel, toMsg } =
             , Cmd.none
             )
     , bundle =
-        \model _ private ->
-            { view = page.view model |> Html.map (toMsg >> private.fromPageMsg)
+        \model context ->
+            { view = page.view model |> Html.map (toMsg >> context.fromPageMsg)
             , subscriptions = Sub.none
             }
     }
@@ -154,9 +152,9 @@ element page { toModel, toMsg } =
             page.update msg model
                 |> upgrade toModel toMsg
     , bundle =
-        \model _ private ->
-            { view = page.view model |> Html.map (toMsg >> private.fromPageMsg)
-            , subscriptions = page.subscriptions model |> Sub.map (toMsg >> private.fromPageMsg)
+        \model context ->
+            { view = page.view model |> Html.map (toMsg >> context.fromPageMsg)
+            , subscriptions = page.subscriptions model |> Sub.map (toMsg >> context.fromPageMsg)
             }
     }
 
@@ -166,18 +164,12 @@ element page { toModel, toMsg } =
 
 
 type alias Layout pageRoute pageModel pageMsg globalModel globalMsg msg =
-    { layout : LayoutOptions globalModel msg
-    , pages : Recipe pageRoute pageModel pageMsg pageModel pageMsg globalModel globalMsg msg
-    }
-
-
-type alias LayoutOptions globalModel msg =
-    { transition : Transition (Html msg)
-    , view :
+    { layout :
         { page : Html msg
         , global : globalModel
         }
         -> Html msg
+    , pages : Recipe pageRoute pageModel pageMsg pageModel pageMsg globalModel globalMsg msg
     }
 
 
@@ -186,28 +178,29 @@ layout :
     -> Page pageRoute pageModel pageMsg layoutModel layoutMsg globalModel globalMsg msg
 layout options { toModel, toMsg } =
     { init =
-        \pageRoute context ->
-            options.pages.init pageRoute context
+        \pageRoute global ->
+            options.pages.init pageRoute global
                 |> truple toModel toMsg
     , update =
-        \msg model context ->
-            options.pages.update msg model context
+        \msg model global ->
+            options.pages.update msg model global
                 |> truple toModel toMsg
     , bundle =
-        \model global private ->
+        \model context ->
             let
+                bundle : { view : Html msg, subscriptions : Sub msg }
                 bundle =
                     options.pages.bundle
                         model
-                        global
-                        { fromGlobalMsg = private.fromGlobalMsg
-                        , fromPageMsg = toMsg >> private.fromPageMsg
+                        { fromGlobalMsg = context.fromGlobalMsg
+                        , fromPageMsg = toMsg >> context.fromPageMsg
+                        , global = context.global
                         }
             in
             { view =
-                options.layout.view
+                options.layout
                     { page = bundle.view
-                    , global = global
+                    , global = context.global
                     }
             , subscriptions = bundle.subscriptions
             }
@@ -231,17 +224,17 @@ component :
     -> Page pageRoute pageModel pageMsg layoutModel layoutMsg globalModel globalMsg msg
 component page { toModel, toMsg } =
     { init =
-        \pageRoute global ->
-            page.init global pageRoute
+        \pageRoute context ->
+            page.init context.global pageRoute
                 |> truple toModel toMsg
     , update =
-        \msg model global ->
-            page.update global msg model
+        \msg model context ->
+            page.update context.global msg model
                 |> truple toModel toMsg
     , bundle =
-        \model global private ->
-            { view = page.view global model |> Html.map (toMsg >> private.fromPageMsg)
-            , subscriptions = page.subscriptions global model |> Sub.map (toMsg >> private.fromPageMsg)
+        \model context ->
+            { view = page.view context.global model |> Html.map (toMsg >> context.fromPageMsg)
+            , subscriptions = page.subscriptions context.global model |> Sub.map (toMsg >> context.fromPageMsg)
             }
     }
 

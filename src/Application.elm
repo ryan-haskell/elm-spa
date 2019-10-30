@@ -21,9 +21,9 @@ module Application exposing (Application, create)
 
 import Application.Page as Page
 import Application.Route as Route
-import Application.Transition exposing (Transition)
 import Browser
 import Browser.Navigation as Nav
+import Html exposing (Html)
 import Internals.Utils as Utils
 import Url exposing (Url)
 import Url.Parser as Parser
@@ -104,16 +104,6 @@ create config =
         }
 
 
-private :
-    { fromGlobalMsg : globalMsg -> Msg globalMsg layoutMsg
-    , fromPageMsg : layoutMsg -> Msg globalMsg layoutMsg
-    }
-private =
-    { fromGlobalMsg = Global
-    , fromPageMsg = Page
-    }
-
-
 
 -- ROUTING
 
@@ -124,7 +114,7 @@ type alias Routes route =
 
 fromUrl : { a | routes : Routes route, notFound : route } -> Url -> route
 fromUrl config =
-    Parser.parse (Parser.oneOf (List.map .parser config.routes))
+    Parser.parse (Parser.oneOf config.routes)
         >> Maybe.withDefault config.notFound
 
 
@@ -170,7 +160,7 @@ init config flags url key =
                             flags
 
                     ( pageModel, pageCmd, pageGlobalCmd ) =
-                        config.init.pages route globalModel
+                        config.init.pages route { global = globalModel }
                 in
                 ( { flags = flags
                   , url = url
@@ -195,7 +185,6 @@ init config flags url key =
 type Msg globalMsg msg
     = ChangedUrl Url
     | ClickedLink Browser.UrlRequest
-    | TransitionedTo Url
     | Global globalMsg
     | Page msg
 
@@ -225,35 +214,23 @@ update :
 update config msg model =
     case msg of
         ClickedLink (Browser.Internal url) ->
-            if url.path == model.url.path && url.fragment == model.url.fragment then
+            if url == model.url then
                 ( model, Cmd.none )
 
             else
-                case transitionFrom config.routing.routes { current = model.url, next = url } of
-                    Just transition ->
-                        ( model
-                        , Utils.delay transition.speed (TransitionedTo url)
-                        )
-
-                    Nothing ->
-                        ( model
-                        , Nav.pushUrl model.key (Url.toString url)
-                        )
+                ( model
+                , Nav.pushUrl model.key (Url.toString url)
+                )
 
         ClickedLink (Browser.External url) ->
             ( model
             , Nav.load url
             )
 
-        TransitionedTo url ->
-            ( model
-            , Nav.pushUrl model.key (Url.toString url)
-            )
-
         ChangedUrl url ->
             url
                 |> config.routing.fromUrl
-                |> (\route -> config.init route model.global)
+                |> (\route -> config.init route { global = model.global })
                 |> (\( pageModel, pageCmd, globalCmd ) ->
                         ( { model
                             | url = url
@@ -282,7 +259,7 @@ update config msg model =
                    )
 
         Page pageMsg ->
-            config.update.pages pageMsg model.page model.global
+            config.update.pages pageMsg model.page { global = model.global }
                 |> (\( page, pageCmd, globalCmd ) ->
                         ( { model | page = page }
                         , Cmd.batch
@@ -300,48 +277,6 @@ navigate toPath url route =
 
 
 
--- transitions
-
-
-transitionFrom : Routes routes -> { current : Url, next : Url } -> Maybe (Transition a)
-transitionFrom routes { current, next } =
-    let
-        toSegments =
-            .path >> String.split "/" >> List.drop 1
-
-        segments =
-            { current = toSegments current
-            , next = toSegments next
-            }
-
-        helper : Route.Route route -> Maybe String -> Maybe String
-        helper route transition =
-            case transition of
-                Just _ ->
-                    transition
-
-                Nothing ->
-                    if
-                        route.shouldTransition
-                            |> Maybe.map (\fn -> fn segments.current segments.next)
-                            |> Maybe.withDefault False
-                    then
-                        Just route.label
-
-                    else
-                        Nothing
-
-        _ =
-            -- TODO: Should be recursive
-            routes
-                |> List.filter (\r -> r.shouldTransition /= Nothing)
-                |> List.foldl helper Nothing
-                |> Debug.log "routes"
-    in
-    Nothing
-
-
-
 -- SUBSCRIPTIONS
 
 
@@ -355,8 +290,10 @@ subscriptions :
 subscriptions config model =
     (config.bundle
         model.page
-        model.global
-        private
+        { fromGlobalMsg = Global
+        , fromPageMsg = Page
+        , global = model.global
+        }
     ).subscriptions
 
 
@@ -374,6 +311,11 @@ view :
 view config model =
     { title = "elm-app demo"
     , body =
-        [ config.bundle model.page model.global private |> .view
+        [ config.bundle model.page
+            { fromGlobalMsg = Global
+            , fromPageMsg = Page
+            , global = model.global
+            }
+            |> .view
         ]
     }

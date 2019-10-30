@@ -1,10 +1,7 @@
 module Generated.Pages exposing
     ( Model
     , Msg
-    , notFoundRoute
     , page
-    , routes
-    , toPath
     )
 
 import Application.Page as Page exposing (Page)
@@ -18,22 +15,6 @@ import Pages.Index as Index
 import Pages.NotFound as NotFound
 import Pages.Random as Random
 import Pages.SignIn as SignIn
-
-
-
--- ROUTING
-
-
-routes =
-    Route.routes
-
-
-toPath =
-    Route.toPath
-
-
-notFoundRoute =
-    Route.NotFound ()
 
 
 
@@ -63,7 +44,7 @@ type Msg
 page : Page Route Model Msg a b Global.Model Global.Msg c
 page =
     Page.layout
-        { layout = Layout.layout
+        { layout = Layout.view
         , pages =
             { init = init
             , update = update

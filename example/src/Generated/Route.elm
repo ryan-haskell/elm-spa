@@ -65,8 +65,8 @@ routes =
     , Route.path "not-found" NotFound
     , Route.path "random" Random
     , Route.path "sign-in" SignIn
-    , Route.folder "settings" Settings Settings.routes Settings.shouldTransition
-    , Route.folder "users" Users Users.routes Users.shouldTransition
+    , Route.folder "settings" Settings Settings.routes
+    , Route.folder "users" Users Users.routes
     ]
 
 

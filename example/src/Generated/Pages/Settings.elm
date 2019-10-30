@@ -29,7 +29,7 @@ type Msg
 page : Application.Page Route Model Msg a b Global.Model Global.Msg c
 page =
     Application.layout
-        { layout = Layout.layout
+        { layout = Layout.view
         , pages =
             { init = init
             , update = update
