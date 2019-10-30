@@ -9,7 +9,8 @@ import Global
 main : Application Global.Flags Global.Model Global.Msg Pages.Model Pages.Msg
 main =
     Application.create
-        { routing =
+        { options = Application.defaultOptions
+        , routing =
             { routes = Route.routes
             , toPath = Route.toPath
             , notFound = Route.NotFound ()

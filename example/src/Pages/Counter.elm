@@ -19,7 +19,7 @@ type Msg
     | Decrement
 
 
-page : Page () Model Msg a b c d e
+page : Page () Model Msg (Html Msg) a b c d e f g
 page =
     Page.sandbox
         { title = always "Counter"

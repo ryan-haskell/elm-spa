@@ -20,10 +20,11 @@ type Msg
     = SlugMsg Slug.Msg
 
 
-page : Application.Page Route Model Msg a b Global.Model Global.Msg c
+page : Application.Page Route Model Msg (Html Msg) a b (Html b) Global.Model Global.Msg c (Html c)
 page =
     Application.layout
-        { layout = Layout.view
+        { map = Html.map
+        , layout = Layout.view
         , pages =
             { init = init
             , update = update
@@ -32,11 +33,12 @@ page =
         }
 
 
-slug : Application.Recipe Route.SlugParams Slug.Model Slug.Msg Model Msg Global.Model Global.Msg a
+slug : Application.Recipe Route.SlugParams Slug.Model Slug.Msg Model Msg (Html Msg) Global.Model Global.Msg a (Html a)
 slug =
     Slug.page
         { toModel = SlugModel
         , toMsg = SlugMsg
+        , map = Html.map
         }
 
 
@@ -59,7 +61,7 @@ update msg_ model_ =
 --     Application.keep model_
 
 
-bundle : Model -> Application.Bundle Msg Global.Model Global.Msg msg
+bundle : Model -> Application.Bundle Msg (Html Msg) Global.Model Global.Msg msg (Html msg)
 bundle model_ =
     case model_ of
         SlugModel model ->

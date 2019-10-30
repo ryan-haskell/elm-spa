@@ -9,6 +9,7 @@ import Generated.Pages.Settings as Settings
 import Generated.Pages.Users as Users
 import Generated.Route as Route exposing (Route)
 import Global
+import Html exposing (Html)
 import Layouts.Main as Layout
 import Pages.Counter as Counter
 import Pages.Index as Index
@@ -41,10 +42,11 @@ type Msg
     | UsersMsg Users.Msg
 
 
-page : Page Route Model Msg a b Global.Model Global.Msg c
+page : Page Route Model Msg (Html Msg) a b (Html b) Global.Model Global.Msg c (Html c)
 page =
     Page.layout
-        { layout = Layout.view
+        { map = Html.map
+        , layout = Layout.view
         , pages =
             { init = init
             , update = update
@@ -58,7 +60,7 @@ page =
 
 
 type alias Recipe params model msg a =
-    Page.Recipe params model msg Model Msg Global.Model Global.Msg a
+    Page.Recipe params model msg Model Msg (Html Msg) Global.Model Global.Msg a (Html a)
 
 
 counter : Recipe Route.CounterParams Counter.Model Counter.Msg a
@@ -66,6 +68,7 @@ counter =
     Counter.page
         { toModel = CounterModel
         , toMsg = CounterMsg
+        , map = Html.map
         }
 
 
@@ -74,6 +77,7 @@ index =
     Index.page
         { toModel = IndexModel
         , toMsg = IndexMsg
+        , map = Html.map
         }
 
 
@@ -82,6 +86,7 @@ notFound =
     NotFound.page
         { toModel = NotFoundModel
         , toMsg = NotFoundMsg
+        , map = Html.map
         }
 
 
@@ -90,6 +95,7 @@ random =
     Random.page
         { toModel = RandomModel
         , toMsg = RandomMsg
+        , map = Html.map
         }
 
 
@@ -98,6 +104,7 @@ settings =
     Settings.page
         { toModel = SettingsModel
         , toMsg = SettingsMsg
+        , map = Html.map
         }
 
 
@@ -106,6 +113,7 @@ signIn =
     SignIn.page
         { toModel = SignInModel
         , toMsg = SignInMsg
+        , map = Html.map
         }
 
 
@@ -114,6 +122,7 @@ users =
     Users.page
         { toModel = UsersModel
         , toMsg = UsersMsg
+        , map = Html.map
         }
 
 
@@ -182,7 +191,7 @@ update msg_ model_ =
 -- BUNDLE
 
 
-bundle : Model -> Page.Bundle Msg Global.Model Global.Msg a
+bundle : Model -> Page.Bundle Msg (Html Msg) Global.Model Global.Msg a (Html a)
 bundle model_ =
     case model_ of
         CounterModel model ->

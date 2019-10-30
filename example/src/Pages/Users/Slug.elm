@@ -12,7 +12,7 @@ type alias Msg =
     Never
 
 
-page : Page String Model Msg a b c d e
+page : Page String Model Msg (Html Msg) a b c d e f g
 page =
     Page.sandbox
         { title = title
@@ -48,7 +48,7 @@ capitalize word =
             word
 
 
-view : Model -> Html msg
+view : Model -> Html Msg
 view model =
     div []
         [ h1 [] [ text "Users" ]

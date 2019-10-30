@@ -1,4 +1,7 @@
-module Application exposing (Application, create)
+module Application exposing
+    ( Application, create
+    , Options, defaultOptions
+    )
 
 {-|
 
@@ -7,15 +10,7 @@ module Application exposing (Application, create)
 
 @docs Application, create
 
-
-## Layouts
-
-@docs Layout
-
-
-## Transitions
-
-@docs Transition, fade, none
+@docs Options, defaultOptions
 
 -}
 
@@ -37,8 +32,26 @@ type alias Application flags globalModel globalMsg layoutModel layoutMsg =
     Platform.Program flags (Model flags globalModel layoutModel) (Msg globalMsg layoutMsg)
 
 
+
+-- Options
+
+
+type alias Options layoutMsg globalMsg htmlLayoutMsg htmlMsg =
+    { toHtml : htmlMsg -> Html (Msg globalMsg layoutMsg)
+    , map : (layoutMsg -> Msg globalMsg layoutMsg) -> htmlLayoutMsg -> htmlMsg
+    }
+
+
+defaultOptions : Options layoutMsg globalMsg (Html layoutMsg) (Html (Msg globalMsg layoutMsg))
+defaultOptions =
+    { toHtml = identity
+    , map = Html.map
+    }
+
+
 create :
-    { routing :
+    { options : Options layoutMsg globalMsg htmlLayoutMsg htmlMsg
+    , routing :
         { routes : Routes route
         , toPath : route -> String
         , notFound : route
@@ -55,7 +68,7 @@ create :
             -> ( globalModel, Cmd globalMsg, Cmd (Msg globalMsg layoutMsg) )
         , subscriptions : globalModel -> Sub globalMsg
         }
-    , page : Page.Page route layoutModel layoutMsg layoutModel layoutMsg globalModel globalMsg (Msg globalMsg layoutMsg)
+    , page : Page.Page route layoutModel layoutMsg htmlLayoutMsg layoutModel layoutMsg htmlLayoutMsg globalModel globalMsg (Msg globalMsg layoutMsg) htmlMsg
     }
     -> Application flags globalModel globalMsg layoutModel layoutMsg
 create config =
@@ -64,6 +77,7 @@ create config =
             config.page
                 { toModel = identity
                 , toMsg = identity
+                , map = always identity
                 }
     in
     Browser.application
@@ -94,10 +108,13 @@ create config =
         , subscriptions =
             subscriptions
                 { bundle = page.bundle
+                , map = config.options.map
                 }
         , view =
             view
-                { bundle = page.bundle
+                { toHtml = config.options.toHtml
+                , bundle = page.bundle
+                , map = config.options.map
                 }
         , onUrlChange = ChangedUrl
         , onUrlRequest = ClickedLink
@@ -281,9 +298,10 @@ navigate toPath url route =
 
 
 subscriptions :
-    { bundle :
+    { map : (layoutMsg -> Msg globalMsg layoutMsg) -> htmlLayoutMsg -> htmlMsg
+    , bundle :
         layoutModel
-        -> Page.Bundle layoutMsg globalModel globalMsg (Msg globalMsg layoutMsg)
+        -> Page.Bundle layoutMsg htmlLayoutMsg globalModel globalMsg (Msg globalMsg layoutMsg) htmlMsg
     }
     -> Model flags globalModel layoutModel
     -> Sub (Msg globalMsg layoutMsg)
@@ -293,6 +311,7 @@ subscriptions config model =
         { fromGlobalMsg = Global
         , fromPageMsg = Page
         , global = model.global
+        , map = config.map
         }
     ).subscriptions
 
@@ -302,9 +321,11 @@ subscriptions config model =
 
 
 view :
-    { bundle :
+    { map : (layoutMsg -> Msg globalMsg layoutMsg) -> htmlLayoutMsg -> htmlMsg
+    , toHtml : htmlMsg -> Html (Msg globalMsg layoutMsg)
+    , bundle :
         layoutModel
-        -> Page.Bundle layoutMsg globalModel globalMsg (Msg globalMsg layoutMsg)
+        -> Page.Bundle layoutMsg htmlLayoutMsg globalModel globalMsg (Msg globalMsg layoutMsg) htmlMsg
     }
     -> Model flags globalModel layoutModel
     -> Browser.Document (Msg globalMsg layoutMsg)
@@ -316,10 +337,11 @@ view config model =
                 { fromGlobalMsg = Global
                 , fromPageMsg = Page
                 , global = model.global
+                , map = config.map
                 }
     in
     { title = bundle.title
     , body =
-        [ bundle.view
+        [ config.toHtml bundle.view
         ]
     }

@@ -26,20 +26,19 @@ module Application.Page exposing
 
 -}
 
-import Html exposing (Html)
 
-
-type alias Page pageRoute pageModel pageMsg layoutModel layoutMsg globalModel globalMsg msg =
+type alias Page pageRoute pageModel pageMsg htmlPageMsg layoutModel layoutMsg htmlLayoutMsg globalModel globalMsg msg htmlMsg =
     { toModel : pageModel -> layoutModel
     , toMsg : pageMsg -> layoutMsg
+    , map : (pageMsg -> layoutMsg) -> htmlPageMsg -> htmlLayoutMsg
     }
-    -> Recipe pageRoute pageModel pageMsg layoutModel layoutMsg globalModel globalMsg msg
+    -> Recipe pageRoute pageModel pageMsg layoutModel layoutMsg htmlLayoutMsg globalModel globalMsg msg htmlMsg
 
 
-type alias Recipe pageRoute pageModel pageMsg layoutModel layoutMsg globalModel globalMsg msg =
+type alias Recipe pageRoute pageModel pageMsg layoutModel layoutMsg htmlLayoutMsg globalModel globalMsg msg htmlMsg =
     { init : pageRoute -> Init layoutModel layoutMsg globalModel globalMsg
     , update : pageMsg -> pageModel -> Update layoutModel layoutMsg globalModel globalMsg
-    , bundle : pageModel -> Bundle layoutMsg globalModel globalMsg msg
+    , bundle : pageModel -> Bundle layoutMsg htmlLayoutMsg globalModel globalMsg msg htmlMsg
     }
 
 
@@ -53,43 +52,44 @@ type alias Update layoutModel layoutMsg globalModel globalMsg =
     -> ( layoutModel, Cmd layoutMsg, Cmd globalMsg )
 
 
-keep : layoutModel -> Update layoutModel layoutMsg globalModel globalMsg
-keep model =
-    always ( model, Cmd.none, Cmd.none )
-
-
-type alias Bundle layoutMsg globalModel globalMsg msg =
+type alias Bundle layoutMsg htmlLayoutMsg globalModel globalMsg msg htmlMsg =
     { global : globalModel
     , fromGlobalMsg : globalMsg -> msg
     , fromPageMsg : layoutMsg -> msg
+    , map : (layoutMsg -> msg) -> htmlLayoutMsg -> htmlMsg
     }
     ->
         { title : String
-        , view : Html msg
+        , view : htmlMsg
         , subscriptions : Sub msg
         }
+
+
+keep : layoutModel -> Update layoutModel layoutMsg globalModel globalMsg
+keep model =
+    always ( model, Cmd.none, Cmd.none )
 
 
 
 -- STATIC
 
 
-type alias Static =
+type alias Static htmlPageMsg =
     { title : String
-    , view : Html Never
+    , view : htmlPageMsg
     }
 
 
 static :
-    Static
-    -> Page pageRoute () Never layoutModel layoutMsg globalModel globalMsg msg
-static page { toModel, toMsg } =
+    Static htmlPageMsg
+    -> Page pageRoute () Never htmlPageMsg layoutModel layoutMsg htmlLayoutMsg globalModel globalMsg msg htmlMsg
+static page { toModel, toMsg, map } =
     { init = \_ _ -> ( toModel (), Cmd.none, Cmd.none )
     , update = \_ model _ -> ( toModel model, Cmd.none, Cmd.none )
     , bundle =
         \_ context ->
             { title = page.title
-            , view = page.view |> Html.map (toMsg >> context.fromPageMsg)
+            , view = page.view |> map toMsg |> context.map context.fromPageMsg
             , subscriptions = Sub.none
             }
     }
@@ -99,18 +99,18 @@ static page { toModel, toMsg } =
 -- SANDBOX
 
 
-type alias Sandbox pageRoute pageModel pageMsg =
+type alias Sandbox pageRoute pageModel pageMsg htmlPageMsg =
     { title : pageModel -> String
     , init : pageRoute -> pageModel
     , update : pageMsg -> pageModel -> pageModel
-    , view : pageModel -> Html pageMsg
+    , view : pageModel -> htmlPageMsg
     }
 
 
 sandbox :
-    Sandbox pageRoute pageModel pageMsg
-    -> Page pageRoute pageModel pageMsg layoutModel layoutMsg globalModel globalMsg msg
-sandbox page { toModel, toMsg } =
+    Sandbox pageRoute pageModel pageMsg htmlPageMsg
+    -> Page pageRoute pageModel pageMsg htmlPageMsg layoutModel layoutMsg htmlLayoutMsg globalModel globalMsg msg htmlMsg
+sandbox page { toModel, toMsg, map } =
     { init =
         \pageRoute _ ->
             ( toModel (page.init pageRoute)
@@ -126,7 +126,7 @@ sandbox page { toModel, toMsg } =
     , bundle =
         \model context ->
             { title = page.title model
-            , view = page.view model |> Html.map (toMsg >> context.fromPageMsg)
+            , view = page.view model |> map toMsg |> context.map context.fromPageMsg
             , subscriptions = Sub.none
             }
     }
@@ -136,19 +136,19 @@ sandbox page { toModel, toMsg } =
 -- ELEMENT
 
 
-type alias Element pageRoute pageModel pageMsg =
+type alias Element pageRoute pageModel pageMsg htmlPageMsg =
     { title : pageModel -> String
     , init : pageRoute -> ( pageModel, Cmd pageMsg )
     , update : pageMsg -> pageModel -> ( pageModel, Cmd pageMsg )
-    , view : pageModel -> Html pageMsg
+    , view : pageModel -> htmlPageMsg
     , subscriptions : pageModel -> Sub pageMsg
     }
 
 
 element :
-    Element pageRoute pageModel pageMsg
-    -> Page pageRoute pageModel pageMsg layoutModel layoutMsg globalModel globalMsg msg
-element page { toModel, toMsg } =
+    Element pageRoute pageModel pageMsg htmlPageMsg
+    -> Page pageRoute pageModel pageMsg htmlPageMsg layoutModel layoutMsg htmlLayoutMsg globalModel globalMsg msg htmlMsg
+element page { toModel, toMsg, map } =
     { init =
         \pageRoute _ ->
             page.init pageRoute
@@ -160,7 +160,7 @@ element page { toModel, toMsg } =
     , bundle =
         \model context ->
             { title = page.title model
-            , view = page.view model |> Html.map (toMsg >> context.fromPageMsg)
+            , view = page.view model |> map toMsg |> context.map context.fromPageMsg
             , subscriptions = page.subscriptions model |> Sub.map (toMsg >> context.fromPageMsg)
             }
     }
@@ -170,38 +170,44 @@ element page { toModel, toMsg } =
 -- LAYOUT
 
 
-type alias Layout pageRoute pageModel pageMsg globalModel globalMsg msg =
-    { layout :
-        { page : Html msg
+type alias Layout pageRoute pageModel pageMsg globalModel globalMsg msg htmlPageMsg htmlMsg =
+    { map : (pageMsg -> msg) -> htmlPageMsg -> htmlMsg
+    , layout :
+        { page : htmlMsg
         , global : globalModel
         }
-        -> Html msg
-    , pages : Recipe pageRoute pageModel pageMsg pageModel pageMsg globalModel globalMsg msg
+        -> htmlMsg
+    , pages : Recipe pageRoute pageModel pageMsg pageModel pageMsg htmlPageMsg globalModel globalMsg msg htmlMsg
     }
 
 
 layout :
-    Layout pageRoute pageModel pageMsg globalModel globalMsg msg
-    -> Page pageRoute pageModel pageMsg layoutModel layoutMsg globalModel globalMsg msg
-layout options { toModel, toMsg } =
+    Layout pageRoute pageModel pageMsg globalModel globalMsg msg htmlPageMsg htmlMsg
+    -> Page pageRoute pageModel pageMsg htmlPageMsg layoutModel layoutMsg htmlLayoutMsg globalModel globalMsg msg htmlMsg
+layout options { toModel, toMsg, map } =
+    let
+        pages =
+            options.pages
+    in
     { init =
         \pageRoute global ->
-            options.pages.init pageRoute global
+            pages.init pageRoute global
                 |> truple toModel toMsg
     , update =
         \msg model global ->
-            options.pages.update msg model global
+            pages.update msg model global
                 |> truple toModel toMsg
     , bundle =
         \model context ->
             let
-                bundle : { title : String, view : Html msg, subscriptions : Sub msg }
+                bundle : { title : String, view : htmlMsg, subscriptions : Sub msg }
                 bundle =
-                    options.pages.bundle
+                    pages.bundle
                         model
                         { fromGlobalMsg = context.fromGlobalMsg
                         , fromPageMsg = toMsg >> context.fromPageMsg
                         , global = context.global
+                        , map = options.map
                         }
             in
             { title = bundle.title
@@ -219,19 +225,19 @@ layout options { toModel, toMsg } =
 -- COMPONENT
 
 
-type alias Component pageRoute pageModel pageMsg globalModel globalMsg =
+type alias Component pageRoute pageModel pageMsg globalModel globalMsg htmlPageMsg =
     { title : globalModel -> pageModel -> String
     , init : globalModel -> pageRoute -> ( pageModel, Cmd pageMsg, Cmd globalMsg )
     , update : globalModel -> pageMsg -> pageModel -> ( pageModel, Cmd pageMsg, Cmd globalMsg )
     , subscriptions : globalModel -> pageModel -> Sub pageMsg
-    , view : globalModel -> pageModel -> Html pageMsg
+    , view : globalModel -> pageModel -> htmlPageMsg
     }
 
 
 component :
-    Component pageRoute pageModel pageMsg globalModel globalMsg
-    -> Page pageRoute pageModel pageMsg layoutModel layoutMsg globalModel globalMsg msg
-component page { toModel, toMsg } =
+    Component pageRoute pageModel pageMsg globalModel globalMsg htmlPageMsg
+    -> Page pageRoute pageModel pageMsg htmlPageMsg layoutModel layoutMsg htmlLayoutMsg globalModel globalMsg msg htmlMsg
+component page { toModel, toMsg, map } =
     { init =
         \pageRoute context ->
             page.init context.global pageRoute
@@ -243,7 +249,7 @@ component page { toModel, toMsg } =
     , bundle =
         \model context ->
             { title = page.title context.global model
-            , view = page.view context.global model |> Html.map (toMsg >> context.fromPageMsg)
+            , view = page.view context.global model |> map toMsg |> context.map context.fromPageMsg
             , subscriptions = page.subscriptions context.global model |> Sub.map (toMsg >> context.fromPageMsg)
             }
     }

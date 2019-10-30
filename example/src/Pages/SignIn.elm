@@ -29,7 +29,7 @@ type Field
     | Password
 
 
-page : Page () Model Msg a b Global.Model Global.Msg c
+page : Page () Model Msg (Html Msg) a b c Global.Model Global.Msg d e
 page =
     Page.component
         { title = title

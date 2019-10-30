@@ -22,7 +22,7 @@ type Msg
     | CatResponded (Result Http.Error String)
 
 
-page : Page () Model Msg a b c d e
+page : Page () Model Msg (Html Msg) a b c d e f g
 page =
     Page.element
         { title = always "Random"
