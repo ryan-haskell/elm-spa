@@ -1,13 +1,13 @@
 {
   "name": "elm-spa",
   "version": "1.0.0",
-  "description": "> a barebones example app made with ryannhg/elm-app",
+  "description": "a way to make single page applications in elm",
   "main": "index.js",
   "scripts": {
-    "dev": "parcel example/index.html",
+    "dev": "parcel examples/html/index.html",
     "build": "npm run build:example",
     "build:generator": "(cd cli && elm make src/Main.elm --optimize --output dist/elm.compiled.js > /dev/null)",
-    "build:example": "parcel build example/index.html",
+    "build:example": "parcel build examples/html/index.html",
     "generate": "npm run build:generator && node ./cli/index.js run example"
   },
   "bin": "./cli/index.js",
