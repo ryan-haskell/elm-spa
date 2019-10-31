@@ -4,7 +4,6 @@ module Generated.Route.Settings exposing
     , Route(..)
     , UserParams
     , routes
-    , shouldTransition
     , toPath
     )
 
@@ -29,7 +28,6 @@ type Route
     | User UserParams
 
 
-routes : List (Route.Route Route)
 routes =
     [ Route.path "account" Account
     , Route.path "notifications" Notifications
@@ -37,7 +35,6 @@ routes =
     ]
 
 
-toPath : Route -> String
 toPath route =
     case route of
         Account _ ->
@@ -48,13 +45,3 @@ toPath route =
 
         User _ ->
             "/user"
-
-
-shouldTransition : List String -> List String -> Bool
-shouldTransition current next =
-    case ( current, next ) of
-        ( "settings" :: _, "settings" :: _ ) ->
-            True
-
-        _ ->
-            False

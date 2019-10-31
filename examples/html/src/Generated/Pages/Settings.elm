@@ -5,9 +5,8 @@ module Generated.Pages.Settings exposing
     )
 
 import Application.Page as Application
-import Generated.Route.Settings as Route exposing (Route)
-import Global
-import Html exposing (..)
+import Generated.Route.Settings as Route
+import Html
 import Layouts.Settings as Layout
 import Pages.Settings.Account as Account
 import Pages.Settings.Notifications as Notifications
@@ -26,7 +25,6 @@ type Msg
     | UserMsg User.Msg
 
 
-page : Application.Page Route Model Msg (Html Msg) a b (Html b) Global.Model Global.Msg c (Html c)
 page =
     Application.layout
         { map = Html.map
@@ -39,7 +37,6 @@ page =
         }
 
 
-account : Application.Recipe Route.AccountParams Account.Model Account.Msg Model Msg (Html Msg) Global.Model Global.Msg a (Html a)
 account =
     Account.page
         { toModel = AccountModel
@@ -48,7 +45,6 @@ account =
         }
 
 
-notifications : Application.Recipe Route.NotificationsParams Notifications.Model Notifications.Msg Model Msg (Html Msg) Global.Model Global.Msg a (Html a)
 notifications =
     Notifications.page
         { toModel = NotificationsModel
@@ -57,7 +53,6 @@ notifications =
         }
 
 
-user : Application.Recipe Route.UserParams User.Model User.Msg Model Msg (Html Msg) Global.Model Global.Msg a (Html a)
 user =
     User.page
         { toModel = UserModel
@@ -66,7 +61,6 @@ user =
         }
 
 
-init : Route -> Application.Init Model Msg Global.Model Global.Msg
 init route_ =
     case route_ of
         Route.Account route ->
@@ -79,7 +73,6 @@ init route_ =
             user.init route
 
 
-update : Msg -> Model -> Application.Update Model Msg Global.Model Global.Msg
 update msg_ model_ =
     case ( msg_, model_ ) of
         ( AccountMsg msg, AccountModel model ) ->
@@ -95,7 +88,6 @@ update msg_ model_ =
             Application.keep model_
 
 
-bundle : Model -> Application.Bundle Msg (Html Msg) Global.Model Global.Msg a (Html a)
 bundle model_ =
     case model_ of
         AccountModel model ->

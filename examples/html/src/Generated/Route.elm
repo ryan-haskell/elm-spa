@@ -1,19 +1,16 @@
 module Generated.Route exposing
-    ( Route(..)
+    ( CounterParams
+    , IndexParams
+    , NotFoundParams
+    , RandomParams
+    , Route(..)
+    , SettingsParams
+    , SignInParams
+    , UsersParams
     , routes
-    , toPath
     , shouldTransition
-    , CounterParams, IndexParams, NotFoundParams, RandomParams, SettingsParams, SignInParams, UsersParams
+    , toPath
     )
-
-{-|
-
-@docs Route
-@docs routes
-@docs toPath
-@docs shouldTransition
-
--}
 
 import Application.Route as Route
 import Generated.Route.Settings as Settings
