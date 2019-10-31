@@ -1,8 +1,8 @@
 {
-  "name": "elm-spa",
-  "version": "1.0.0",
+  "name": "@ryannhg/elm-spa",
+  "version": "0.0.2",
   "description": "a way to make single page applications in elm",
-  "main": "index.js",
+  "main": "cli/index.js",
   "scripts": {
     "dev": "npm run generate && parcel examples/html/index.html",
     "build": "npm run generate && npm run build:example",
