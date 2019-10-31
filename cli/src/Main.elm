@@ -42,11 +42,11 @@ decoder =
     D.map fromFlags flagsDecoder
 
 
-fromFlags : Flags -> Decoder (List NewFile)
+fromFlags : Flags -> List NewFile
 fromFlags { items, options } =
      items
-         |> D.map (toFileInfo [])
-         |> D.map (fromData options)
+         |> toFileInfo []
+         |> fromData options
 
 
 type alias Flags =
