@@ -4,15 +4,15 @@
   "description": "a way to make single page applications in elm",
   "main": "index.js",
   "scripts": {
-    "dev": "parcel examples/html/index.html",
-    "build": "npm run build:example",
+    "dev": "npm run generate && parcel examples/html/index.html",
+    "build": "npm run generate && npm run build:example",
     "build:generator": "(cd cli && elm make src/Main.elm --optimize --output dist/elm.compiled.js > /dev/null)",
     "build:example": "parcel build examples/html/index.html",
     "generate": "npm run build:generator && node ./cli/index.js run examples/html"
   },
   "bin": "./cli/index.js",
   "keywords": [],
-  "author": "",
+  "author": "Ryan Haskell-Glatz",
   "license": "ISC",
   "devDependencies": {
     "elm": "0.19.1-3",

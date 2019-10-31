@@ -43,9 +43,13 @@ const passToElm = (json) => new Promise((resolve) => {
   app.ports.toJs.subscribe(stuff => resolve(stuff))
 })
 
-const writeToFolder = (folder) => ({ filepathSegments, contents }) =>
+const writeToFolder = (srcFolder) => ({ filepathSegments, contents }) =>
   new Promise((resolve, reject) => {
-    const filepath = path.join(folder, ...filepathSegments)
+    const folder = path.join(srcFolder, ...filepathSegments.slice(0, -1))
+    if (!fs.existsSync(folder)) {
+      fs.mkdirSync(folder)
+    }
+    const filepath = path.join(srcFolder, ...filepathSegments)
     fs.writeFile(filepath, contents, { encoding: 'utf8' }, (err, _) => err ? reject(err) : resolve(filepath))
   })
 
