@@ -1,6 +1,18 @@
 # the cli tool
 > you _could_ type everything out... or...
 
+```
+usage: elm-spa <command> [options]
+
+commands:
+  help                      prints this help screen
+  build [options] <path>    generates pages and routes
+  init [options] <path>     scaffolds a new project at <path>
+
+options:
+  --ui=<Html|Element>       what your \`view\` returns (default: Html)
+```
+
 ## so the package makes wiring things up consistent
 
 And you know what loves consistency? __Computers!__

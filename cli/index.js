@@ -5,9 +5,9 @@ const utils = {
   bold: str => '\033[1m' + str + '\033[0m'
 }
 
-const main = ([ command, ...args = [] ] = []) => {
+const main = ([ command, ...args ] = []) => {
   const commands = { help, init, build }
-  return (commands[command] || commands.help)(args)
+  return (commands[command] || commands.help)(args || [])
 }
 
 const help = _ => console.info(
@@ -23,7 +23,7 @@ options:
 `)
 
 const init = _ =>
-  console.info(`Hey there, this still needs implementation 😬`)
+  console.info(`\nHey there! This still needs implementation... 😬\n`)
 
 const build = (args = []) => {
   const fs = require('fs')
@@ -33,11 +33,11 @@ const build = (args = []) => {
 
   const optionArgs = args.filter(a => a.startsWith('--'))
   const nonOptionArgs = args.filter(a => a.startsWith('--') === false)
-  const grabOption = (prefix) => optionArgs.filter(option => option.startsWith(prefix)).split(prefix)[1]
+  const grabOption = (prefix) => (optionArgs.filter(option => option.startsWith(prefix))[0] || '').split(prefix)[1]
 
   const relative = nonOptionArgs.slice(-1)[0] || '.'
   const options = {
-    ui: grabOption('--ui=')
+    ui: grabOption('--ui=') || 'Html'
   }
 
   const exploreFolder = (filepath) => {
