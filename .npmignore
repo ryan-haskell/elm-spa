@@ -1,0 +1,10 @@
+.cache
+./cli/elm-stuff
+./cli/src
+./cli/elm.json
+./dist
+./examples
+./node_modules
+./src
+./elm*.json
+./netlify.toml
