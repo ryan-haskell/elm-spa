@@ -4,8 +4,8 @@ import Item exposing (Item)
 import Templates.Shared as Shared
 
 
-contents : List Item -> List String -> String
-contents items path =
+contents : String -> List Item -> List String -> String
+contents ui items path =
     """module {{module_}} exposing
     ( Model
     , Msg
@@ -96,7 +96,7 @@ page =
                 }
                 items
             )
-        |> String.replace "{{ui}}" "Html"
+        |> String.replace "{{ui}}" ui
 
 
 module_ : List String -> String
