@@ -39,9 +39,38 @@ parse =
 
 decoder : Decoder (List NewFile)
 decoder =
-    D.list Item.decoder
-        |> D.map (toFileInfo [])
-        |> D.map fromData
+    D.map fromFlags flagsDecoder
+
+
+fromFlags : Flags -> Decoder (List NewFile)
+fromFlags { items, options } =
+     items
+         |> D.map (toFileInfo [])
+         |> D.map (fromData options)
+
+
+type alias Flags =
+    { items : List Item
+    , options : Options
+    }
+
+
+type alias Options =
+    { ui : String
+    }
+
+
+flagsDecoder : Decoder Flags
+flagsDecoder =
+    D.map2 Flags
+        (D.field "folders" (D.list Item.decoder))
+        (D.field "options" optionsDecoder)
+
+
+optionsDecoder : Decoder Options
+optionsDecoder =
+    D.map Options
+        (D.field "ui" D.string)
 
 
 type alias FileInfo =
@@ -61,23 +90,23 @@ toFileInfo path items =
         (Item.folders items)
 
 
-fromData : List FileInfo -> List NewFile
-fromData fileInfos =
+fromData : Options -> List FileInfo -> List NewFile
+fromData options fileInfos =
     List.concat
         [ List.map routeFile fileInfos
-        , List.map pageFile fileInfos
+        , List.map (pageFile options) fileInfos
         ]
+
+
+pageFile : Options -> FileInfo -> NewFile
+pageFile { ui } { path, items } =
+    { filepathSegments = segments "Pages" path
+    , contents = Templates.Pages.contents ui items path
+    }
 
 
 routeFile : FileInfo -> NewFile
 routeFile { path, items } =
-    { filepathSegments = segments "Pages" path
-    , contents = Templates.Pages.contents items path
-    }
-
-
-pageFile : FileInfo -> NewFile
-pageFile { path, items } =
     { filepathSegments = segments "Route" path
     , contents = Templates.Route.contents items path
     }
