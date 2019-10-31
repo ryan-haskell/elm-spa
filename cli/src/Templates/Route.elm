@@ -1,25 +1,18 @@
-module Templates.TopLevelRoute exposing (contents)
+module Templates.Route exposing (contents)
 
 import Item exposing (Item)
 import Templates.Shared as Shared
 
 
-contents : List Item -> String
-contents items =
-    """module Generated.Route exposing
+contents : List Item -> List String -> String
+contents items path =
+    """module {{module_}} exposing
     ( Route(..)
     , routes
     , toPath
     , {{exports}}
     )
 
-{-|
-
-@docs Route
-@docs routes
-@docs toPath
-
--}
 
 import Application.Route as Route
 {{folderImports}}
@@ -34,20 +27,19 @@ import Application.Route as Route
 {{routeTypes}}
 
 
-routes : List (Route.Route Route)
 routes =
     [ {{routes}}
     ]
 
 
-toPath : Route -> String
 toPath route =
     case route of
         {{toPath}}
 
 """
+        |> String.replace "{{module_}}" (module_ path)
         |> String.replace "{{exports}}" (exports items)
-        |> String.replace "{{folderImports}}" (folderImports items)
+        |> String.replace "{{folderImports}}" (folderImports items path)
         |> String.replace "{{fileParams}}" (fileParams items)
         |> String.replace "{{folderParams}}" (folderParams items)
         |> String.replace "{{routeTypes}}"
@@ -62,6 +54,11 @@ toPath route =
         |> String.replace "{{toPath}}" (toPath items)
 
 
+module_ : List String -> String
+module_ path =
+    "Generated.Route" ++ (path |> List.map ((++) ".") |> String.concat)
+
+
 exports : List Item -> String
 exports items =
     items
@@ -70,10 +67,20 @@ exports items =
         |> String.join "\n    , "
 
 
-folderImports : List Item -> String
-folderImports items =
+folderImports : List Item -> List String -> String
+folderImports items path =
     Item.folders items
-        |> List.map (\{ name } -> String.concat [ "import Generated.Route.", name, " as ", name ])
+        |> List.map
+            (\{ name } ->
+                String.concat
+                    [ "import Generated.Route"
+                    , path |> List.map ((++) ".") |> String.concat
+                    , "."
+                    , name
+                    , " as "
+                    , name
+                    ]
+            )
         |> String.join "\n"
 
 
@@ -121,17 +128,20 @@ routes items =
                     if name == "Index" then
                         "Route.index Index"
 
+                    else if name == "Slug" then
+                        "Route.slug Slug"
+
                     else
-                        String.concat [ "Route.path \"", path name, "\" ", name ]
+                        String.concat [ "Route.path \"", pathOf name, "\" ", name ]
                 )
         , Item.folders items
-            |> List.map (\{ name } -> String.concat [ "Route.folder \"", path name, "\" ", name, " ", name, ".routes" ])
+            |> List.map (\{ name } -> String.concat [ "Route.folder \"", pathOf name, "\" ", name, " ", name, ".routes" ])
         ]
         |> String.join "\n    , "
 
 
-path : String -> String
-path name =
+pathOf : String -> String
+pathOf name =
     name
         |> String.toList
         |> List.map
@@ -158,7 +168,7 @@ toPath items =
                         String.concat
                             [ name
                             , " _ ->\n            \"/"
-                            , path name
+                            , pathOf name
                             , "\""
                             ]
                 )
@@ -168,7 +178,7 @@ toPath items =
                     String.concat
                         [ name
                         , " route_ ->\n            \"/"
-                        , path name
+                        , pathOf name
                         , "\" ++ "
                         , name
                         , ".toPath route_"

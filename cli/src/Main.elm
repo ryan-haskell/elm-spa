@@ -2,8 +2,8 @@ port module Main exposing (main)
 
 import Item exposing (Item)
 import Json.Decode as D exposing (Decoder)
-import Templates.TopLevelPages
-import Templates.TopLevelRoute
+import Templates.Pages
+import Templates.Route
 
 
 port toJs : List NewFile -> Cmd msg
@@ -40,38 +40,72 @@ parse =
 decoder : Decoder (List NewFile)
 decoder =
     D.list Item.decoder
+        |> D.map (toFileInfo [])
         |> D.map fromData
 
 
-fromData : List Item -> List NewFile
-fromData items =
+type alias FileInfo =
+    { path : List String
+    , items : List Item
+    }
+
+
+toFileInfo : List String -> List Item -> List FileInfo
+toFileInfo path items =
+    List.foldl
+        (\folder infos ->
+            infos ++ toFileInfo (path ++ [ folder.name ]) folder.children
+        )
+        [ { path = path, items = items }
+        ]
+        (Item.folders items)
+
+
+fromData : List FileInfo -> List NewFile
+fromData fileInfos =
     List.concat
-        [ [ topLevelRoute items ]
-        , [ topLevelPages items ]
-        , nestedRoutes items
-        , nestedPages items
+        [ List.map routeFile fileInfos
+        , List.map pageFile fileInfos
         ]
 
 
-topLevelPages : List Item -> NewFile
-topLevelPages items =
-    { filepathSegments = [ "Generated", "Pages.elm" ]
-    , contents = Templates.TopLevelPages.contents items
+routeFile : FileInfo -> NewFile
+routeFile { path, items } =
+    { filepathSegments = segments "Pages" path
+    , contents = Templates.Pages.contents items path
     }
 
 
-topLevelRoute : List Item -> NewFile
-topLevelRoute items =
-    { filepathSegments = [ "Generated", "Route.elm" ]
-    , contents = Templates.TopLevelRoute.contents items
+pageFile : FileInfo -> NewFile
+pageFile { path, items } =
+    { filepathSegments = segments "Route" path
+    , contents = Templates.Route.contents items path
     }
 
 
-nestedRoutes : List Item -> List NewFile
-nestedRoutes _ =
-    []
+segments : String -> List String -> List String
+segments prefix path =
+    "Generated"
+        :: (if List.isEmpty path then
+                [ prefix ++ ".elm" ]
+
+            else
+                prefix :: appendToLast ".elm" path
+           )
 
 
-nestedPages : List Item -> List NewFile
-nestedPages _ =
-    []
+appendToLast : String -> List String -> List String
+appendToLast str list =
+    let
+        lastIndex =
+            List.length list - 1
+    in
+    List.indexedMap
+        (\i value ->
+            if i == lastIndex then
+                value ++ str
+
+            else
+                value
+        )
+        list

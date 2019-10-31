@@ -1,27 +1,23 @@
-module Templates.TopLevelPages exposing (contents)
+module Templates.Pages exposing (contents)
 
 import Item exposing (Item)
 import Templates.Shared as Shared
 
 
-contents : List Item -> String
-contents items =
-    """module Generated.Pages exposing
+contents : List Item -> List String -> String
+contents items path =
+    """module {{module_}} exposing
     ( Model
     , Msg
     , page
     )
 
-import Application.Page as Page exposing (Page)
+import Application.Page as Page
 {{folderImports}}
-import Generated.Route as Route exposing (Route)
-import Global
-import Layouts.Main as Layout
+import {{routeModule}} as Route
+import {{ui}}
+import {{layoutModule}} as Layout
 {{fileImports}}
-
-
-
--- MODEL & MSG
 
 
 {{models}}
@@ -30,10 +26,10 @@ import Layouts.Main as Layout
 {{msgs}}
 
 
-page : Page Route Model Msg a b Global.Model Global.Msg c
 page =
     Page.layout
-        { view = Layout.view
+        { map = {{ui}}.map
+        , view = Layout.view
         , pages =
             { init = init
             , update = update
@@ -42,49 +38,30 @@ page =
         }
 
 
-
--- RECIPES
-
-
 {{recipes}}
-
-
-
--- INIT
 
 
 {{init}}
 
 
-
--- UPDATE
-
-
 {{update}}
-
-        _ ->
-            Page.keep model_
-
-
-
--- BUNDLE
+{{updateLastCase}}
 
 
 {{bundle}}
 
 """
-        |> String.replace "{{fileImports}}" (fileImports items)
-        |> String.replace "{{folderImports}}" (folderImports items)
+        |> String.replace "{{module_}}" (module_ path)
+        |> String.replace "{{routeModule}}" (routeModule path)
+        |> String.replace "{{layoutModule}}" (layoutModule path)
+        |> String.replace "{{fileImports}}" (fileImports items path)
+        |> String.replace "{{folderImports}}" (folderImports items path)
         |> String.replace "{{models}}" (Shared.customTypes "Model" items)
         |> String.replace "{{msgs}}" (Shared.customTypes "Msg" items)
         |> String.replace "{{recipes}}" (recipes items)
         |> String.replace "{{init}}"
             (topLevelFunction
                 { name = "init"
-                , types =
-                    { input = "Route"
-                    , output = "Page.Init Model Msg Global.Model Global.Msg"
-                    }
                 , inputs = "route_"
                 , caseExpression =
                     { value = "route_"
@@ -97,10 +74,6 @@ page =
         |> String.replace "{{update}}"
             (topLevelFunction
                 { name = "update"
-                , types =
-                    { input = "Msg -> Model"
-                    , output = "Page.Update Model Msg Global.Model Global.Msg"
-                    }
                 , inputs = "msg_ model_"
                 , caseExpression =
                     { value = "( msg_, model_ )"
@@ -110,13 +83,10 @@ page =
                 }
                 items
             )
+        |> String.replace "{{updateLastCase}}" (updateLastCase items)
         |> String.replace "{{bundle}}"
             (topLevelFunction
                 { name = "bundle"
-                , types =
-                    { input = "Model"
-                    , output = "Page.Bundle Msg Global.Model Global.Msg a"
-                    }
                 , inputs = "model_"
                 , caseExpression =
                     { value = "model_"
@@ -126,6 +96,28 @@ page =
                 }
                 items
             )
+        |> String.replace "{{ui}}" "Html"
+
+
+module_ : List String -> String
+module_ path =
+    "Generated.Pages" ++ (path |> List.map ((++) ".") |> String.concat)
+
+
+routeModule : List String -> String
+routeModule path =
+    "Generated.Route" ++ (path |> List.map ((++) ".") |> String.concat)
+
+
+layoutModule : List String -> String
+layoutModule path =
+    "Layouts"
+        ++ (if path == [] then
+                ".Main"
+
+            else
+                path |> List.map ((++) ".") |> String.concat
+           )
 
 
 {-| fileImports
@@ -137,10 +129,20 @@ page =
     import Pages.SignIn as SignIn
 
 -}
-fileImports : List Item -> String
-fileImports items =
+fileImports : List Item -> List String -> String
+fileImports items path =
     Item.files items
-        |> List.map (\file -> String.concat [ "import Pages.", file.name, " as ", file.name ])
+        |> List.map
+            (\file ->
+                String.concat
+                    [ "import Pages"
+                    , path |> List.map ((++) ".") |> String.concat
+                    , "."
+                    , file.name
+                    , " as "
+                    , file.name
+                    ]
+            )
         |> String.join "\n"
 
 
@@ -150,10 +152,20 @@ fileImports items =
     import Generated.Pages.Users as Users
 
 -}
-folderImports : List Item -> String
-folderImports items =
+folderImports : List Item -> List String -> String
+folderImports items path =
     Item.folders items
-        |> List.map (\folder -> String.concat [ "import Generated.Pages.", folder.name, " as ", folder.name ])
+        |> List.map
+            (\folder ->
+                String.concat
+                    [ "import Generated.Pages"
+                    , path |> List.map ((++) ".") |> String.concat
+                    , "."
+                    , folder.name
+                    , " as "
+                    , folder.name
+                    ]
+            )
         |> String.join "\n"
 
 
@@ -177,11 +189,11 @@ recipes items =
 -}
 recipe : String -> String
 recipe name =
-    """{{camelCase}} : Page.Recipe Route.{{name}}Params {{name}}.Model {{name}}.Msg Model Msg Global.Model Global.Msg msg
-{{camelCase}} =
+    """{{camelCase}} =
     {{name}}.page
         { toModel = {{name}}Model
         , toMsg = {{name}}Msg
+        , map = {{ui}}.map
         }"""
         |> String.replace "{{camelCase}}" (camelCase name)
         |> String.replace "{{name}}" name
@@ -204,10 +216,6 @@ camelCase name =
 
 type alias TopLevelFunctionOptions =
     { name : String
-    , types :
-        { input : String
-        , output : String
-        }
     , inputs : String
     , caseExpression : CaseExpression
     }
@@ -224,10 +232,6 @@ type alias CaseExpression =
 
     topLevelFunction
         { name = "update"
-        , types =
-            { input = "Msg -> Model"
-            , output = "Page.Update Model Msg Global.Model Global.Msg"
-            }
         , inputs = "msg_ model_"
         , caseExpression =
             { value = "( msg_, model_ )"
@@ -237,7 +241,6 @@ type alias CaseExpression =
         }
         [ "Counter", "Index", "NotFound" ]
 
-    update : Msg -> Model -> Page.Update Model Msg Global.Model Global.Msg
     update msg_ model_ =
         case ( msg_, model_ ) of
             ( CounterMsg msg, CounterModel model ) ->
@@ -252,13 +255,10 @@ type alias CaseExpression =
 -}
 topLevelFunction : TopLevelFunctionOptions -> List Item -> String
 topLevelFunction options items =
-    """{{name}} : {{types.input}} -> {{types.output}}
-{{name}} {{inputs}} =
+    """{{name}} {{inputs}} =
     case {{caseExpression.value}} of
         {{conditions}}"""
         |> String.replace "{{name}}" options.name
-        |> String.replace "{{types.input}}" options.types.input
-        |> String.replace "{{types.output}}" options.types.output
         |> String.replace "{{inputs}}" options.inputs
         |> String.replace "{{caseExpression.value}}" options.caseExpression.value
         |> String.replace "{{conditions}}" (conditions options.caseExpression items)
@@ -276,3 +276,14 @@ conditions caseExpression items =
                     |> String.replace "{{result}}" (caseExpression.result name)
             )
         |> String.join "\n\n        "
+
+
+updateLastCase : List a -> String
+updateLastCase list =
+    if List.length list > 1 then
+        """
+        _ ->
+            Page.keep model_"""
+
+    else
+        ""

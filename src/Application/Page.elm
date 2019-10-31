@@ -172,7 +172,7 @@ element page { toModel, toMsg, map } =
 
 type alias Layout pageRoute pageModel pageMsg globalModel globalMsg msg htmlPageMsg htmlMsg =
     { map : (pageMsg -> msg) -> htmlPageMsg -> htmlMsg
-    , layout :
+    , view :
         { page : htmlMsg
         , global : globalModel
         }
@@ -184,7 +184,7 @@ type alias Layout pageRoute pageModel pageMsg globalModel globalMsg msg htmlPage
 layout :
     Layout pageRoute pageModel pageMsg globalModel globalMsg msg htmlPageMsg htmlMsg
     -> Page pageRoute pageModel pageMsg htmlPageMsg layoutModel layoutMsg htmlLayoutMsg globalModel globalMsg msg htmlMsg
-layout options { toModel, toMsg, map } =
+layout options { toModel, toMsg } =
     let
         pages =
             options.pages
@@ -212,7 +212,7 @@ layout options { toModel, toMsg, map } =
             in
             { title = bundle.title
             , view =
-                options.layout
+                options.view
                     { page = bundle.view
                     , global = context.global
                     }

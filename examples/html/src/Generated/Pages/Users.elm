@@ -4,7 +4,8 @@ module Generated.Pages.Users exposing
     , page
     )
 
-import Application.Page as Application
+import Application.Page as Page
+
 import Generated.Route.Users as Route
 import Html
 import Layouts.Users as Layout
@@ -20,9 +21,9 @@ type Msg
 
 
 page =
-    Application.layout
+    Page.layout
         { map = Html.map
-        , layout = Layout.view
+        , view = Layout.view
         , pages =
             { init = init
             , update = update
@@ -51,7 +52,9 @@ update msg_ model_ =
             slug.update msg model
 
 
+
 bundle model_ =
     case model_ of
         SlugModel model ->
             slug.bundle model
+

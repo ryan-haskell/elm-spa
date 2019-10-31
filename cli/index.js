@@ -11,7 +11,7 @@ const main = ([ command, ...args ] = []) => {
     generate: generate
   }
 
-  return (commands[command] || commands['help'])(args || [])
+  return (commands[command] || commands.help)(args || [])
 }
 
 const generate = ([ relative = '.' ] = []) =>
@@ -38,7 +38,7 @@ const dir = (filepath) => {
     .then(utils.all(tag))
 }
 
-const passToElm = (json) => new Promise((resolve, reject) => {
+const passToElm = (json) => new Promise((resolve) => {
   const app = Elm.Main.init({ flags: json })
   app.ports.toJs.subscribe(stuff => resolve(stuff))
 })

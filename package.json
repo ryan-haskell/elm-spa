@@ -8,7 +8,7 @@
     "build": "npm run build:example",
     "build:generator": "(cd cli && elm make src/Main.elm --optimize --output dist/elm.compiled.js > /dev/null)",
     "build:example": "parcel build examples/html/index.html",
-    "generate": "npm run build:generator && node ./cli/index.js run example"
+    "generate": "npm run build:generator && node ./cli/index.js run examples/html"
   },
   "bin": "./cli/index.js",
   "keywords": [],

@@ -40,7 +40,7 @@ type Msg
 page =
     Page.layout
         { map = Html.map
-        , layout = Layout.view
+        , view = Layout.view
         , pages =
             { init = init
             , update = update
@@ -178,3 +178,4 @@ bundle model_ =
 
         UsersModel model ->
             users.bundle model
+

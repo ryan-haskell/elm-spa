@@ -1,16 +1,16 @@
 module Generated.Route exposing
-    ( CounterParams
+    ( Route(..)
+    , routes
+    , toPath
+    , CounterParams
     , IndexParams
     , NotFoundParams
     , RandomParams
-    , Route(..)
     , SettingsParams
     , SignInParams
     , UsersParams
-    , routes
-    , shouldTransition
-    , toPath
     )
+
 
 import Application.Route as Route
 import Generated.Route.Settings as Settings
@@ -44,7 +44,7 @@ type alias SettingsParams =
 type alias UsersParams =
     Users.Route
 
-
+ 
 type Route
     = Counter CounterParams
     | Index IndexParams
@@ -55,7 +55,6 @@ type Route
     | Users UsersParams
 
 
-routes : List (Route.Route Route)
 routes =
     [ Route.path "counter" Counter
     , Route.index Index
@@ -67,7 +66,6 @@ routes =
     ]
 
 
-toPath : Route -> String
 toPath route =
     case route of
         Counter _ ->
@@ -91,7 +89,3 @@ toPath route =
         Users route_ ->
             "/users" ++ Users.toPath route_
 
-
-shouldTransition : List String -> List String -> Bool
-shouldTransition _ _ =
-    True

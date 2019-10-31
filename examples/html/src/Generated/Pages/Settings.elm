@@ -4,7 +4,8 @@ module Generated.Pages.Settings exposing
     , page
     )
 
-import Application.Page as Application
+import Application.Page as Page
+
 import Generated.Route.Settings as Route
 import Html
 import Layouts.Settings as Layout
@@ -26,9 +27,9 @@ type Msg
 
 
 page =
-    Application.layout
+    Page.layout
         { map = Html.map
-        , layout = Layout.view
+        , view = Layout.view
         , pages =
             { init = init
             , update = update
@@ -85,7 +86,7 @@ update msg_ model_ =
             user.update msg model
 
         _ ->
-            Application.keep model_
+            Page.keep model_
 
 
 bundle model_ =
@@ -98,3 +99,4 @@ bundle model_ =
 
         UserModel model ->
             user.bundle model
+

@@ -1,13 +1,15 @@
 module Generated.Route.Settings exposing
-    ( AccountParams
-    , NotificationsParams
-    , Route(..)
-    , UserParams
+    ( Route(..)
     , routes
     , toPath
+    , AccountParams
+    , NotificationsParams
+    , UserParams
     )
 
+
 import Application.Route as Route
+
 
 
 type alias AccountParams =
@@ -22,6 +24,9 @@ type alias UserParams =
     ()
 
 
+
+
+ 
 type Route
     = Account AccountParams
     | Notifications NotificationsParams
@@ -45,3 +50,4 @@ toPath route =
 
         User _ ->
             "/user"
+
