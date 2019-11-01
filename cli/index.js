@@ -1,8 +1,23 @@
 #!/usr/bin/env node
+const fs = require('fs')
+const path = require('path')
+const cwd = process.cwd()
 
 const utils = {
   all: fn => items => Promise.all(items.map(fn)),
-  bold: str => '\033[1m' + str + '\033[0m'
+  bold: str => '\033[1m' + str + '\033[0m',
+  cp (src, dest) {
+    const exists = fs.existsSync(src)
+    const stats = exists && fs.statSync(src)
+    if (stats.isDirectory()) {
+      fs.mkdirSync(dest)
+      fs.readdirSync(src).forEach(child =>
+        this.cp(path.join(src, child), path.join(dest, child))
+      )
+    } else {
+      fs.copyFileSync(src, dest)
+    }
+  }
 }
 
 const main = ([ command, ...args ] = []) => {
@@ -16,19 +31,20 @@ const help = _ => console.info(
 commands:
   help                      prints this help screen
   build [options] <path>    generates pages and routes
-  init [options] <path>     scaffolds a new project at <path>
+  init <path>               scaffolds a new project at <path>
 
 options:
   --ui=<Html|Element>       what your \`view\` returns (default: Html)
 `)
 
-const init = _ =>
-  console.info(`\nHey there! This still needs implementation... 😬\n`)
+const init = ([ relative = '.' ] = []) => {
+  const src = path.join(__dirname, 'initial-project')
+  const dest = path.join(cwd, relative)
+  if (fs.existsSync(dest)) fs.rmdirSync(dest)
+  utils.cp(src, dest)
+}
 
 const build = (args = []) => {
-  const fs = require('fs')
-  const path = require('path')
-  const cwd = process.cwd()
   const { Elm } = require('./dist/elm.compiled.js')
 
   const optionArgs = args.filter(a => a.startsWith('--'))
