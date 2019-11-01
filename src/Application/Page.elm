@@ -1,6 +1,5 @@
 module Application.Page exposing
-    ( Page
-    , Static, static
+    ( Static, static
     , Sandbox, sandbox
     , Element, element
     , Component, component
@@ -8,14 +7,7 @@ module Application.Page exposing
     , recipe, keep
     )
 
-{-|
-
-
-# Pages
-
-@docs Page
-
-Each page can be as simple or complex as you need:
+{-| Each page can be as simple or complex as you need:
 
 1.  [Static](#static) - for rendering a simple view
 
@@ -356,15 +348,7 @@ type alias Component pageRoute pageModel pageMsg globalModel globalMsg htmlPageM
     }
 
 
-{-|
-
-    Page.component
-        { title = title
-        , init = init
-        , update = update
-        , view = view
-        , subscriptions = subscriptions
-        }
+{-| Create an `component` page from a record. [Here's an example](https://github.com/ryannhg/elm-spa/examples/html/src/Pages/SignIn.elm)
 
 -}
 component :

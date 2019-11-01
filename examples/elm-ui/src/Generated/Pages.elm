@@ -4,7 +4,7 @@ module Generated.Pages exposing
     , page
     )
 
-import Application.Page as Page exposing (Page)
+import Application.Page as Page 
 import Element exposing (Element)
 import Generated.Route as Route exposing (Route)
 import Global

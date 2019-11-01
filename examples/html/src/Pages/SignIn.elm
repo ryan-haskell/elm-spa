@@ -4,7 +4,7 @@ module Pages.SignIn exposing
     , page
     )
 
-import Application.Page as Page exposing (Page)
+import Application.Page as Page
 import Generated.Route as Route
 import Global
 import Html exposing (..)
@@ -29,7 +29,6 @@ type Field
     | Password
 
 
-page : Page () Model Msg (Html Msg) a b c Global.Model Global.Msg d e
 page =
     Page.component
         { title = title

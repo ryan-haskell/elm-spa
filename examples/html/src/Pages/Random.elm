@@ -4,7 +4,7 @@ module Pages.Random exposing
     , page
     )
 
-import Application.Page as Page exposing (Page)
+import Application.Page as Page
 import Html exposing (..)
 import Html.Attributes as Attr
 import Html.Events as Events
@@ -22,7 +22,6 @@ type Msg
     | CatResponded (Result Http.Error String)
 
 
-page : Page () Model Msg (Html Msg) a b c d e f g
 page =
     Page.element
         { title = always "Random"

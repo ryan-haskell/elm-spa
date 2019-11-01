@@ -4,7 +4,7 @@ module Pages.Settings.Account exposing
     , page
     )
 
-import Application.Page as Page exposing (Page)
+import Application.Page as Page
 import Html exposing (..)
 
 
@@ -16,7 +16,6 @@ type alias Msg =
     Never
 
 
-page : Page () Model Msg (Html Msg) a b c d e f g
 page =
     Page.static
         { title = "Account Settings"
