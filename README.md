@@ -41,7 +41,7 @@ main =
 
 (Instead of making everything an [elm-fork-knife](https://youtu.be/RN2_NchjrJQ?t=2362)!)
 
-- [`Pages.Index`](./example/src/Pages/Index.elm)
+- [`Pages.Index`](https://github.com/ryannhg/elm-spa/blob/master/examples/html/src/Pages/Index.elm)
 
 ```elm
 page =
@@ -51,7 +51,7 @@ page =
         }
 ```
 
-- [`Pages.Counter`](./example/src/Pages/Counter.elm)
+- [`Pages.Counter`](https://github.com/ryannhg/elm-spa/blob/master/examples/html/src/Pages/Counter.elm)
 
 ```elm
 page =
@@ -63,7 +63,7 @@ page =
         }
 ```
 
-- [`Pages.Random`](./example/src/Pages/Random.elm)
+- [`Pages.Random`](https://github.com/ryannhg/elm-spa/blob/master/examples/html/src/Pages/Random.elm)
 
 ```elm
 page =
@@ -76,7 +76,7 @@ page =
         }
 ```
 
-- [`Pages.SignIn`](./example/src/Pages/SignIn.elm)
+- [`Pages.SignIn`](https://github.com/ryannhg/elm-spa/blob/master/examples/html/src/Pages/SignIn.elm)
 
 ```elm
 page =
@@ -109,7 +109,7 @@ init appRoute =
 
 ### run the example
 
-this project comes with an example in [examples/html](./examples/html).
+this project comes with an example in [examples/html](https://github.com/ryannhg/elm-spa/blob/master/examples/html).
 
 Here's how to run it:
 
