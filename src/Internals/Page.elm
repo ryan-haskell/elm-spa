@@ -11,35 +11,35 @@ module Internals.Page exposing
 -}
 
 
-type Page pageRoute pageModel pageMsg htmlPageMsg layoutModel layoutMsg htmlLayoutMsg globalModel globalMsg msg htmlMsg
-    = Page (Page_ pageRoute pageModel pageMsg htmlPageMsg layoutModel layoutMsg htmlLayoutMsg globalModel globalMsg msg htmlMsg)
+type Page pageRoute pageModel pageMsg uiPageMsg layoutModel layoutMsg uiLayoutMsg globalModel globalMsg msg uiMsg
+    = Page (Page_ pageRoute pageModel pageMsg uiPageMsg layoutModel layoutMsg uiLayoutMsg globalModel globalMsg msg uiMsg)
 
 
-type alias Page_ pageRoute pageModel pageMsg htmlPageMsg layoutModel layoutMsg htmlLayoutMsg globalModel globalMsg msg htmlMsg =
+type alias Page_ pageRoute pageModel pageMsg uiPageMsg layoutModel layoutMsg uiLayoutMsg globalModel globalMsg msg uiMsg =
     { toModel : pageModel -> layoutModel
     , toMsg : pageMsg -> layoutMsg
-    , map : (pageMsg -> layoutMsg) -> htmlPageMsg -> htmlLayoutMsg
+    , map : (pageMsg -> layoutMsg) -> uiPageMsg -> uiLayoutMsg
     }
-    -> Recipe pageRoute pageModel pageMsg layoutModel layoutMsg htmlLayoutMsg globalModel globalMsg msg htmlMsg
+    -> Recipe pageRoute pageModel pageMsg layoutModel layoutMsg uiLayoutMsg globalModel globalMsg msg uiMsg
 
 
 {-| Recipe docs
 -}
-type alias Recipe pageRoute pageModel pageMsg layoutModel layoutMsg htmlLayoutMsg globalModel globalMsg msg htmlMsg =
+type alias Recipe pageRoute pageModel pageMsg layoutModel layoutMsg uiLayoutMsg globalModel globalMsg msg uiMsg =
     { init : pageRoute -> Init layoutModel layoutMsg globalModel globalMsg
     , update : pageMsg -> pageModel -> Update layoutModel layoutMsg globalModel globalMsg
-    , bundle : pageModel -> Bundle layoutMsg htmlLayoutMsg globalModel globalMsg msg htmlMsg
+    , bundle : pageModel -> Bundle layoutMsg uiLayoutMsg globalModel globalMsg msg uiMsg
     }
 
 
 upgrade :
-    Page pageRoute pageModel pageMsg htmlPageMsg layoutModel layoutMsg htmlLayoutMsg globalModel globalMsg msg htmlMsg
+    Page pageRoute pageModel pageMsg uiPageMsg layoutModel layoutMsg uiLayoutMsg globalModel globalMsg msg uiMsg
     ->
         { toModel : pageModel -> layoutModel
         , toMsg : pageMsg -> layoutMsg
-        , map : (pageMsg -> layoutMsg) -> htmlPageMsg -> htmlLayoutMsg
+        , map : (pageMsg -> layoutMsg) -> uiPageMsg -> uiLayoutMsg
         }
-    -> Recipe pageRoute pageModel pageMsg layoutModel layoutMsg htmlLayoutMsg globalModel globalMsg msg htmlMsg
+    -> Recipe pageRoute pageModel pageMsg layoutModel layoutMsg uiLayoutMsg globalModel globalMsg msg uiMsg
 upgrade (Page fn) data =
     fn data
 
@@ -60,14 +60,14 @@ type alias Update layoutModel layoutMsg globalModel globalMsg =
 
 {-| Bundle docs
 -}
-type alias Bundle layoutMsg htmlLayoutMsg globalModel globalMsg msg htmlMsg =
+type alias Bundle layoutMsg uiLayoutMsg globalModel globalMsg msg uiMsg =
     { global : globalModel
     , fromGlobalMsg : globalMsg -> msg
     , fromPageMsg : layoutMsg -> msg
-    , map : (layoutMsg -> msg) -> htmlLayoutMsg -> htmlMsg
+    , map : (layoutMsg -> msg) -> uiLayoutMsg -> uiMsg
     }
     ->
         { title : String
-        , view : htmlMsg
+        , view : uiMsg
         , subscriptions : Sub msg
         }

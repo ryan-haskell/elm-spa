@@ -10,7 +10,7 @@ import Global
 main : Application Global.Flags Global.Model Global.Msg Pages.Model Pages.Msg
 main =
     Application.create
-        { options =
+        { ui =
             { map = Element.map
             , toHtml = Element.layout []
             }

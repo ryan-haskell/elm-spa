@@ -1,52 +1,15 @@
 module Application exposing
     ( Program, create
-    , Options, defaultOptions
+    , usingHtml
     )
 
-{-| Let's build some single page applications!
+{-|
 
 
-# Terrifying types ahead 😬
+## Let's build some single page applications!
 
-The `elm-spa` package makes your _functions look nice_,
-but holy cow do those type annotations get intimidating!
-
-
-## But why tho? 🤔
-
-So much of the types are defined in _your app_, and this package needs
-to use generic types to understand them correctly.
-
-In practice, this actually leads to your code looking like this
-
-    init route_ =
-        case route_ of
-            Route.Foo route ->
-                foo.init route
-
-            Route.Bar route ->
-                bar.init route
-
-            Route.Baz route ->
-                baz.init route
-
-            _ ->
-                Page.keep model_
-
-( Instead of a crazy nested torture chamber of doom )
-
-
-## Anyway, enough excuses from me! 🤐
-
-Check out the examples below to decide for yourself!
-
-
-# Program
-
-At a high-level, `elm-spa` replaces [Browser.application](https://package.elm-lang.org/packages/elm/browser/latest/Browser#application)
-so you don't have to deal with `Url` or `Nav.Key`!
-
-You can create a `Program` with `Application.create`:
+`Application.create` replaces [Browser.application](https://package.elm-lang.org/packages/elm/browser/latest/Browser#application)
+as the entrypoint to your app.
 
     module Main exposing (main)
 
@@ -57,7 +20,7 @@ You can create a `Program` with `Application.create`:
 
     main =
         Application.create
-            { options = Application.defaultOptions
+            { ui = Application.usingHtml
             , routing =
                 { routes = Route.routes
                 , toPath = Route.toPath
@@ -71,12 +34,10 @@ You can create a `Program` with `Application.create`:
             , page = Pages.page
             }
 
-
-
 @docs Program, create
 
 
-# Using elm-ui?
+# Supports more than elm/html
 
 If you're a fan of [mdgriffith/elm-ui](https://package.elm-lang.org/packages/mdgriffith/elm-ui/latest/),
 it's important to support using `Element msg` instead of `Html msg` for your pages and components.
@@ -87,25 +48,26 @@ Let `Application.create` know about this by passing in your own `Options` like t
     -- other imports
 
     Application.create
-        { options =
+        { ui =
             { toHtml = Element.layout []
             , map = Element.map
             }
         , -- ... the rest of your app
         }
 
-@docs Options, defaultOptions
+@docs usingHtml
 
 -}
 
-import Application.Route as Route
+import Application.Route as Route exposing (Route)
 import Browser
 import Browser.Navigation as Nav
 import Html exposing (Html)
+import Internals.Page as Page
 import Internals.Utils as Utils
 import Url exposing (Url)
 import Url.Parser as Parser
-import Internals.Page as Page
+
 
 
 -- APPLICATION
@@ -117,35 +79,19 @@ type alias Program flags globalModel globalMsg layoutModel layoutMsg =
     Platform.Program flags (Model flags globalModel layoutModel) (Msg globalMsg layoutMsg)
 
 
-
--- Options
-
-
-{-| Useful for using packages like [elm-ui](https://package.elm-lang.org/packages/mdgriffith/elm-ui/latest/)
-
-    import Element
-
-    options =
-        { toHtml = Element.layout []
-        , map = Element.map
-        }
-
-This tells your app how to convert into `Html msg` when it's time to render to the page.
-
--}
-type alias Options layoutMsg globalMsg htmlLayoutMsg htmlMsg =
-    { toHtml : htmlMsg -> Html (Msg globalMsg layoutMsg)
-    , map : (layoutMsg -> Msg globalMsg layoutMsg) -> htmlLayoutMsg -> htmlMsg
-    }
-
-
-{-| Just using `elm/html`? Pass this in when calling `Application.create`
+{-| Pass this in when calling `Application.create`
 
 ( It will work if your view returns the standard `Html msg` )
 
 -}
-defaultOptions : Options layoutMsg globalMsg (Html layoutMsg) (Html (Msg globalMsg layoutMsg))
-defaultOptions =
+usingHtml :
+    { map :
+        (layoutMsg -> Msg globalMsg layoutMsg)
+        -> Html layoutMsg
+        -> Html (Msg globalMsg layoutMsg)
+    , toHtml : uiMsg -> uiMsg
+    }
+usingHtml =
     { toHtml = identity
     , map = Html.map
     }
@@ -153,32 +99,37 @@ defaultOptions =
 
 {-| Creates a new `Program` given some one-time configuration:
 
-  - `options` - How do we convert the view to `Html msg`?
+  - `ui` - How do we convert the view to `Html msg`?
   - `routing` - What are the app's routes?
-  - `global` - How do we maintain the global app state
+  - `global` - How do we manage shared state between pages?
   - `page` - What pages do we have available?
 
 -}
 create :
-    { options : Options layoutMsg globalMsg htmlLayoutMsg htmlMsg
+    { ui :
+        { toHtml : uiMsg -> Html (Msg globalMsg layoutMsg)
+        , map : (layoutMsg -> Msg globalMsg layoutMsg) -> uiLayoutMsg -> uiMsg
+        }
     , routing :
-        { routes : Routes route
+        { routes : List (Route route)
         , toPath : route -> String
         , notFound : route
         }
     , global :
         { init :
-            { navigate : route -> Cmd (Msg globalMsg layoutMsg) }
+            { navigate : route -> Cmd (Msg globalMsg layoutMsg)
+            }
             -> flags
             -> ( globalModel, Cmd globalMsg, Cmd (Msg globalMsg layoutMsg) )
         , update :
-            { navigate : route -> Cmd (Msg globalMsg layoutMsg) }
+            { navigate : route -> Cmd (Msg globalMsg layoutMsg)
+            }
             -> globalMsg
             -> globalModel
             -> ( globalModel, Cmd globalMsg, Cmd (Msg globalMsg layoutMsg) )
         , subscriptions : globalModel -> Sub globalMsg
         }
-    , page : Page.Page route layoutModel layoutMsg htmlLayoutMsg layoutModel layoutMsg htmlLayoutMsg globalModel globalMsg (Msg globalMsg layoutMsg) htmlMsg
+    , page : Page.Page route layoutModel layoutMsg uiLayoutMsg layoutModel layoutMsg uiLayoutMsg globalModel globalMsg (Msg globalMsg layoutMsg) uiMsg
     }
     -> Program flags globalModel globalMsg layoutModel layoutMsg
 create config =
@@ -219,13 +170,13 @@ create config =
         , subscriptions =
             subscriptions
                 { bundle = page.bundle
-                , map = config.options.map
+                , map = config.ui.map
                 }
         , view =
             view
-                { toHtml = config.options.toHtml
+                { toHtml = config.ui.toHtml
                 , bundle = page.bundle
-                , map = config.options.map
+                , map = config.ui.map
                 }
         , onUrlChange = ChangedUrl
         , onUrlRequest = ClickedLink
@@ -409,10 +360,10 @@ navigate toPath url route =
 
 
 subscriptions :
-    { map : (layoutMsg -> Msg globalMsg layoutMsg) -> htmlLayoutMsg -> htmlMsg
+    { map : (layoutMsg -> Msg globalMsg layoutMsg) -> uiLayoutMsg -> uiMsg
     , bundle :
         layoutModel
-        -> Page.Bundle layoutMsg htmlLayoutMsg globalModel globalMsg (Msg globalMsg layoutMsg) htmlMsg
+        -> Page.Bundle layoutMsg uiLayoutMsg globalModel globalMsg (Msg globalMsg layoutMsg) uiMsg
     }
     -> Model flags globalModel layoutModel
     -> Sub (Msg globalMsg layoutMsg)
@@ -432,11 +383,11 @@ subscriptions config model =
 
 
 view :
-    { map : (layoutMsg -> Msg globalMsg layoutMsg) -> htmlLayoutMsg -> htmlMsg
-    , toHtml : htmlMsg -> Html (Msg globalMsg layoutMsg)
+    { map : (layoutMsg -> Msg globalMsg layoutMsg) -> uiLayoutMsg -> uiMsg
+    , toHtml : uiMsg -> Html (Msg globalMsg layoutMsg)
     , bundle :
         layoutModel
-        -> Page.Bundle layoutMsg htmlLayoutMsg globalModel globalMsg (Msg globalMsg layoutMsg) htmlMsg
+        -> Page.Bundle layoutMsg uiLayoutMsg globalModel globalMsg (Msg globalMsg layoutMsg) uiMsg
     }
     -> Model flags globalModel layoutModel
     -> Browser.Document (Msg globalMsg layoutMsg)

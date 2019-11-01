@@ -22,7 +22,7 @@ import Global
 
 main =
     Application.create
-        { options = Application.defaultOptions
+        { ui = Application.usingHtml
         , routing =
             { routes = Route.routes
             , toPath = Route.toPath

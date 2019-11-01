@@ -9,7 +9,7 @@ import Global
 main : Application.Program Global.Flags Global.Model Global.Msg Pages.Model Pages.Msg
 main =
     Application.create
-        { options = Application.defaultOptions
+        { ui = Application.usingHtml
         , routing =
             { routes = Route.routes
             , toPath = Route.toPath
