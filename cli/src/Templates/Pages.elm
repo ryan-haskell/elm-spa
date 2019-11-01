@@ -190,7 +190,7 @@ recipes items =
 recipe : String -> String
 recipe name =
     """{{camelCase}} =
-    {{name}}.page
+        Page.recipe {{name}}.page
         { toModel = {{name}}Model
         , toMsg = {{name}}Msg
         , map = {{ui}}.map

@@ -1,23 +1,12 @@
-# the cli tool
-> you _could_ type everything out... or...
+# the cli
+> so you _could_ type everything out... or...
 
-```
-usage: elm-spa <command> [options]
 
-commands:
-  help                      prints this help screen
-  build [options] <path>    generates pages and routes
-  init [options] <path>     scaffolds a new project at <path>
+### are your hands tired? 😩
 
-options:
-  --ui=<Html|Element>       what your \`view\` returns (default: Html)
-```
+Maybe it's because you've been typing out boilerplate!
 
-## so the package makes wiring things up consistent
-
-And you know what loves consistency? __Computers!__
-
-So if you don't want to type out this:
+Using `ryannhg/elm-spa` makes the things you type more _consistent_, but the repetitive bits might get boring after a while...
 
 ```elm
 type Model
@@ -50,13 +39,11 @@ bundle model_ =
     BazModel model -> baz.bundle model
 ```
 
-It was pretty easy to make a script to type that for you:
+### sounds like a job for a robot! 🤖
 
-```
-elm-spa generate
-```
+it seemed like a good idea to write something to type all that for you. so i did! ❤️
 
-And it will look at the files in your `src/Pages` folder:
+it looks at the files in your `src/Pages` folder:
 
 ```elm
 src/
@@ -66,18 +53,65 @@ src/
     Baz.elm
 ```
 
-And even generate the routes based on the module name:
+...types out all that stuff...
 
 ```elm
--- routes
-/foo -> Foo.elm
-/bar -> Bar.elm
-/baz -> Baz.elm
+module Generated.Pages exposing (Model, Msg, page)
+
+-- ...
+
+type Model
+  = Foo Foo.Model
+  | Bar Bar.Model
+  | Baz Baz.Model
+
+-- ... everything else!
+```
+
+...and infers the routes based on the filenames!
+
+```elm
+module Generated.Route exposing (Route, routes)
+
+-- ... route stuff
+
+routes =
+  [ Route.path "/foo" Route.Foo
+  , Route.path "/bar" Route.Bar
+  , Route.path "/baz" Route.Baz
+  ]
 ```
 
 
-### Hooray!
+### (the choice is yours) ⚖️
 
-This CLI tool just benefits from the consistent API the package uses.
+This CLI tool is just a companion tool for the Elm package. Totally optional!
 
-If you'd rather use `ryannhg/elm-spa` without the CLI tool- that's cool with me! 😎
+If you'd rather use [`ryannhg/elm-spa`](https://package.elm-lang.org/packages/ryannhg/elm-spa/latest/) without the CLI tool- that's cool with me!
+
+
+### thinking about trying it out? 🤔
+
+If you already have [NodeJS](https://nodejs.org/en/), getting started is easy!
+
+Just install [the npm package](https://www.npmjs.com/package/@ryannhg/elm-spa) (it's got zero dependencies, bb)
+
+```
+npm install -g @ryannhg/elm-spa
+```
+
+and make a new project somewhere:
+
+```
+elm-spa init my-new-app
+cd my-new-app
+npm install
+npm run dev
+```
+
+Your app will be at [http://localhost:1234](http://localhost:1234)
+
+
+### you've got this! 💪
+
+Go build something awesome! 🚀
