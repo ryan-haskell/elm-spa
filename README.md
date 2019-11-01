@@ -3,7 +3,7 @@
 
 ### trying it out
 
-__Note__: the API is still experimental, I'd love to hear your feedback on the [elm slack]().
+__Note__: the API is still experimental! (hoping to post on discourse soon for community feedback)
 
 ```
 elm install ryannhg/elm-spa
