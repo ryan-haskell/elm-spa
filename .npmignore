@@ -2,9 +2,11 @@
 cli/elm-stuff/*
 cli/src/*
 cli/elm.json
+cli/README.md
 dist/*
 examples/*
 node_modules/*
 src/*
 elm*.json
 netlify.toml
+docs.json
