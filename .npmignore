@@ -7,6 +7,6 @@ dist/*
 examples/*
 node_modules/*
 src/*
-elm*.json
-netlify.toml
-docs.json
+/elm*.json
+/netlify.toml
+/docs.json
