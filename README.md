@@ -1,29 +1,29 @@
 # ryannhg/elm-spa
 > an experiment for creating single page apps with Elm!
 
+### trying it out
 
-### try it out
+__Note__: the API is still experimental, I'd love to hear your feedback on the [elm slack]().
 
-1. `npm install`
-
-1. `npm run dev`
-
+```
+elm install ryannhg/elm-spa
+```
 
 ### overview
 
 ```elm
 module Main exposing (main)
 
-import Application exposing (Application)
+import Application
 import Generated.Pages as Pages
 import Generated.Route as Route
 import Global
 
 
-main : Application Global.Flags Global.Model Global.Msg Pages.Model Pages.Msg
 main =
     Application.create
-        { routing =
+        { options = Application.defaultOptions
+        , routing =
             { routes = Route.routes
             , toPath = Route.toPath
             , notFound = Route.NotFound ()
@@ -46,7 +46,8 @@ main =
 ```elm
 page =
     Page.static
-        { view = view
+        { title = title
+        , view = view
         }
 ```
 
@@ -55,7 +56,8 @@ page =
 ```elm
 page =
     Page.sandbox
-        { init = init
+        { title = title
+        , init = init
         , update = update
         , view = view
         }
@@ -66,7 +68,8 @@ page =
 ```elm
 page =
     Page.element
-        { init = init
+        { title = title
+        , init = init
         , update = update
         , subscriptions = subscriptions
         , view = view
@@ -78,14 +81,15 @@ page =
 ```elm
 page =
     Page.component
-        { init = init
+        { title = title
+        , init = init
         , update = update
         , subscriptions = subscriptions
         , view = view
         }
 ```
 
-### _and_ your top level easy to read!
+### while the top level stays easy to read!
 
 ```elm
 init appRoute =
@@ -103,18 +107,14 @@ init appRoute =
 ( It's like magic, but actually it's just functions. )
 
 
-### the folder structure
+### run the example
 
-- [Example](./example/src)
+this project comes with an example in [examples/html](./examples/html).
 
-```elm
-src/
-  Api/        -- for backend things
-  Components/ -- reusable ui
-  Data/       -- types used everywhere
-  Layouts/    -- shared views
-  Pages/      -- all your pages
-  Utils/      -- helpers
-  Global.elm  -- shared app state
-  Main.elm    -- the entrypoint
-```
+Here's how to run it:
+
+1. `git clone https://github.com/ryannhg/elm-spa.git && cd elm-spa`
+
+1. `npm install`
+
+1. `npm run dev`
