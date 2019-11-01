@@ -39,17 +39,36 @@ parse =
 
 decoder : Decoder (List NewFile)
 decoder =
-    D.map fromFlags flagsDecoder
+    commandDecoder
+        |> D.map
+            (\command ->
+                case command of
+                    Add info ->
+                        addCommand info
+
+                    Build info ->
+                        buildCommand info
+            )
 
 
-fromFlags : Flags -> List NewFile
-fromFlags { items, options } =
-     items
-         |> toFileInfo []
-         |> fromData options
+buildCommand : BuildInfo -> List NewFile
+buildCommand { items, options } =
+    items
+        |> toFileInfo []
+        |> fromData options
 
 
-type alias Flags =
+addCommand : AddInfo -> List NewFile
+addCommand { page, path } =
+    []
+
+
+type Command
+    = Build BuildInfo
+    | Add AddInfo
+
+
+type alias BuildInfo =
     { items : List Item
     , options : Options
     }
@@ -60,11 +79,35 @@ type alias Options =
     }
 
 
-flagsDecoder : Decoder Flags
-flagsDecoder =
-    D.map2 Flags
-        (D.field "folders" (D.list Item.decoder))
-        (D.field "options" optionsDecoder)
+type alias AddInfo =
+    { page : String
+    , path : List String
+    }
+
+
+commandDecoder : Decoder Command
+commandDecoder =
+    D.field "command" D.string
+        |> D.andThen fromCommand
+
+
+fromCommand : String -> Decoder Command
+fromCommand command =
+    case command of
+        "build" ->
+            D.map Build <|
+                D.map2 BuildInfo
+                    (D.field "folders" (D.list Item.decoder))
+                    (D.field "options" optionsDecoder)
+
+        "add" ->
+            D.map Add <|
+                D.map2 AddInfo
+                    (D.field "page" D.string)
+                    (D.field "path" (D.list D.string))
+
+        _ ->
+            D.fail <| "Don't recognize command: " ++ command
 
 
 optionsDecoder : Decoder Options

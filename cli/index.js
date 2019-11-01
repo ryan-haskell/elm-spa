@@ -17,6 +17,18 @@ const utils = {
     } else {
       fs.copyFileSync(src, dest)
     }
+  },
+  handleArgs: (args = []) => {
+    const optionArgs = args.filter(a => a.startsWith('--'))
+    const nonOptionArgs = args.filter(a => a.startsWith('--') === false)
+    const grabOption = (prefix) => (optionArgs.filter(option => option.startsWith(prefix))[0] || '').split(prefix)[1]
+
+    const relative = nonOptionArgs.slice(-1)[0] || '.'
+    const options = {
+      ui: grabOption('--ui=') || 'Html'
+    }
+
+    return { relative, options }
   }
 }
 
@@ -25,16 +37,44 @@ const main = ([ command, ...args ] = []) => {
   return (commands[command] || commands.help)(args || [])
 }
 
-const help = _ => console.info(
-`usage: elm-spa <command> [options]
+const help = _ => console.info(`
+usage: ${utils.bold('elm-spa')} <command> [...]
 
 commands:
-  help                      prints this help screen
-  build [options] <path>    generates pages and routes
-  init <path>               scaffolds a new project at <path>
 
-options:
-  --ui=<Html|Element>       what your \`view\` returns (default: Html)
+🌳  ${utils.bold('init')} <path>               create a new project at <path>
+
+                             examples:
+                             ${utils.bold('elm-spa init your-project')}
+
+
+🌳  ${utils.bold('build')} [options] <path>    generate pages and routes
+
+   options:
+     ${utils.bold('--ui=')}<module>           the module your \`view\` uses (default: Html)
+
+                             examples:
+                             ${utils.bold('elm-spa build your-project')}
+                             ${utils.bold('elm-spa build --ui=Element your-project')}
+
+
+🌳  ${utils.bold('add')} static <module>       create a new static page
+       sandbox <module>      create a new sandbox page
+       element <module>      create a new element page
+       component <module>    create a new component page
+
+                             examples:
+                             ${utils.bold('elm-spa add static AboutUs')}
+                             ${utils.bold('elm-spa add element Settings.Index')}
+
+
+🌳  ${utils.bold('help')}                      print this help screen
+
+                             examples:
+                             ${utils.bold('elm-spa help')}
+                             ${utils.bold('elm-spa wat')}
+                             ${utils.bold('elm-spa huh?')}
+                             ${utils.bold('elm-spa 🤷‍')}
 `)
 
 const init = ([ relative = '.' ] = []) => {
@@ -47,14 +87,7 @@ const init = ([ relative = '.' ] = []) => {
 const build = (args = []) => {
   const { Elm } = require('./dist/elm.compiled.js')
 
-  const optionArgs = args.filter(a => a.startsWith('--'))
-  const nonOptionArgs = args.filter(a => a.startsWith('--') === false)
-  const grabOption = (prefix) => (optionArgs.filter(option => option.startsWith(prefix))[0] || '').split(prefix)[1]
-
-  const relative = nonOptionArgs.slice(-1)[0] || '.'
-  const options = {
-    ui: grabOption('--ui=') || 'Html'
-  }
+  const { relative, options } = utils.handleArgs(args)
 
   const exploreFolder = (filepath) => {
     const tag = (item) =>
@@ -68,8 +101,8 @@ const build = (args = []) => {
     ).then(utils.all(tag))
   }
 
-  const passToElm = (folders) => new Promise((resolve) => {
-    const app = Elm.Main.init({ flags: { folders, options } })
+  const buildWithElm = (folders) => new Promise((resolve) => {
+    const app = Elm.Main.init({ flags: { command: 'build', folders, options } })
     app.ports.toJs.subscribe(stuff => resolve(stuff))
   })
 
@@ -84,7 +117,7 @@ const build = (args = []) => {
     })
 
   exploreFolder(path.join(cwd, relative, 'src', 'Pages'))
-    .then(passToElm)
+    .then(buildWithElm)
     .then(utils.all(writeToFolder(path.join(cwd, relative, 'src'))))
     .then(files => {
       const lines = files.map(file => `${utils.bold(' 🌳 ')} ${file}`).join('\n')
