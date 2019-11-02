@@ -393,7 +393,7 @@ layout :
     -> Page pageRoute pageModel pageMsg uiPageMsg layoutModel layoutMsg uiLayoutMsg globalModel globalMsg msg uiMsg
 layout options =
     Page
-        (\{ toModel, toMsg, map } ->
+        (\{ toModel, toMsg } ->
             let
                 pages =
                     options.pages

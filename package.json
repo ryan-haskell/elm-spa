@@ -1,6 +1,6 @@
 {
   "name": "@ryannhg/elm-spa",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "a way to make single page applications in elm",
   "main": "cli/index.js",
   "scripts": {
