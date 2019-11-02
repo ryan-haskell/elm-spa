@@ -1,6 +1,5 @@
 module Components.Navbar exposing (view)
 
-import Generated.Route as Route exposing (Route)
 import Html exposing (..)
 import Html.Attributes as Attr
 
@@ -12,16 +11,16 @@ view =
         , Attr.style "margin-bottom" "32px"
         ]
         (List.map viewLink
-            [ ( "homepage", Route.Index () )
-            , ( "docs", Route.Docs () )
+            [ ( "homepage", "/" )
+            , ( "docs", "/docs" )
             ]
         )
 
 
-viewLink : ( String, Route ) -> Html msg
-viewLink ( label, route ) =
+viewLink : ( String, String ) -> Html msg
+viewLink ( label, url ) =
     a
-        [ Attr.href (Route.toPath route)
+        [ Attr.href url
         , Attr.style "margin-right" "16px"
         ]
         [ text label

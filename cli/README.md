@@ -97,7 +97,7 @@ If you already have [NodeJS](https://nodejs.org/en/), getting started is easy!
 Just install [the npm package](https://www.npmjs.com/package/@ryannhg/elm-spa) (it's got zero dependencies, bb)
 
 ```
-npm install -g @ryannhg/elm-spa
+npm install -g elm-spa
 ```
 
 and make a new project somewhere:

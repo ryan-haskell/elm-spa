@@ -1,9 +1,17 @@
 # ryannhg/elm-spa
 > an experiment for creating single page apps with Elm!
 
+__Note__: the API is __still experimental__! (hoping to post on discourse soon for community feedback)
+
 ### trying it out
 
-__Note__: the API is still experimental! (hoping to post on discourse soon for community feedback)
+```
+npm install -g elm-spa
+elm-spa init your-project
+```
+
+### just using the elm package?
+
 
 ```
 elm install ryannhg/elm-spa
