@@ -3,6 +3,11 @@ port module Main exposing (main)
 import Item exposing (Item)
 import Json.Decode as D exposing (Decoder)
 import Templates.Pages
+import Templates.Pages.Component as Component
+import Templates.Pages.Element as Element
+import Templates.Pages.Layout as Layout
+import Templates.Pages.Sandbox as Sandbox
+import Templates.Pages.Static as Static
 import Templates.Route
 
 
@@ -52,15 +57,82 @@ decoder =
 
 
 buildCommand : BuildInfo -> List NewFile
-buildCommand { items, options } =
-    items
+buildCommand { pages, options } =
+    pages
         |> toFileInfo []
         |> fromData options
 
 
 addCommand : AddInfo -> List NewFile
-addCommand { page, path } =
-    []
+addCommand { page, path, layouts } =
+    let
+        existingLayoutPaths : List (List String)
+        existingLayoutPaths =
+            layouts
+                |> List.map toLayoutPaths
+                |> List.concat
+
+        newPagePath : List String
+        newPagePath =
+            "Pages" :: appendToLast ".elm" path
+
+        subsets : List a -> List (List a)
+        subsets list =
+            list
+                |> List.indexedMap (\i _ -> List.take i list)
+                |> List.drop 1
+
+        layoutsToCreate : List NewFile
+        layoutsToCreate =
+            -- TODO: should only need to create at most one layout
+            path
+                |> subsets
+                |> List.filter (\list -> not (List.member list existingLayoutPaths))
+                |> List.map
+                    (\path_ ->
+                        { filepathSegments = "Layouts" :: appendToLast ".elm" path_
+                        , contents = Layout.contents { path = path_ }
+                        }
+                    )
+    in
+    case page of
+        Static ->
+            { filepathSegments = newPagePath
+            , contents = Static.contents { path = path }
+            }
+                :: layoutsToCreate
+
+        Sandbox ->
+            { filepathSegments = newPagePath
+            , contents = Sandbox.contents { path = path }
+            }
+                :: layoutsToCreate
+
+        Element ->
+            { filepathSegments = newPagePath
+            , contents = Element.contents { path = path }
+            }
+                :: layoutsToCreate
+
+        Component ->
+            { filepathSegments = newPagePath
+            , contents = Component.contents { path = path }
+            }
+                :: layoutsToCreate
+
+
+toLayoutPaths : Item -> List (List String)
+toLayoutPaths item =
+    case item of
+        Item.File_ { name } ->
+            [ [ name ]
+            ]
+
+        Item.Folder_ { name, children } ->
+            children
+                |> List.map toLayoutPaths
+                |> List.concat
+                |> List.map (\tail -> name :: tail)
 
 
 type Command
@@ -69,7 +141,7 @@ type Command
 
 
 type alias BuildInfo =
-    { items : List Item
+    { pages : List Item
     , options : Options
     }
 
@@ -80,9 +152,40 @@ type alias Options =
 
 
 type alias AddInfo =
-    { page : String
+    { page : PageType
     , path : List String
+    , layouts : List Item
     }
+
+
+type PageType
+    = Static
+    | Sandbox
+    | Element
+    | Component
+
+
+pageTypeDecoder : Decoder PageType
+pageTypeDecoder =
+    D.string
+        |> D.andThen
+            (\str ->
+                case str of
+                    "static" ->
+                        D.succeed Static
+
+                    "sandbox" ->
+                        D.succeed Sandbox
+
+                    "element" ->
+                        D.succeed Element
+
+                    "component" ->
+                        D.succeed Component
+
+                    _ ->
+                        D.fail (str ++ "is not a page type.")
+            )
 
 
 commandDecoder : Decoder Command
@@ -97,14 +200,15 @@ fromCommand command =
         "build" ->
             D.map Build <|
                 D.map2 BuildInfo
-                    (D.field "folders" (D.list Item.decoder))
+                    (D.field "pages" (D.list Item.decoder))
                     (D.field "options" optionsDecoder)
 
         "add" ->
             D.map Add <|
-                D.map2 AddInfo
-                    (D.field "page" D.string)
+                D.map3 AddInfo
+                    (D.field "page" pageTypeDecoder)
                     (D.field "path" (D.list D.string))
+                    (D.field "layouts" (D.list Item.decoder))
 
         _ ->
             D.fail <| "Don't recognize command: " ++ command

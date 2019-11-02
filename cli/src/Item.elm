@@ -1,5 +1,5 @@
 module Item exposing
-    ( Item
+    ( Item(..)
     , children
     , decoder
     , files

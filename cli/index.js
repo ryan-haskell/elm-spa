@@ -18,26 +18,49 @@ const utils = {
       fs.copyFileSync(src, dest)
     }
   },
-  handleArgs: (args = []) => {
-    const optionArgs = args.filter(a => a.startsWith('--'))
-    const nonOptionArgs = args.filter(a => a.startsWith('--') === false)
-    const grabOption = (prefix) => (optionArgs.filter(option => option.startsWith(prefix))[0] || '').split(prefix)[1]
+  exploreFolder (filepath) {
+    const tag = (item) =>
+      item.endsWith('.elm')
+        ? Promise.resolve({ type: 'file', name: item })
+        : this.exploreFolder(path.join(filepath, item))
+            .then(children => ({ type: 'folder', name: item, children }))
 
-    const relative = nonOptionArgs.slice(-1)[0] || '.'
-    const options = {
-      ui: grabOption('--ui=') || 'Html'
-    }
+    return new Promise(
+      (resolve, reject) => fs.readdir(filepath, (err, files) => err ? reject(err) : resolve(files))
+    ).then(utils.all(tag))
+  },
+  sendToElm : (relative) => (flags) => {
+    const writeToFolder = (srcFolder) => ({ filepathSegments, contents }) =>
+      new Promise((resolve, reject) => {
+        const folder = path.join(srcFolder, ...filepathSegments.slice(0, -1))
+        if (!fs.existsSync(folder)) {
+          fs.mkdirSync(folder, { recursive: true })
+        }
+        const filepath = path.join(srcFolder, ...filepathSegments)
+        fs.writeFile(filepath, contents, { encoding: 'utf8' }, (err, _) => err ? reject(err) : resolve(filepath))
+      })
 
-    return { relative, options }
+    return new Promise((resolve) => {
+      const { Elm } = require('./dist/elm.compiled.js')
+      const app = Elm.Main.init({ flags })
+      app.ports.toJs.subscribe(stuff => resolve(stuff))
+    })
+      .then(utils.all(writeToFolder(path.join(cwd, relative, 'src'))))
+      .then(files => {
+        const lines = files.map(file => `${utils.bold(' 🌳 ')} ${file}`).join('\n')
+        console.info(`${utils.bold('elm-spa generated:')}\n${lines}\n`)
+      })
+      .catch(console.error)
   }
 }
 
 const main = ([ command, ...args ] = []) => {
-  const commands = { help, init, build }
+  const commands = { help, init, build, add }
   return (commands[command] || commands.help)(args || [])
 }
 
-const help = _ => console.info(`
+const help = _ =>
+  console.info(`
 usage: ${utils.bold('elm-spa')} <command> [...]
 
 commands:
@@ -84,46 +107,86 @@ const init = ([ relative = '.' ] = []) => {
   utils.cp(src, dest)
 }
 
-const build = (args = []) => {
-  const { Elm } = require('./dist/elm.compiled.js')
+const add = ([ page, moduleName ] = []) => {
+  const relative = '.'
 
-  const { relative, options } = utils.handleArgs(args)
+  const expectedFiles = [
+    path.join(cwd, relative, 'elm.json'),
+    path.join(cwd, relative, 'src', 'Layouts')
+  ]
 
-  const exploreFolder = (filepath) => {
-    const tag = (item) =>
-      item.endsWith('.elm')
-        ? Promise.resolve({ type: 'file', name: item })
-        : exploreFolder(path.join(filepath, item))
-            .then(children => ({ type: 'folder', name: item, children }))
-
-    return new Promise(
-      (resolve, reject) => fs.readdir(filepath, (err, files) => err ? reject(err) : resolve(files))
-    ).then(utils.all(tag))
+  if (expectedFiles.some(file => !fs.existsSync(file))) {
+    console.warn(`\n⚠️  I don't see an elm-spa project here... ⚠️\n\nPlease run this command in the directory with your ${utils.bold('elm.json')}\n`)
+    return
   }
 
-  const buildWithElm = (folders) => new Promise((resolve) => {
-    const app = Elm.Main.init({ flags: { command: 'build', folders, options } })
-    app.ports.toJs.subscribe(stuff => resolve(stuff))
-  })
+  const getLayouts = () =>
+    utils.exploreFolder(path.join(cwd, relative, 'src', 'Layouts'))
 
-  const writeToFolder = (srcFolder) => ({ filepathSegments, contents }) =>
-    new Promise((resolve, reject) => {
-      const folder = path.join(srcFolder, ...filepathSegments.slice(0, -1))
-      if (!fs.existsSync(folder)) {
-        fs.mkdirSync(folder)
-      }
-      const filepath = path.join(srcFolder, ...filepathSegments)
-      fs.writeFile(filepath, contents, { encoding: 'utf8' }, (err, _) => err ? reject(err) : resolve(filepath))
-    })
+  const isValidPage = {
+    'static': true,
+    'sandbox': true,
+    'element': true,
+    'component': true
+  }
 
-  exploreFolder(path.join(cwd, relative, 'src', 'Pages'))
-    .then(buildWithElm)
-    .then(utils.all(writeToFolder(path.join(cwd, relative, 'src'))))
-    .then(files => {
-      const lines = files.map(file => `${utils.bold(' 🌳 ')} ${file}`).join('\n')
-      console.info(`${utils.bold('elm-spa generated:')}\n${lines}\n`)
-    })
-    .catch(console.error)
+  const isValidModuleName = (name = '') => {
+    const isAlphaOnly = word => word.match(/[A-Z|a-z]+/)[0] === word
+    const isCapitalized = word => word[0].toUpperCase() === word[0]
+    return name &&
+      name.length &&
+      name.split('.').every(word => isAlphaOnly(word) && isCapitalized(word))
+  }
+
+  const messages = {
+    invalidPage: ({ page, name }) => `
+⚠️  "${utils.bold(page)}" is not a valid page. ⚠️
+
+Try one of these?
+${utils.bold(Object.keys(isValidPage).map(page => `elm-spa add ${page} ${name}`).join('\n'))}
+    `,
+    invalidModuleName: ({ page, name }) => `
+⚠️  "${utils.bold(name)}" doesn't look like an Elm module. ⚠️
+
+Here are some examples of what I'm expecting:
+${utils.bold(`elm-spa add ${page} Index`)}
+${utils.bold(`elm-spa add ${page} Settings.User`)}
+    `
+  }
+
+  if (isValidPage[page] !== true) {
+    console.warn(messages.invalidPage({
+      page,
+      name: isValidModuleName(moduleName) ? moduleName : 'Index'
+    }))
+  } else if (isValidModuleName(moduleName) === false) {
+    console.warn(messages.invalidModuleName({ page, name: moduleName }))
+  } else {
+    return getLayouts(relative)
+      .then(layouts => 
+        utils.sendToElm(relative)({
+          command: 'add',
+          page,
+          path: moduleName.split('.'),
+          layouts
+        })
+      )
+  }
+}
+
+const build = (args = []) => {
+  const optionArgs = args.filter(a => a.startsWith('--'))
+  const nonOptionArgs = args.filter(a => a.startsWith('--') === false)
+  const grabOption = (prefix) => (optionArgs.filter(option => option.startsWith(prefix))[0] || '').split(prefix)[1]
+
+  const relative = nonOptionArgs.slice(-1)[0] || '.'
+  const options = {
+    ui: grabOption('--ui=') || 'Html'
+  }
+
+  return utils.exploreFolder(path.join(cwd, relative, 'src', 'Pages'))
+    .then(pages => ({ command: 'build', pages, options }))
+    .then(utils.sendToElm(relative))
 }
 
 // runs the things
