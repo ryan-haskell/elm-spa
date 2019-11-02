@@ -6,6 +6,7 @@ cli/README.md
 dist/*
 examples/*
 node_modules/*
+elm-stuff/*
 src/*
 /elm*.json
 /netlify.toml
