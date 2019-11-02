@@ -1,7 +1,7 @@
 # ryannhg/elm-spa
 > an experiment for creating single page apps with Elm!
 
-__Note__: the API is __still experimental__! (hoping to post on discourse soon for community feedback)
+__Note__: the API is __still experimental__! (join the conversation on [discourse](https://discourse.elm-lang.org/t/elm-spa-a-tool-for-building-single-page-apps/4597))
 
 ### trying it out
 
