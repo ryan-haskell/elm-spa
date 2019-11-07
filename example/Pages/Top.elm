@@ -5,7 +5,7 @@ import Components.Hero
 import Components.Section
 import Components.Styles as Styles
 import Element exposing (..)
-import Generated.Flags as Flags
+import Generated.Params as Params
 import Html.Attributes as Attr
 import Ports
 import Utils.Page exposing (Page)
@@ -15,7 +15,7 @@ type alias Model =
     ()
 
 
-page : Page Flags.Top Model Msg model msg appMsg
+page : Page Params.Top Model Msg model msg appMsg
 page =
     App.Page.element
         { title = always "elm-spa"
@@ -30,8 +30,8 @@ page =
 -- INIT
 
 
-init : Flags.Top -> ( Model, Cmd Msg )
-init flags =
+init : Params.Top -> ( Model, Cmd Msg )
+init params =
     ( ()
     , Cmd.none
     )

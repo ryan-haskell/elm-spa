@@ -7,7 +7,7 @@ import Element exposing (..)
 import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
-import Generated.Flags as Flags
+import Generated.Params as Params
 import Global
 import Html exposing (Html)
 import Html.Attributes as Attr
@@ -31,7 +31,7 @@ type Field
     | Password
 
 
-page : Page Flags.SignIn Model Msg model msg appMsg
+page : Page Params.SignIn Model Msg model msg appMsg
 page =
     App.Page.component
         { title = always "sign in | elm-spa"
@@ -46,7 +46,7 @@ page =
 -- INIT
 
 
-init : Flags.SignIn -> ( Model, Cmd Msg, Cmd Global.Msg )
+init : Params.SignIn -> ( Model, Cmd Msg, Cmd Global.Msg )
 init flags =
     ( { username = ""
       , password = ""

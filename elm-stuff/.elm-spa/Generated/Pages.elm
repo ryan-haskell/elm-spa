@@ -6,11 +6,11 @@ module Generated.Pages exposing
 
 import App.Page
 import Generated.Docs.Pages
-import Generated.Docs.Routes
-import Generated.Flags as Flags
+import Generated.Docs.Route
 import Generated.Guide.Pages
-import Generated.Guide.Routes
-import Generated.Routes as Routes exposing (Route(..))
+import Generated.Guide.Route
+import Generated.Params as Params
+import Generated.Route as Route exposing (Route(..))
 import Layout as Layout
 import Pages.Docs
 import Pages.Guide
@@ -61,13 +61,13 @@ type alias Recipe flags model msg appMsg =
 
 
 type alias Recipes msg =
-    { top : Recipe Flags.Top Pages.Top.Model Pages.Top.Msg msg
-    , docs : Recipe Flags.Docs Pages.Docs.Model Pages.Docs.Msg msg
-    , notFound : Recipe Flags.NotFound Pages.NotFound.Model Pages.NotFound.Msg msg
-    , signIn : Recipe Flags.SignIn Pages.SignIn.Model Pages.SignIn.Msg msg
-    , guide : Recipe Flags.Guide Pages.Guide.Model Pages.Guide.Msg msg
-    , guide_folder : Recipe Generated.Guide.Routes.Route Generated.Guide.Pages.Model Generated.Guide.Pages.Msg msg
-    , docs_folder : Recipe Generated.Docs.Routes.Route Generated.Docs.Pages.Model Generated.Docs.Pages.Msg msg
+    { top : Recipe Params.Top Pages.Top.Model Pages.Top.Msg msg
+    , docs : Recipe Params.Docs Pages.Docs.Model Pages.Docs.Msg msg
+    , notFound : Recipe Params.NotFound Pages.NotFound.Model Pages.NotFound.Msg msg
+    , signIn : Recipe Params.SignIn Pages.SignIn.Model Pages.SignIn.Msg msg
+    , guide : Recipe Params.Guide Pages.Guide.Model Pages.Guide.Msg msg
+    , guide_folder : Recipe Generated.Guide.Route.Route Generated.Guide.Pages.Model Generated.Guide.Pages.Msg msg
+    , docs_folder : Recipe Generated.Docs.Route.Route Generated.Docs.Pages.Model Generated.Docs.Pages.Msg msg
     }
 
 
@@ -125,25 +125,25 @@ recipes =
 init : Route -> Page.Init Model Msg
 init route_ =
     case route_ of
-        Routes.Top flags ->
+        Route.Top flags ->
             recipes.top.init flags
 
-        Routes.Docs flags ->
+        Route.Docs flags ->
             recipes.docs.init flags
 
-        Routes.NotFound flags ->
+        Route.NotFound flags ->
             recipes.notFound.init flags
 
-        Routes.SignIn flags ->
+        Route.SignIn flags ->
             recipes.signIn.init flags
 
-        Routes.Guide flags ->
+        Route.Guide flags ->
             recipes.guide.init flags
 
-        Routes.Guide_Folder route ->
+        Route.Guide_Folder route ->
             recipes.guide_folder.init route
 
-        Routes.Docs_Folder route ->
+        Route.Docs_Folder route ->
             recipes.docs_folder.init route
 
 

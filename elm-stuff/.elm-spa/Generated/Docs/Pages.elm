@@ -5,8 +5,8 @@ module Generated.Docs.Pages exposing
     )
 
 import App.Page
-import Generated.Docs.Flags as Flags
-import Generated.Docs.Routes as Routes exposing (Route(..))
+import Generated.Docs.Params as Params
+import Generated.Docs.Route as Route exposing (Route(..))
 import Layouts.Docs as Layout
 import Pages.Docs.Dynamic
 import Pages.Docs.Static
@@ -44,8 +44,8 @@ type alias Recipe flags model msg appMsg =
 
 
 type alias Recipes msg =
-    { dynamic : Recipe Flags.Dynamic Pages.Docs.Dynamic.Model Pages.Docs.Dynamic.Msg msg
-    , static : Recipe Flags.Static Pages.Docs.Static.Model Pages.Docs.Static.Msg msg
+    { dynamic : Recipe Params.Dynamic Pages.Docs.Dynamic.Model Pages.Docs.Dynamic.Msg msg
+    , static : Recipe Params.Static Pages.Docs.Static.Model Pages.Docs.Static.Msg msg
     }
 
 
@@ -73,10 +73,10 @@ recipes =
 init : Route -> Page.Init Model Msg
 init route =
     case route of
-        Routes.Dynamic flags ->
+        Route.Dynamic _ flags ->
             recipes.dynamic.init flags
 
-        Routes.Static flags ->
+        Route.Static flags ->
             recipes.static.init flags
 
 

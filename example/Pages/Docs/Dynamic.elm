@@ -3,7 +3,7 @@ module Pages.Docs.Dynamic exposing (Model, Msg, page)
 import App.Page
 import Components.Hero
 import Element exposing (..)
-import Generated.Docs.Flags as Flags
+import Generated.Docs.Params as Params
 import Global
 import Utils.Page exposing (Page)
 
@@ -17,7 +17,7 @@ type alias Msg =
     Never
 
 
-page : Page Flags.Dynamic Model Msg model msg appMsg
+page : Page Params.Dynamic Model Msg model msg appMsg
 page =
     App.Page.sandbox
         { title = always "Dynamic"
@@ -31,9 +31,9 @@ page =
 -- INIT
 
 
-init : Flags.Dynamic -> Model
-init slug =
-    { slug = slug
+init : Params.Dynamic -> Model
+init { param1 } =
+    { slug = param1
     }
 
 

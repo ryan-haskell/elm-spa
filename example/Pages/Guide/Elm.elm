@@ -3,7 +3,7 @@ module Pages.Guide.Elm exposing (Model, Msg, page)
 import App.Page
 import Components.Hero
 import Element exposing (..)
-import Generated.Guide.Flags as Flags
+import Generated.Guide.Params as Params
 import Utils.Page exposing (Page)
 
 
@@ -15,7 +15,7 @@ type alias Msg =
     Never
 
 
-page : Page Flags.Elm Model Msg model msg appMsg
+page : Page Params.Elm Model Msg model msg appMsg
 page =
     App.Page.static
         { title = always "Guide.Elm"

@@ -1,4 +1,4 @@
-module Generated.Guide.Flags exposing
+module Generated.Guide.Params exposing
     ( Elm
     , ElmSpa
     , Programming
@@ -6,12 +6,12 @@ module Generated.Guide.Flags exposing
 
 
 type alias Elm =
-    ()
+    {}
 
 
 type alias ElmSpa =
-    ()
+    {}
 
 
 type alias Programming =
-    ()
+    {}

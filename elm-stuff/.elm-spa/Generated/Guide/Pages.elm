@@ -6,9 +6,9 @@ module Generated.Guide.Pages exposing
 
 import App.Page
 import Generated.Guide.Dynamic.Pages
-import Generated.Guide.Dynamic.Routes
-import Generated.Guide.Flags as Flags
-import Generated.Guide.Routes as Routes exposing (Route(..))
+import Generated.Guide.Dynamic.Route
+import Generated.Guide.Params as Params
+import Generated.Guide.Route as Route exposing (Route)
 import Layouts.Guide as Layout
 import Pages.Guide.Elm
 import Pages.Guide.ElmSpa
@@ -51,10 +51,10 @@ type alias Recipe flags model msg appMsg =
 
 
 type alias Recipes msg =
-    { elm : Recipe Flags.Elm Pages.Guide.Elm.Model Pages.Guide.Elm.Msg msg
-    , elmApp : Recipe Flags.ElmSpa Pages.Guide.ElmSpa.Model Pages.Guide.ElmSpa.Msg msg
-    , programming : Recipe Flags.Programming Pages.Guide.Programming.Model Pages.Guide.Programming.Msg msg
-    , dynamic_folder : Recipe Generated.Guide.Dynamic.Routes.Route Generated.Guide.Dynamic.Pages.Model Generated.Guide.Dynamic.Pages.Msg msg
+    { elm : Recipe Params.Elm Pages.Guide.Elm.Model Pages.Guide.Elm.Msg msg
+    , elmApp : Recipe Params.ElmSpa Pages.Guide.ElmSpa.Model Pages.Guide.ElmSpa.Msg msg
+    , programming : Recipe Params.Programming Pages.Guide.Programming.Model Pages.Guide.Programming.Msg msg
+    , dynamic_folder : Recipe Generated.Guide.Dynamic.Route.Route Generated.Guide.Dynamic.Pages.Model Generated.Guide.Dynamic.Pages.Msg msg
     }
 
 
@@ -94,16 +94,16 @@ recipes =
 init : Route -> Page.Init Model Msg
 init route =
     case route of
-        Routes.Elm flags ->
+        Route.Elm flags ->
             recipes.elm.init flags
 
-        Routes.ElmSpa flags ->
+        Route.ElmSpa flags ->
             recipes.elmApp.init flags
 
-        Routes.Programming flags ->
+        Route.Programming flags ->
             recipes.programming.init flags
 
-        Routes.Dynamic_Folder flags route_ ->
+        Route.Dynamic_Folder flags route_ ->
             recipes.dynamic_folder.init route_
 
 

@@ -3,7 +3,7 @@ module Pages.Docs exposing (Model, Msg, page)
 import App.Page
 import Components.Hero
 import Element exposing (..)
-import Generated.Flags as Flags
+import Generated.Params as Params
 import Utils.Page exposing (Page)
 
 
@@ -15,7 +15,7 @@ type alias Msg =
     Never
 
 
-page : Page Flags.Docs Model Msg model msg appMsg
+page : Page Params.Docs Model Msg model msg appMsg
 page =
     App.Page.static
         { title = always "Docs"

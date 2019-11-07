@@ -57,14 +57,13 @@ Let `App.create` know about this by passing in your own `Options` like these:
 
 -}
 
-import App.Route as Route exposing (Route)
 import Browser
 import Browser.Navigation as Nav
 import Html exposing (Html)
 import Internals.Page as Page
 import Internals.Utils as Utils
 import Url exposing (Url)
-import Url.Parser as Parser
+import Url.Parser as Parser exposing (Parser)
 
 
 
@@ -109,7 +108,7 @@ create :
         , map : (layoutMsg -> Msg globalMsg layoutMsg) -> uiLayoutMsg -> uiMsg
         }
     , routing :
-        { routes : List (Route route route)
+        { routes : List (Parser (route -> route) route)
         , toPath : route -> String
         , notFound : route
         }
@@ -186,7 +185,7 @@ create config =
 
 
 type alias Routes route a =
-    List (Route.Route route a)
+    List (Parser (route -> a) a)
 
 
 fromUrl : { a | routes : Routes route route, notFound : route } -> Url -> route

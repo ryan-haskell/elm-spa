@@ -5,19 +5,22 @@ module Generated.Guide.Dynamic.Pages exposing
     )
 
 import App.Page
-import Generated.Guide.Dynamic.Flags as Flags
-import Generated.Guide.Dynamic.Routes as Routes exposing (Route(..))
+import Generated.Guide.Dynamic.Params as Params
+import Generated.Guide.Dynamic.Route as Route exposing (Route)
 import Layouts.Guide.Dynamic as Layout
 import Pages.Guide.Dynamic.Intro
+import Pages.Guide.Dynamic.Other
 import Utils.Page as Page exposing (Page)
 
 
 type Model
     = IntroModel Pages.Guide.Dynamic.Intro.Model
+    | OtherModel Pages.Guide.Dynamic.Other.Model
 
 
 type Msg
     = IntroMsg Pages.Guide.Dynamic.Intro.Msg
+    | OtherMsg Pages.Guide.Dynamic.Other.Msg
 
 
 page : Page Route Model Msg layoutModel layoutMsg appMsg
@@ -41,7 +44,8 @@ type alias Recipe flags model msg appMsg =
 
 
 type alias Recipes msg =
-    { intro : Recipe Flags.Intro Pages.Guide.Dynamic.Intro.Model Pages.Guide.Dynamic.Intro.Msg msg
+    { intro : Recipe Params.Intro Pages.Guide.Dynamic.Intro.Model Pages.Guide.Dynamic.Intro.Msg msg
+    , other : Recipe Params.Other Pages.Guide.Dynamic.Other.Model Pages.Guide.Dynamic.Other.Msg msg
     }
 
 
@@ -53,6 +57,12 @@ recipes =
             , toModel = IntroModel
             , toMsg = IntroMsg
             }
+    , other =
+        Page.recipe
+            { page = Pages.Guide.Dynamic.Other.page
+            , toModel = OtherModel
+            , toMsg = OtherMsg
+            }
     }
 
 
@@ -63,8 +73,11 @@ recipes =
 init : Route -> Page.Init Model Msg
 init route =
     case route of
-        Routes.Intro flags ->
+        Route.Intro flags ->
             recipes.intro.init flags
+
+        Route.Other flags ->
+            recipes.other.init flags
 
 
 
@@ -77,10 +90,14 @@ update bigMsg bigModel =
         ( IntroMsg msg, IntroModel model ) ->
             recipes.intro.update msg model
 
+        ( OtherMsg msg, OtherModel model ) ->
+            recipes.other.update msg model
+
+        _ ->
+            App.Page.keep bigModel
 
 
--- _ ->
---     App.Page.keep bigModel
+
 -- BUNDLE
 
 
@@ -89,3 +106,6 @@ bundle bigModel =
     case bigModel of
         IntroModel model ->
             recipes.intro.bundle model
+
+        OtherModel model ->
+            recipes.other.bundle model

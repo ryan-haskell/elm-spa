@@ -1,12 +1,13 @@
-module Generated.Docs.Flags exposing
+module Generated.Docs.Params exposing
     ( Dynamic
     , Static
     )
 
 
 type alias Static =
-    ()
+    {}
 
 
 type alias Dynamic =
-    String
+    { param1 : String
+    }

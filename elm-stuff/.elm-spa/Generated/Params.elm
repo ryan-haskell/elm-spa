@@ -1,4 +1,4 @@
-module Generated.Flags exposing
+module Generated.Params exposing
     ( Docs
     , Guide
     , NotFound
@@ -8,20 +8,20 @@ module Generated.Flags exposing
 
 
 type alias Top =
-    ()
+    {}
 
 
 type alias Docs =
-    ()
+    {}
 
 
 type alias NotFound =
-    ()
+    {}
 
 
 type alias SignIn =
-    ()
+    {}
 
 
 type alias Guide =
-    ()
+    {}

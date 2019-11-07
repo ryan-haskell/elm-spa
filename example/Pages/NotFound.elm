@@ -3,7 +3,7 @@ module Pages.NotFound exposing (Model, Msg, page)
 import App.Page
 import Components.Hero
 import Element exposing (..)
-import Generated.Flags as Flags
+import Generated.Params as Params
 import Utils.Page exposing (Page)
 
 
@@ -15,7 +15,7 @@ type alias Msg =
     Never
 
 
-page : Page Flags.NotFound Model Msg model msg appMsg
+page : Page Params.NotFound Model Msg model msg appMsg
 page =
     App.Page.static
         { title = always "NotFound"
@@ -31,7 +31,7 @@ view : Element Msg
 view =
     column [ width fill ]
         [ Components.Hero.view
-            { title = "that's not a place."
+            { title = "page not found"
             , subtitle = text "but i'm not even mad about it."
             , buttons =
                 [ { label = text "back home", action = Components.Hero.Link "/" }
