@@ -3,24 +3,6 @@ module App.Router exposing (Router, create)
 import Url.Parser as Parser exposing ((</>), Parser)
 
 
-router =
-    { top =
-        \r -> Parser.map (r {}) <| Parser.top
-    , path =
-        \r p -> Parser.map (r {}) <| Parser.s p
-    , folder =
-        \r p children -> Parser.map r <| Parser.s p </> Parser.oneOf children
-    , dynamicFolder =
-        \folder toParams routes_ ->
-            Parser.string
-                |> andThen
-                    (\value ->
-                        Parser.oneOf (routes_ (toParams value))
-                            |> Parser.map (folder value)
-                    )
-    }
-
-
 andThen :
     (a -> Parser (b -> c) c)
     -> Parser (a -> b) b
