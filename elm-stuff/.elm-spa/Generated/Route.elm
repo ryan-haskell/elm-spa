@@ -4,8 +4,9 @@ module Generated.Route exposing
     , toPath
     )
 
-import App.Router
 import Generated.Docs.Route
+import Generated.Guide.Dynamic.Dynamic.Route
+import Generated.Guide.Dynamic.Faq.Route
 import Generated.Guide.Dynamic.Route
 import Generated.Guide.Route
 import Generated.Params
@@ -24,17 +25,76 @@ type Route
 
 routes : List (Parser (Route -> a) a)
 routes =
-    let
-        router =
-            App.Router.create {}
-    in
-    [ router.top Top
-    , router.path Docs "docs"
-    , router.path Guide "guide"
-    , router.path SignIn "sign-in"
-    , router.path NotFound "not-found"
-    , router.folder Guide_Folder "guide" Generated.Guide.Route.routes
-    , router.folder Docs_Folder "docs" Generated.Docs.Route.routes
+    [ Parser.top
+        |> Parser.map (Top {})
+    , Parser.s "docs"
+        |> Parser.map (Docs {})
+    , Parser.s "guide"
+        |> Parser.map (Guide {})
+    , Parser.s "not-found"
+        |> Parser.map (NotFound {})
+    , Parser.s "sign-in"
+        |> Parser.map (SignIn {})
+    , Parser.s "guide"
+        </> Parser.s "elm"
+        |> Parser.map (Guide_Folder (Generated.Guide.Route.Elm {}))
+    , Parser.s "guide"
+        </> Parser.s "elm-spa"
+        |> Parser.map (Guide_Folder (Generated.Guide.Route.ElmSpa {}))
+    , Parser.s "guide"
+        </> Parser.s "programming"
+        |> Parser.map (Guide_Folder (Generated.Guide.Route.Programming {}))
+    , Parser.s "guide"
+        </> Parser.string
+        </> Parser.s "intro"
+        |> Parser.map
+            (\param1 ->
+                Guide_Folder
+                    (Generated.Guide.Route.Dynamic_Folder
+                        param1
+                        (Generated.Guide.Dynamic.Route.Intro { param1 = param1 })
+                    )
+            )
+    , Parser.s "guide"
+        </> Parser.string
+        </> Parser.s "other"
+        |> Parser.map
+            (\param1 ->
+                Guide_Folder
+                    (Generated.Guide.Route.Dynamic_Folder
+                        param1
+                        (Generated.Guide.Dynamic.Route.Other { param1 = param1 })
+                    )
+            )
+    , Parser.s "guide"
+        </> Parser.string
+        </> Parser.s "faq"
+        </> Parser.top
+        |> Parser.map
+            (\param1 ->
+                Guide_Folder
+                    (Generated.Guide.Route.Dynamic_Folder
+                        param1
+                        (Generated.Guide.Dynamic.Route.Faq_Folder
+                            (Generated.Guide.Dynamic.Faq.Route.Top { param1 = param1 })
+                        )
+                    )
+            )
+    , Parser.s "guide"
+        </> Parser.string
+        </> Parser.string
+        </> Parser.top
+        |> Parser.map
+            (\param1 param2 ->
+                Guide_Folder
+                    (Generated.Guide.Route.Dynamic_Folder
+                        param1
+                        (Generated.Guide.Dynamic.Route.Dynamic_Folder
+                            param2
+                            (Generated.Guide.Dynamic.Dynamic.Route.Top { param1 = param1, param2 = param2 })
+                        )
+                    )
+            )
     ]
 
 

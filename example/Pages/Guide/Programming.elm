@@ -32,7 +32,7 @@ view =
     column [ width fill ]
         [ Components.Hero.view
             { title = "programming"
-            , subtitle = text "become nerdy, in a lovable way"
+            , subtitle = text "become nerdy, in an awful way"
             , buttons = []
             }
         ]

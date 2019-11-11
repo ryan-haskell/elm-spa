@@ -1,9 +1,9 @@
-module Pages.Guide.Dynamic.Other exposing (Model, Msg, page)
+module Pages.Guide.Dynamic.Faq.Top exposing (Model, Msg, page)
 
 import App.Page
 import Components.Hero
 import Element exposing (..)
-import Generated.Guide.Dynamic.Params as Params
+import Generated.Guide.Dynamic.Faq.Params as Params
 import Utils.Page exposing (Page)
 
 
@@ -16,17 +16,17 @@ type alias Msg =
     Never
 
 
-page : Page Params.Other Model Msg model msg appMsg
+page : Page Params.Top Model Msg model msg appMsg
 page =
     App.Page.sandbox
-        { title = always "Guide.Dynamic.Other"
+        { title = always "Guide.Dynamic.Top"
         , init = always init
         , update = always update
         , view = always view
         }
 
 
-init : Params.Other -> Model
+init : Params.Top -> Model
 init { param1 } =
     { slug = param1
     }
@@ -47,7 +47,7 @@ view model =
         [ width fill
         ]
         [ Components.Hero.view
-            { title = "other " ++ model.slug
+            { title = "Faq for " ++ model.slug
             , subtitle = text "\"you're gonna be great.\""
             , buttons = []
             }

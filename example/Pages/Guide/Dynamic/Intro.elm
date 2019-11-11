@@ -32,6 +32,7 @@ init { param1 } =
     }
 
 
+update : Msg -> Model -> Model
 update msg model =
     model
 
