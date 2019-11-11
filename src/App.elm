@@ -168,6 +168,7 @@ create config =
             subscriptions
                 { bundle = page.bundle
                 , map = config.ui.map
+                , global = config.global.subscriptions
                 }
         , view =
             view
@@ -361,18 +362,22 @@ subscriptions :
     , bundle :
         layoutModel
         -> Page.Bundle layoutMsg uiLayoutMsg globalModel globalMsg (Msg globalMsg layoutMsg) uiMsg
+    , global : globalModel -> Sub globalMsg
     }
     -> Model flags globalModel layoutModel
     -> Sub (Msg globalMsg layoutMsg)
 subscriptions config model =
-    (config.bundle
-        model.page
-        { fromGlobalMsg = Global
-        , fromPageMsg = Page
-        , global = model.global
-        , map = config.map
-        }
-    ).subscriptions
+    Sub.batch
+        [ (config.bundle
+            model.page
+            { fromGlobalMsg = Global
+            , fromPageMsg = Page
+            , global = model.global
+            , map = config.map
+            }
+          ).subscriptions
+        , Sub.map Global (config.global model.global)
+        ]
 
 
 
