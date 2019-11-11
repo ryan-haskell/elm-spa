@@ -72,13 +72,10 @@ routes =
         </> Parser.top
         |> Parser.map
             (\param1 ->
-                Guide_Folder
-                    (Generated.Guide.Route.Dynamic_Folder
-                        param1
-                        (Generated.Guide.Dynamic.Route.Faq_Folder
-                            (Generated.Guide.Dynamic.Faq.Route.Top { param1 = param1 })
-                        )
-                    )
+                Guide_Folder <|
+                    Generated.Guide.Route.Dynamic_Folder param1 <|
+                        Generated.Guide.Dynamic.Route.Faq_Folder <|
+                            Generated.Guide.Dynamic.Faq.Route.Top { param1 = param1 }
             )
     , Parser.s "guide"
         </> Parser.string
@@ -86,14 +83,20 @@ routes =
         </> Parser.top
         |> Parser.map
             (\param1 param2 ->
-                Guide_Folder
-                    (Generated.Guide.Route.Dynamic_Folder
-                        param1
-                        (Generated.Guide.Dynamic.Route.Dynamic_Folder
-                            param2
-                            (Generated.Guide.Dynamic.Dynamic.Route.Top { param1 = param1, param2 = param2 })
-                        )
-                    )
+                Guide_Folder <|
+                    Generated.Guide.Route.Dynamic_Folder param1 <|
+                        Generated.Guide.Dynamic.Route.Dynamic_Folder param2 <|
+                            Generated.Guide.Dynamic.Dynamic.Route.Top { param1 = param1, param2 = param2 }
+            )
+    , Parser.s "docs"
+        </> Parser.s "static"
+        |> Parser.map (Docs_Folder (Generated.Docs.Route.Static {}))
+    , Parser.s "docs"
+        </> Parser.string
+        |> Parser.map
+            (\param1 ->
+                Docs_Folder <|
+                    Generated.Docs.Route.Dynamic param1 { param1 = param1 }
             )
     ]
 
