@@ -6,6 +6,7 @@ module Application.Page exposing
     , layout
     , recipe
     , keep
+    , Page
     )
 
 {-| Each page can be as simple or complex as you need:
