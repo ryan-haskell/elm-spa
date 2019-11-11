@@ -1,4 +1,5 @@
 .DS_Store
 dist
 elm-stuff/0.19.1
+example/elm-stuff/0.19.1
 node_modules

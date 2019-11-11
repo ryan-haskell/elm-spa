@@ -1,5 +1,10 @@
-# src
+# elm-spa/example
+> what a project might look like!
 
-```elm
 
+## running things
+
+```
+npm install
+npm run dev
 ```

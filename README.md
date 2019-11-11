@@ -2,8 +2,8 @@
 > for building single page apps
 
 
-## local development
+## run the example!
 
 ```
-npm install && npm run dev
+npm run example
 ```
