@@ -3,7 +3,7 @@ module Main exposing (main)
 import App
 import Element
 import Generated.Pages as Pages
-import Generated.Route as Route
+import Generated.Routes as Routes
 import Global
 import Pages.NotFound
 
@@ -16,9 +16,9 @@ main =
             , map = Element.map
             }
         , routing =
-            { routes = Route.routes
-            , toPath = Route.toPath
-            , notFound = Route.NotFound {}
+            { routes = Routes.parsers
+            , toPath = Routes.toPath
+            , notFound = Routes.routes.notFound
             }
         , global =
             { init = Global.init

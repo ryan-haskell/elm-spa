@@ -1,11 +1,9 @@
 module Generated.Docs.Route exposing
     ( Route(..)
-    , routes
     , toPath
     )
 
 import Generated.Docs.Params as Params
-import Url.Parser as Parser exposing ((</>), Parser)
 
 
 type Route
@@ -21,17 +19,3 @@ toPath route =
 
         Dynamic value _ ->
             "/" ++ value
-
-
-routes :
-    {}
-    -> List (Parser (Route -> a) a)
-routes params =
-    []
-    -- let
-    --     router =
-    --         App.Router.create params
-    -- in
-    -- [ router.path Static "static"
-    -- , router.dynamic Dynamic (\param1 -> { param1 = param1 })
-    -- ]

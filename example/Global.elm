@@ -7,7 +7,7 @@ module Global exposing
     , update
     )
 
-import Generated.Route as Route exposing (Route)
+import Generated.Routes as Routes exposing (Route, routes)
 
 
 type alias Flags =
@@ -43,8 +43,7 @@ update commands msg model =
         SignIn user ->
             ( { model | user = Just user }
             , Cmd.none
-            , Cmd.none
-              -- , commands.navigate (Route.Top {})
+            , commands.navigate routes.top
             )
 
         SignOut ->

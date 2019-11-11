@@ -5,7 +5,6 @@ module Generated.Guide.Route exposing
 
 import Generated.Guide.Dynamic.Route as Dynamic_Routes
 import Generated.Guide.Params as Params
-import Url.Parser as Parser exposing ((</>), Parser)
 
 
 type Route
