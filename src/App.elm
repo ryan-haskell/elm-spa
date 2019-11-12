@@ -11,18 +11,22 @@ module App exposing
 `App.create` replaces [Browser.application](https://package.elm-lang.org/packages/elm/browser/latest/Browser#application)
 as the entrypoint to your app.
 
-    import App
-    import Generated.Pages as Pages
-    import Generated.Route as Route
-    import Global
+    module Main exposing (main)
 
+    import App
+    import Element
+    import Global
+    import Pages
+    import Routes
+
+    main : App.Program Global.Flags Global.Model Global.Msg Pages.Model Pages.Msg
     main =
         App.create
             { ui = App.usingHtml
             , routing =
-                { routes = Route.routes
-                , toPath = Route.toPath
-                , notFound = Route.NotFound ()
+                { routes = Routes.parsers
+                , toPath = Routes.toPath
+                , notFound = Routes.routes.notFound
                 }
             , global =
                 { init = Global.init
@@ -35,23 +39,23 @@ as the entrypoint to your app.
 @docs Program, create
 
 
-# Supports more than elm/html
+# using elm-ui?
 
-If you're a fan of [mdgriffith/elm-ui](https://package.elm-lang.org/packages/mdgriffith/elm-ui/latest/),
-it's important to support using `Element msg` instead of `Html msg` for your pages and components.
+If you're a big fan of [mdgriffith/elm-ui](https://package.elm-lang.org/packages/mdgriffith/elm-ui/latest/) (or not-so-big-fan of CSS),
+this package supports using `Element msg` instead of `Html msg` for your pages and components.
 
-Let `App.create` know about this by passing in your own `Options` like these:
+Providing `App.create` with these `ui` options will do the trick!
 
     import Element
-    -- other imports
 
-    App.create
-        { ui =
-            { toHtml = Element.layout []
-            , map = Element.map
+    main =
+        App.create
+            { ui =
+                { toHtml = Element.layout []
+                , map = Element.map
+                }
+            , -- ...
             }
-        , -- ... the rest of your app
-        }
 
 @docs usingHtml
 
@@ -78,7 +82,11 @@ type alias Program flags globalModel globalMsg layoutModel layoutMsg =
 
 {-| Pass this in when calling `App.create`
 
-( It will work if your view returns the standard `Html msg` )
+    main =
+        App.create
+            { ui = App.usingHtml
+            , -- ...
+            }
 
 -}
 usingHtml :
@@ -86,7 +94,7 @@ usingHtml :
         (layoutMsg -> Msg globalMsg layoutMsg)
         -> Html layoutMsg
         -> Html (Msg globalMsg layoutMsg)
-    , toHtml : uiMsg -> uiMsg
+    , toHtml : ui_msg -> ui_msg
     }
 usingHtml =
     { toHtml = identity
@@ -104,8 +112,8 @@ usingHtml =
 -}
 create :
     { ui :
-        { toHtml : uiMsg -> Html (Msg globalMsg layoutMsg)
-        , map : (layoutMsg -> Msg globalMsg layoutMsg) -> uiLayoutMsg -> uiMsg
+        { toHtml : ui_msg -> Html (Msg globalMsg layoutMsg)
+        , map : (layoutMsg -> Msg globalMsg layoutMsg) -> ui_layoutMsg -> ui_msg
         }
     , routing :
         { routes : List (Parser (route -> route) route)
@@ -126,7 +134,7 @@ create :
             -> ( globalModel, Cmd globalMsg, Cmd (Msg globalMsg layoutMsg) )
         , subscriptions : globalModel -> Sub globalMsg
         }
-    , page : Page.Page route layoutModel layoutMsg uiLayoutMsg layoutModel layoutMsg uiLayoutMsg globalModel globalMsg (Msg globalMsg layoutMsg) uiMsg
+    , page : Page.Page route layoutModel layoutMsg ui_layoutMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg (Msg globalMsg layoutMsg) ui_msg
     }
     -> Program flags globalModel globalMsg layoutModel layoutMsg
 create config =
@@ -358,10 +366,10 @@ navigate toPath url route =
 
 
 subscriptions :
-    { map : (layoutMsg -> Msg globalMsg layoutMsg) -> uiLayoutMsg -> uiMsg
+    { map : (layoutMsg -> Msg globalMsg layoutMsg) -> ui_layoutMsg -> ui_msg
     , bundle :
         layoutModel
-        -> Page.Bundle layoutMsg uiLayoutMsg globalModel globalMsg (Msg globalMsg layoutMsg) uiMsg
+        -> Page.Bundle layoutMsg ui_layoutMsg globalModel globalMsg (Msg globalMsg layoutMsg) ui_msg
     , global : globalModel -> Sub globalMsg
     }
     -> Model flags globalModel layoutModel
@@ -385,11 +393,11 @@ subscriptions config model =
 
 
 view :
-    { map : (layoutMsg -> Msg globalMsg layoutMsg) -> uiLayoutMsg -> uiMsg
-    , toHtml : uiMsg -> Html (Msg globalMsg layoutMsg)
+    { map : (layoutMsg -> Msg globalMsg layoutMsg) -> ui_layoutMsg -> ui_msg
+    , toHtml : ui_msg -> Html (Msg globalMsg layoutMsg)
     , bundle :
         layoutModel
-        -> Page.Bundle layoutMsg uiLayoutMsg globalModel globalMsg (Msg globalMsg layoutMsg) uiMsg
+        -> Page.Bundle layoutMsg ui_layoutMsg globalModel globalMsg (Msg globalMsg layoutMsg) ui_msg
     }
     -> Model flags globalModel layoutModel
     -> Browser.Document (Msg globalMsg layoutMsg)

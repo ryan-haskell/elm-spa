@@ -10,76 +10,47 @@ module App.Page exposing
 
 {-| Each page can be as simple or complex as you need:
 
-1.  [Static](#static) - for rendering a simple view
+1.  [Static](#static) - a page without state
 
-2.  [Sandbox](#sandbox) - for maintaining state, without any side-effects
+2.  [Sandbox](#sandbox) - a page without side-effects
 
-3.  [Element](#element) - for maintaining state, **with** side-effects
+3.  [Element](#element) - a page _with_ side-effects
 
-4.  [Component](#component) - for a full-blown page, that can view and update global state
+4.  [Component](#component) - a page that can change the global state
 
 
-## Static
+## what's that `always` for?
 
-For rendering a simple view.
+You may notice the examples below use `always`. This is to **opt-out** each
+function from reading the global model.
 
-    page =
-        Page.static
-            { title = title
-            , view = view
-            }
+If you need access to `Global.Model` in your `title`, `init`, `update`, `view`, or
+`subscriptions` functions, just remove the always.
+
+**It is recommended to include this to keep your pages as simple as possible!**
+
+
+# static
 
 @docs static
 
 
-## Sandbox
-
-For maintaining state, without any side-effects.
-
-    page =
-        Page.sandbox
-            { title = title
-            , init = init
-            , update = update
-            , view = view
-            }
+# sandbox
 
 @docs sandbox
 
 
-## Element
-
-For maintaining state, **with** side-effects.
-
-    page =
-        Page.element
-            { title = title
-            , init = init
-            , update = update
-            , view = view
-            , subscriptions = subscriptions
-            }
+# element
 
 @docs element
 
 
-## Component
-
-For a full-blown page, that can view and update global state.
-
-    page =
-        Page.component
-            { title = title
-            , init = init
-            , update = update
-            , view = view
-            , subscriptions = subscriptions
-            }
+# component
 
 @docs component, send
 
 
-# Composing pages together
+# composing pages together
 
 The rest of this module contains types and functions that
 can be generated with the [cli companion tool](https://github.com/ryannhg/elm-spa/tree/master/cli)
@@ -88,7 +59,7 @@ If you're typing this stuff manually, you might need to know what
 these are for!
 
 
-## Layout
+## layout
 
 A page that is comprimised of smaller pages, that is
 able to share a common layout (maybe a something like a sidebar!)
@@ -107,7 +78,7 @@ able to share a common layout (maybe a something like a sidebar!)
 @docs layout
 
 
-## Recipe
+## recipe
 
 Implementing the `init`, `update` and `bundle` functions is much easier
 when you turn a `Page` type into `Recipe`.
@@ -120,16 +91,18 @@ A `Recipe` contains a record waiting for page specific data.
 
   - `bundle` (`view`/`subscriptions`) : just needs a `model`
 
+@docs recipe
 
-### What's a "bundle"?
+
+## what's a "bundle"?
 
 We can "bundle" the `view` and `subscriptions` functions together,
-because they both only depend on the current `model`. That's why this
-API exposes `bundle` instead of making you type this:
+because they both only need the current `model`.
 
-    -- BEFORE
-    view model =
-        case model_ of
+So _instead_ of typing out these:
+
+    view bigModel =
+        case bigModel of
             FooModel model ->
                 foo.view model
 
@@ -139,8 +112,8 @@ API exposes `bundle` instead of making you type this:
             BazModel model ->
                 baz.view model
 
-    subscriptions model =
-        case model_ of
+    subscriptions bigModel =
+        case bigModel of
             FooModel model ->
                 foo.subscriptions model
 
@@ -150,9 +123,10 @@ API exposes `bundle` instead of making you type this:
             BazModel model ->
                 baz.subscriptions model
 
-    -- AFTER
-    bundle model =
-        case model_ of
+You only need **one** case expression: (woohoo, less boilerplate!)
+
+    bundle bigModel =
+        case bigModel of
             FooModel model ->
                 foo.bundle model
 
@@ -162,12 +136,8 @@ API exposes `bundle` instead of making you type this:
             BazModel model ->
                 baz.bundle model
 
-(Woohoo, less case expressions to type out!)
 
-@docs recipe
-
-
-## Update helper
+## update helpers
 
 @docs keep
 
@@ -177,47 +147,62 @@ import Internals.Page exposing (..)
 import Internals.Utils as Utils
 
 
-type alias Page pageRoute pageModel pageMsg uiPageMsg layoutModel layoutMsg uiLayoutMsg globalModel globalMsg msg uiMsg =
-    Internals.Page.Page pageRoute pageModel pageMsg uiPageMsg layoutModel layoutMsg uiLayoutMsg globalModel globalMsg msg uiMsg
+type alias Page pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg =
+    Internals.Page.Page pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
 
 
 {-| Turns a page and some upgrade information into a recipe,
 for use in a layout's `init`, `update`, and `bundle` functions!
 
-    Page.recipe Homepage.page
-        { toModel = HomepageModel
-        , toMsg = HomepageMsg
-        , map = Element.map -- ( if using elm-ui )
+    import Utils.Spa as Spa
+
+    recipes : Recipes msg
+    recipes =
+        { top =
+            Spa.recipe
+                { page = Top.page
+                , toModel = TopModel
+                , toMsg = TopMsg
+                }
+        , counter =
+            Spa.recipe
+                { page = Counter.page
+                , toModel = CounterModel
+                , toMsg = CounterMsg
+                }
+
+        -- ...
         }
 
 -}
 recipe :
-    { page : Page pageRoute pageModel pageMsg uiPageMsg layoutModel layoutMsg uiLayoutMsg globalModel globalMsg msg uiMsg
+    { page : Page pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
     , toModel : pageModel -> layoutModel
     , toMsg : pageMsg -> layoutMsg
-    , map : (pageMsg -> layoutMsg) -> uiPageMsg -> uiLayoutMsg
+    , map : (pageMsg -> layoutMsg) -> ui_pageMsg -> ui_layoutMsg
     }
-    -> Recipe pageRoute pageModel pageMsg layoutModel layoutMsg uiLayoutMsg globalModel globalMsg msg uiMsg
+    -> Recipe pageParams pageModel pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
 recipe =
     Internals.Page.upgrade
 
 
 {-| In the event that our `case` expression in `update` receives a `msg` that doesn't
-match it's `model`, we use this function to keep the model as-is.
+match up with it's `model`, we use `keep` to leave the page as-is.
 
-    update msg_ model_ =
-        case ( msg_, model_ ) of
-            ( FooMsg msg, FooModel model ) ->
-                foo.update msg model
+    update : Msg -> Model -> Spa.Update Model Msg
+    update bigMsg bigModel =
+        case ( bigMsg, bigModel ) of
+            ( TopMsg msg, TopModel model ) ->
+                top.update msg model
 
-            ( BarMsg msg, BarModel model ) ->
-                bar.update msg model
+            ( CounterMsg msg, CounterModel model ) ->
+                counter.update msg model
 
-            ( BazMsg msg, BazModel model ) ->
-                baz.update msg model
+            ( NotFoundMsg msg, NotFoundModel model ) ->
+                notFound.update msg model
 
             _ ->
-                Page.keep model_
+                Page.keep bigModel
 
 -}
 keep :
@@ -227,17 +212,31 @@ keep model =
     always ( model, Cmd.none, Cmd.none )
 
 
+{-|
 
--- STATIC
 
+## an example
 
-{-| Create an `static` page from a record. [Here's an example](https://github.com/ryannhg/elm-spa/examples/html/src/Pages/Index.elm)
+    page =
+        Page.static
+            { title = always title
+            , view = always view
+            }
+
+    title : String
+    title =
+        "Example"
+
+    view : Html Never
+    view =
+        h1 [ class "title" ] [ text "Example" ]
+
 -}
 static :
     { title : { global : globalModel } -> String
-    , view : globalModel -> uiPageMsg
+    , view : globalModel -> ui_pageMsg
     }
-    -> Page pageRoute () Never uiPageMsg layoutModel layoutMsg uiLayoutMsg globalModel globalMsg msg uiMsg
+    -> Page pageParams () Never ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
 static page =
     Page
         (\{ toModel, toMsg, map } ->
@@ -257,21 +256,65 @@ static page =
 -- SANDBOX
 
 
-{-| Create an `sandbox` page from a record. [Here's an example](https://github.com/ryannhg/elm-spa/examples/html/src/Pages/Counter.elm)
+{-|
+
+
+## an example
+
+    page =
+        Page.sandbox
+            { title = always title
+            , init = always init
+            , update = always update
+            , view = always view
+            }
+
+    title : String
+    title =
+        "Counter"
+
+    type alias Model =
+        Int
+
+    init : Model
+    init =
+        0
+
+    type Msg
+        = Increment
+        | Decrement
+
+    update : Msg -> Model -> Model
+    update msg model =
+        case msg of
+            Increment ->
+                model + 1
+
+            Decrement ->
+                model - 1
+
+    view : Model -> Html Msg
+    view model =
+        div []
+            [ button [ Events.onClick Increment ] [ text "+" ]
+            , text (String.fromInt model)
+            , button [ Events.onClick Decrement ] [ text "-" ]
+            ]
+
 -}
 sandbox :
     { title : { global : globalModel, model : pageModel } -> String
-    , init : globalModel -> pageRoute -> pageModel
+    , init : globalModel -> pageParams -> pageModel
     , update : globalModel -> pageMsg -> pageModel -> pageModel
-    , view : globalModel -> pageModel -> uiPageMsg
+    , view : globalModel -> pageModel -> ui_pageMsg
     }
-    -> Page pageRoute pageModel pageMsg uiPageMsg layoutModel layoutMsg uiLayoutMsg globalModel globalMsg msg uiMsg
+    -> Page pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
 sandbox page =
     Page
         (\{ toModel, toMsg, map } ->
             { init =
-                \pageRoute context ->
-                    ( toModel (page.init context.global pageRoute)
+                \pageParams context ->
+                    ( toModel (page.init context.global pageParams)
                     , Cmd.none
                     , Cmd.none
                     )
@@ -295,22 +338,55 @@ sandbox page =
 -- ELEMENT
 
 
-{-| Create an `element` page from a record. [Here's an example](https://github.com/ryannhg/elm-spa/examples/html/src/Pages/Random.elm)
+{-|
+
+
+## an example
+
+    page =
+        Page.element
+            { title = always title
+            , init = always init
+            , update = always update
+            , subscriptions = always subscriptions
+            , view = always view
+            }
+
+    title : String
+    title =
+        "Cat Gifs"
+
+    init : ( Model, Cmd.none )
+    init =
+        -- ...
+
+    update : Msg -> Model -> ( Model, Cmd Msg )
+    update msg model =
+        -- ...
+
+    subscriptions : Model -> Sub Msg
+    subscriptions model =
+        -- ...
+
+    view : Model -> Html Msg
+    view model =
+        -- ...
+
 -}
 element :
     { title : { global : globalModel, model : pageModel } -> String
-    , init : globalModel -> pageRoute -> ( pageModel, Cmd pageMsg )
+    , init : globalModel -> pageParams -> ( pageModel, Cmd pageMsg )
     , update : globalModel -> pageMsg -> pageModel -> ( pageModel, Cmd pageMsg )
-    , view : globalModel -> pageModel -> uiPageMsg
+    , view : globalModel -> pageModel -> ui_pageMsg
     , subscriptions : globalModel -> pageModel -> Sub pageMsg
     }
-    -> Page pageRoute pageModel pageMsg uiPageMsg layoutModel layoutMsg uiLayoutMsg globalModel globalMsg msg uiMsg
+    -> Page pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
 element page =
     Page
         (\{ toModel, toMsg, map } ->
             { init =
-                \pageRoute context ->
-                    page.init context.global pageRoute
+                \pageParams context ->
+                    page.init context.global pageParams
                         |> tuple toModel toMsg
             , update =
                 \msg model context ->
@@ -330,22 +406,58 @@ element page =
 -- COMPONENT
 
 
-{-| Create an `component` page from a record. [Here's an example](https://github.com/ryannhg/elm-spa/examples/html/src/Pages/SignIn.elm)
+{-|
+
+
+## an example
+
+    page =
+        Page.component
+            { title = always title
+            , init = always init
+            , update = always update
+            , subscriptions = always subscriptions
+            -- no always, so `view` gets `Global.Model`
+            , view = view
+            }
+
+    title : String
+    title =
+        "Sign in"
+
+    init : Params.SignIn -> ( Model, Cmd Msg, Cmd Global.Msg )
+    init params =
+        -- ...
+
+    update : Msg -> Model -> ( Model, Cmd Msg, Cmd Global.Msg )
+    update msg model =
+        -- ...
+
+    subscriptions : Model -> Sub Msg
+    subscriptions model =
+        -- ...
+
+    view : Global.Model -> Model -> Html Msg
+    view global model =
+        case global.user of
+            SignedIn _ -> viewSignOutForm
+            SignedOut -> viewSignInForm
+
 -}
 component :
     { title : { global : globalModel, model : pageModel } -> String
-    , init : globalModel -> pageRoute -> ( pageModel, Cmd pageMsg, Cmd globalMsg )
+    , init : globalModel -> pageParams -> ( pageModel, Cmd pageMsg, Cmd globalMsg )
     , update : globalModel -> pageMsg -> pageModel -> ( pageModel, Cmd pageMsg, Cmd globalMsg )
-    , view : globalModel -> pageModel -> uiPageMsg
+    , view : globalModel -> pageModel -> ui_pageMsg
     , subscriptions : globalModel -> pageModel -> Sub pageMsg
     }
-    -> Page pageRoute pageModel pageMsg uiPageMsg layoutModel layoutMsg uiLayoutMsg globalModel globalMsg msg uiMsg
+    -> Page pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
 component page =
     Page
         (\{ toModel, toMsg, map } ->
             { init =
-                \pageRoute context ->
-                    page.init context.global pageRoute
+                \pageParams context ->
+                    page.init context.global pageParams
                         |> truple toModel toMsg
             , update =
                 \msg model context ->
@@ -363,14 +475,12 @@ component page =
 
 {-| Useful for sending `Global.Msg` from a component.
 
-    update : Global.Model -> Msg -> Model -> ( Model, Cmd Msg, Cmd Global.Msg )
-    update global msg model =
-        case msg of
-            SignIn ->
-                ( model
-                , Cmd.none
-                , Page.send Global.SignIn
-                )
+    init : Params.SignIn -> ( Model, Cmd Msg, Cmd Global.Msg )
+    init params =
+        ( model
+        , Cmd.none
+        , Page.send (Global.NavigateTo routes.dashboard)
+        )
 
 -}
 send : msg -> Cmd msg
@@ -382,39 +492,38 @@ send =
 -- LAYOUT
 
 
-{-| These are used by top-level files like `src/Generated/Pages.elm`
-to compose together pages and layouts.
+{-| In practice, we wrap `layout` in `Utils/Spa.elm` so we only have to provide `Html.map` or `Element.map` once)
 
-We'll get a better understanding of `init`, `update`, and `bundle` below!
+    import Utils.Spa as Spa
 
-    Page.layout
-        { map = Html.map
-        , layout = Layout.view
-        , pages =
-            { init = init
-            , update = update
-            , bundle = bundle
+    page =
+        Spa.layout
+            { layout = Layout.view
+            , pages =
+                { init = init
+                , update = update
+                , bundle = bundle
+                }
             }
-        }
 
 -}
 layout :
-    { map : (pageMsg -> msg) -> uiPageMsg -> uiMsg
+    { map : (pageMsg -> msg) -> ui_pageMsg -> ui_msg
     , view :
-        { page : uiMsg
+        { page : ui_msg
         , global : globalModel
         , toMsg : globalMsg -> msg
         }
-        -> uiMsg
-    , recipe : Recipe pageRoute pageModel pageMsg pageModel pageMsg uiPageMsg globalModel globalMsg msg uiMsg
+        -> ui_msg
+    , recipe : Recipe pageParams pageModel pageMsg pageModel pageMsg ui_pageMsg globalModel globalMsg msg ui_msg
     }
-    -> Page pageRoute pageModel pageMsg uiPageMsg layoutModel layoutMsg uiLayoutMsg globalModel globalMsg msg uiMsg
+    -> Page pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
 layout options =
     Page
         (\{ toModel, toMsg } ->
             { init =
-                \pageRoute global ->
-                    options.recipe.init pageRoute global
+                \pageParams global ->
+                    options.recipe.init pageParams global
                         |> truple toModel toMsg
             , update =
                 \msg model global ->
@@ -423,7 +532,7 @@ layout options =
             , bundle =
                 \model context ->
                     let
-                        bundle : { title : String, view : uiMsg, subscriptions : Sub msg }
+                        bundle : { title : String, view : ui_msg, subscriptions : Sub msg }
                         bundle =
                             options.recipe.bundle
                                 model

@@ -14,12 +14,12 @@ import Element exposing (Element)
 import Global
 
 
-type alias Page flags model msg layoutModel layoutMsg appMsg =
-    App.Types.Page flags model msg (Element msg) layoutModel layoutMsg (Element layoutMsg) Global.Model Global.Msg appMsg (Element appMsg)
+type alias Page params model msg layoutModel layoutMsg appMsg =
+    App.Types.Page params model msg (Element msg) layoutModel layoutMsg (Element layoutMsg) Global.Model Global.Msg appMsg (Element appMsg)
 
 
-type alias Recipe flags model msg layoutModel layoutMsg appMsg =
-    App.Types.Recipe flags model msg layoutModel layoutMsg (Element layoutMsg) Global.Model Global.Msg appMsg (Element appMsg)
+type alias Recipe params model msg layoutModel layoutMsg appMsg =
+    App.Types.Recipe params model msg layoutModel layoutMsg (Element layoutMsg) Global.Model Global.Msg appMsg (Element appMsg)
 
 
 type alias Init model msg =
