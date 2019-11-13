@@ -4,6 +4,7 @@ import Dict exposing (Dict)
 import File exposing (File)
 import Json.Encode as Json
 import Ports
+import Set exposing (Set)
 
 
 type alias Flags =
@@ -26,7 +27,7 @@ main =
 parse : List Filepath -> Cmd msg
 parse =
     List.foldl groupByFolder Dict.empty
-        >> toGroupedFiles
+        >> toDetails
         >> generate
             [ File.params
             , File.route
@@ -46,46 +47,70 @@ generate fns value =
         |> List.concat
 
 
-folderOf : Filepath -> String
-folderOf =
+dropLast : List a -> List a
+dropLast =
     List.reverse
         >> List.drop 1
+        >> List.reverse
+
+
+fileWithin : Filepath -> String
+fileWithin =
+    dropLast
+        >> String.join "."
+
+
+folderWithin : Filepath -> String
+folderWithin =
+    List.reverse
+        >> List.drop 2
         >> List.reverse
         >> String.join "."
 
 
+type alias Items =
+    { files : Set Filepath
+    , folders : Set Filepath
+    }
+
+
 groupByFolder :
     Filepath
-    -> Dict String (List Filepath)
-    -> Dict String (List Filepath)
-groupByFolder items =
+    -> Dict String Items
+    -> Dict String Items
+groupByFolder filepath =
     Dict.update
-        (folderOf items)
-        (Maybe.map ((::) items)
-            >> Maybe.withDefault [ items ]
+        (fileWithin filepath)
+        (Maybe.map
+            (\entry -> { entry | files = Set.insert filepath entry.files })
+            >> Maybe.withDefault
+                { files = Set.singleton filepath
+                , folders = Set.empty
+                }
             >> Just
         )
+        >> Dict.update
+            (folderWithin filepath)
+            (Maybe.map
+                (\entry -> { entry | folders = Set.insert (dropLast filepath) entry.folders })
+                >> Maybe.withDefault
+                    { folders = Set.singleton (dropLast filepath)
+                    , files = Set.empty
+                    }
+                >> (\entry -> { entry | folders = Set.filter ((/=) []) entry.folders })
+                >> Just
+            )
 
 
-toGroupedFiles :
-    Dict String (List Filepath)
-    -> List File.GroupedFiles
-toGroupedFiles dict =
+toDetails :
+    Dict String Items
+    -> List File.Details
+toDetails dict =
     Dict.toList dict
         |> List.map
-            (\( moduleName, paths ) ->
-                let
-                    isFolder path =
-                        Dict.keys dict
-                            |> List.map (String.split ".")
-                            |> List.any ((==) path)
-
-                    ( folders, files ) =
-                        List.partition isFolder paths
-                in
+            (\( moduleName, { files, folders } ) ->
                 { moduleName = moduleName
-                , folders = folders
-                , files = files
-                , paths = paths
+                , folders = Set.toList folders
+                , files = Set.toList files
                 }
             )

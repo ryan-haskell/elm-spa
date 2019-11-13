@@ -1,6 +1,6 @@
 module File exposing
-    ( File
-    , GroupedFiles
+    ( Details
+    , File
     , encode
     , params
     , route
@@ -13,11 +13,10 @@ type alias Filepath =
     List String
 
 
-type alias GroupedFiles =
+type alias Details =
     { moduleName : String
     , folders : List Filepath
     , files : List Filepath
-    , paths : List Filepath
     }
 
 
@@ -39,15 +38,15 @@ encode file =
 -- PARAMS
 
 
-params : GroupedFiles -> File
-params options =
-    { filepath = filepathFor options.moduleName "Params"
-    , contents = paramsContents options
+params : Details -> File
+params details =
+    { filepath = filepathFor details.moduleName "Params"
+    , contents = paramsContents details
     }
 
 
-paramsContents : GroupedFiles -> String
-paramsContents options =
+paramsContents : Details -> String
+paramsContents details =
     """
 module {{paramModuleName}} exposing (..)
 
@@ -55,9 +54,9 @@ module {{paramModuleName}} exposing (..)
 {{paramsTypeAliases}}
     """
         |> String.replace "{{paramModuleName}}"
-            (paramsModuleName options.moduleName)
+            (paramsModuleName details.moduleName)
         |> String.replace "{{paramsTypeAliases}}"
-            (paramsTypeAliases options.paths)
+            (paramsTypeAliases details.files)
         |> String.trim
 
 
@@ -78,7 +77,7 @@ type alias {{last}} =
 {{paramsRecord}}
     """
         |> String.replace "{{last}}"
-            (last filepath |> Maybe.withDefault "")
+            (last filepath)
         |> String.replace "{{paramsRecord}}"
             (paramsRecord filepath |> indent 1)
         |> String.trim
@@ -108,15 +107,15 @@ paramsRecord path =
 -- ROUTES
 
 
-route : GroupedFiles -> File
-route options =
-    { filepath = filepathFor options.moduleName "Route"
-    , contents = routeContents options
+route : Details -> File
+route details =
+    { filepath = filepathFor details.moduleName "Route"
+    , contents = routeContents details
     }
 
 
-routeContents : GroupedFiles -> String
-routeContents options =
+routeContents : Details -> String
+routeContents details =
     """
 module {{routeModuleName}} exposing
     ( Route(..)
@@ -124,9 +123,21 @@ module {{routeModuleName}} exposing
     )
 
 {{routeImports}}
+
+
+{{routeTypes}}
+
+
+{{routeToPath}}
     """
-        |> String.replace "{{routeModuleName}}" (routeModuleName options.moduleName)
-        |> String.replace "{{routeImports}}" (routeImports options)
+        |> String.replace "{{routeModuleName}}"
+            (routeModuleName details.moduleName)
+        |> String.replace "{{routeImports}}"
+            (routeImports details)
+        |> String.replace "{{routeTypes}}"
+            (routeTypes details)
+        |> String.replace "{{routeToPath}}"
+            (routeToPath details)
         |> String.trim
 
 
@@ -140,16 +151,16 @@ routeModuleNameFromFilepath =
     String.join "." >> routeModuleName
 
 
-routeImports : GroupedFiles -> String
-routeImports options =
+routeImports : Details -> String
+routeImports details =
     """
 import {{paramModuleName}} as Params
 {{routeFolderImports}}
     """
         |> String.replace "{{paramModuleName}}"
-            (paramsModuleName options.moduleName)
+            (paramsModuleName details.moduleName)
         |> String.replace "{{routeFolderImports}}"
-            (routeFolderImports options.folders)
+            (routeFolderImports details.folders)
         |> String.trim
 
 
@@ -162,47 +173,133 @@ routeFolderImports folderNames =
         |> String.trim
 
 
-routeTypes =
+routeTypes details =
     """
 type Route
-    = Top Generated.Params.Top
-    | Docs Generated.Params.Docs
-    | NotFound Generated.Params.NotFound
-    | SignIn Generated.Params.SignIn
-    | Guide Generated.Params.Guide
-    | Guide_Folder Generated.Guide.Route.Route
-    | Docs_Folder Generated.Docs.Route.Route
-"""
+{{routeVariants}}
+    """
+        |> String.replace "{{routeVariants}}" (routeVariants details)
         |> String.trim
 
 
-routeToPath =
+routeVariants : Details -> String
+routeVariants { folders, files } =
+    List.concat
+        [ List.map routeFileVariant files
+        , List.map routeFolderVariant folders
+        ]
+        |> (\list ->
+                case list of
+                    [] ->
+                        ""
+
+                    head :: rest ->
+                        ("= " ++ head)
+                            :: rest
+                            |> String.join "\n| "
+                            |> indent 1
+           )
+
+
+routeFolderVariant : Filepath -> String
+routeFolderVariant name =
+    (if last name == "Dynamic" then
+        "{{name}}_Folder String {{routeModuleName}}.Route"
+
+     else
+        "{{name}}_Folder {{routeModuleName}}.Route"
+    )
+        |> String.replace "{{name}}" (last name)
+        |> String.replace "{{routeModuleName}}" (routeModuleNameFromFilepath name)
+
+
+routeFileVariant : Filepath -> String
+routeFileVariant name =
+    if last name == "Dynamic" then
+        "Dynamic String Params.Dynamic"
+
+    else
+        "{{name}} Params.{{name}}"
+            |> String.replace "{{name}}" (last name)
+
+
+type Item
+    = StaticFile Filepath
+    | DynamicFile Filepath
+    | StaticFolder Filepath
+    | DynamicFolder Filepath
+
+
+routeCaseTemplate : Item -> String
+routeCaseTemplate item =
+    case item of
+        StaticFile filepath ->
+            """
+{{name}} _ ->
+    "/{{slug}}"
+            """
+                |> String.replace "{{name}}" (last filepath)
+                |> String.replace "{{slug}}" (sluggify (last filepath))
+
+        DynamicFile _ ->
+            """
+Dynamic value _ ->
+    "/" ++ value
+        """
+
+        StaticFolder filepath ->
+            """
+{{name}}_Folder subRoute ->
+    "/{{slug}}" ++ {{routeModuleName}}.toPath subRoute
+        """
+                |> String.replace "{{name}}" (last filepath)
+                |> String.replace "{{slug}}" (sluggify (last filepath))
+                |> String.replace "{{routeModuleName}}" (routeModuleNameFromFilepath filepath)
+
+        DynamicFolder filepath ->
+            """
+Dynamic_Folder value subRoute ->
+    "/" ++ value ++ {{routeModuleName}}.toPath subRoute
+        """
+                |> String.replace "{{routeModuleName}}" (routeModuleNameFromFilepath filepath)
+
+
+routeToPath : Details -> String
+routeToPath details =
     """
 toPath : Route -> String
 toPath route =
     case route of
-        Top _ ->
-            "/"
-
-        Docs _ ->
-            "/docs"
-
-        NotFound _ ->
-            "/not-found"
-
-        SignIn _ ->
-            "/sign-in"
-
-        Guide _ ->
-            "/guide"
-
-        Guide_Folder subRoute ->
-            "/guide" ++ Generated.Guide.Route.toPath subRoute
-
-        Docs_Folder subRoute ->
-            "/docs" ++ Generated.Docs.Route.toPath subRoute
+{{cases}}
     """
+        |> String.replace "{{cases}}"
+            (toItems details
+                |> List.map routeCaseTemplate
+                |> List.map String.trim
+                |> String.join "\n\n\n"
+                |> indent 2
+            )
         |> String.trim
+
+
+toItems : Details -> List Item
+toItems { folders, files } =
+    let
+        endsInDynamic path =
+            last path == "Dynamic"
+
+        ( dynamicFiles, staticFiles ) =
+            List.partition endsInDynamic files
+
+        ( dynamicFolders, staticFolders ) =
+            List.partition endsInDynamic folders
+    in
+    [ List.map StaticFile staticFiles
+    , List.map StaticFolder staticFolders
+    , List.map DynamicFile dynamicFiles
+    , List.map DynamicFolder dynamicFolders
+    ]
+        |> List.concat
 
 
 
@@ -215,9 +312,11 @@ fromModuleName =
         >> List.filter (not << String.isEmpty)
 
 
-last : List a -> Maybe a
+last : List String -> String
 last list =
-    List.drop (List.length list - 1) list |> List.head
+    List.drop (List.length list - 1) list
+        |> List.head
+        |> Maybe.withDefault ""
 
 
 indent : Int -> String -> String
@@ -243,3 +342,20 @@ moduleNameFor ending name =
 nonEmptyString : String -> Bool
 nonEmptyString =
     not << String.isEmpty
+
+
+sluggify : String -> String
+sluggify word =
+    String.toList word
+        |> List.map
+            (\c ->
+                if Char.isUpper c then
+                    [ '-', c ]
+
+                else
+                    [ c ]
+            )
+        |> List.concat
+        |> String.fromList
+        |> String.toLower
+        |> String.dropLeft 1

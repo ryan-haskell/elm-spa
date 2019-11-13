@@ -79,9 +79,7 @@ const Elm = (_ => {
       )
     })
  
-  return {
-    run
-  }
+  return { run }
 })()
 
 const bold = str => '\033[1m' + str + '\033[0m'

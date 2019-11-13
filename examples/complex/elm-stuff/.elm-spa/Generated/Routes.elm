@@ -11,7 +11,7 @@ import Generated.Guide.Dynamic.Faq.Route
 import Generated.Guide.Dynamic.Route
 import Generated.Guide.Route
 import Generated.Route
-import Url.Parser as Parser exposing ((</>), Parser)
+import Url.Parser as Parser exposing ((</>), Parser, map, s, string, top)
 
 
 
@@ -102,53 +102,34 @@ routes =
     }
 
 
-
--- URL PARSERS
-
-
 parsers : List (Parser (Route -> a) a)
 parsers =
-    [ Parser.top
-        |> Parser.map routes.top
-    , Parser.s "docs"
-        |> Parser.map routes.docs
-    , Parser.s "guide"
-        |> Parser.map routes.guide
-    , Parser.s "not-found"
-        |> Parser.map routes.notFound
-    , Parser.s "sign-in"
-        |> Parser.map routes.signIn
-    , Parser.s "guide"
-        </> Parser.s "elm"
-        |> Parser.map routes.guide_elm
-    , Parser.s "guide"
-        </> Parser.s "elm-spa"
-        |> Parser.map routes.guide_elmSpa
-    , Parser.s "guide"
-        </> Parser.s "programming"
-        |> Parser.map routes.guide_programming
-    , Parser.s "guide"
-        </> Parser.string
-        </> Parser.s "intro"
-        |> Parser.map routes.guide_dynamic_intro
-    , Parser.s "guide"
-        </> Parser.string
-        </> Parser.s "other"
-        |> Parser.map routes.guide_dynamic_other
-    , Parser.s "guide"
-        </> Parser.string
-        </> Parser.s "faq"
-        </> Parser.top
-        |> Parser.map routes.guide_dynamic_faq_top
-    , Parser.s "guide"
-        </> Parser.string
-        </> Parser.string
-        </> Parser.top
-        |> Parser.map routes.guide_dynamic_dynamic_top
-    , Parser.s "docs"
-        </> Parser.s "static"
-        |> Parser.map routes.docs_static
-    , Parser.s "docs"
-        </> Parser.string
-        |> Parser.map routes.docs_dynamic
+    [ map routes.top
+        top
+    , map routes.docs
+        (s "docs")
+    , map routes.guide
+        (s "guide")
+    , map routes.notFound
+        (s "not-found")
+    , map routes.signIn
+        (s "sign-in")
+    , map routes.guide_elm
+        (s "guide" </> s "elm")
+    , map routes.guide_elmSpa
+        (s "guide" </> s "elm-spa")
+    , map routes.guide_programming
+        (s "guide" </> s "programming")
+    , map routes.guide_dynamic_intro
+        (s "guide" </> string </> s "intro")
+    , map routes.guide_dynamic_other
+        (s "guide" </> string </> s "other")
+    , map routes.guide_dynamic_faq_top
+        (s "guide" </> string </> s "faq" </> top)
+    , map routes.guide_dynamic_dynamic_top
+        (s "guide" </> string </> string </> top)
+    , map routes.docs_static
+        (s "docs" </> s "static")
+    , map routes.docs_dynamic
+        (s "docs" </> string)
     ]
