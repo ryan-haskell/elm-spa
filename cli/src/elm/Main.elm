@@ -23,19 +23,27 @@ main =
         }
 
 
-
--- ACTUAL CODE
-
-
 parse : List Filepath -> Cmd msg
 parse =
     List.foldl groupByFolder Dict.empty
-        >> (\dict ->
-                [ paramsFiles dict
-                ]
-           )
-        >> List.concat
+        >> toGroupedFiles
+        >> generate
+            [ File.params
+            , File.route
+            ]
         >> Ports.sendFiles
+
+
+
+-- UTILS
+
+
+generate : List (a -> b) -> List a -> List b
+generate fns value =
+    List.map
+        (\fn -> List.map fn value)
+        fns
+        |> List.concat
 
 
 folderOf : Filepath -> String
@@ -59,19 +67,18 @@ groupByFolder items =
         )
 
 
-paramsFiles :
-    Dict String (List Filepath)
-    -> List File
-paramsFiles =
+type alias GroupedFiles =
+    { moduleName : String
+    , paths : List Filepath
+    }
+
+
+toGroupedFiles : Dict String (List Filepath) -> List GroupedFiles
+toGroupedFiles =
     Dict.toList
         >> List.map
             (\( moduleName, paths ) ->
-                { filepath =
-                    String.split "." moduleName ++ [ "Params" ]
-                , contents =
-                    File.params
-                        { moduleName = moduleName
-                        , paths = paths
-                        }
+                { moduleName = moduleName
+                , paths = paths
                 }
             )

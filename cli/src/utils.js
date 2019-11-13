@@ -62,7 +62,10 @@ const Elm = (_ => {
 
   const handlers = {
     sendFiles: (data) =>
-      data.forEach(a => console.log(a.filepath) || console.log(a.contents))
+      data.forEach(a =>
+        console.log() ||
+        console.log(bold(a.filepath.join('/') + '.elm')) ||
+        console.log('\n' + a.contents + '\n'))
   }
 
   const run = paths =>
@@ -80,6 +83,8 @@ const Elm = (_ => {
     run
   }
 })()
+
+const bold = str => '\033[1m' + str + '\033[0m'
 
 module.exports = {
   Elm,

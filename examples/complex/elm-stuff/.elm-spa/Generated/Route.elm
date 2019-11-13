@@ -4,9 +4,6 @@ module Generated.Route exposing
     )
 
 import Generated.Docs.Route
-import Generated.Guide.Dynamic.Dynamic.Route
-import Generated.Guide.Dynamic.Faq.Route
-import Generated.Guide.Dynamic.Route
 import Generated.Guide.Route
 import Generated.Params
 
