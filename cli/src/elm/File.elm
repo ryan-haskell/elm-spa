@@ -1,5 +1,6 @@
 module File exposing
     ( File
+    , GroupedFiles
     , encode
     , params
     , route
@@ -14,6 +15,8 @@ type alias Filepath =
 
 type alias GroupedFiles =
     { moduleName : String
+    , folders : List Filepath
+    , files : List Filepath
     , paths : List Filepath
     }
 
@@ -123,7 +126,7 @@ module {{routeModuleName}} exposing
 {{routeImports}}
     """
         |> String.replace "{{routeModuleName}}" (routeModuleName options.moduleName)
-        |> String.replace "{{routeImports}}" (routeImports options.moduleName)
+        |> String.replace "{{routeImports}}" (routeImports options)
         |> String.trim
 
 
@@ -132,33 +135,31 @@ routeModuleName =
     moduleNameFor "Route"
 
 
-routeImports moduleName =
+routeModuleNameFromFilepath : Filepath -> String
+routeModuleNameFromFilepath =
+    String.join "." >> routeModuleName
+
+
+routeImports : GroupedFiles -> String
+routeImports options =
     """
 import {{paramModuleName}} as Params
 {{routeFolderImports}}
     """
         |> String.replace "{{paramModuleName}}"
-            (paramsModuleName moduleName)
+            (paramsModuleName options.moduleName)
         |> String.replace "{{routeFolderImports}}"
-            (routeFolderImports moduleName [ "Docs", "Guide" ])
+            (routeFolderImports options.folders)
         |> String.trim
 
 
-routeFolderImports : String -> List String -> String
-routeFolderImports moduleName folderNames =
+routeFolderImports : List Filepath -> String
+routeFolderImports folderNames =
     folderNames
-        |> List.map (routeFolderModuleName moduleName)
+        |> List.map routeModuleNameFromFilepath
         |> List.map (String.append "import ")
         |> String.join "\n"
         |> String.trim
-
-
-routeFolderModuleName : String -> String -> String
-routeFolderModuleName moduleName folderName =
-    "{{moduleFolder}}.{{folderName}}.Route"
-        |> String.replace "{{folderName}}" folderName
-        |> String.replace "{{moduleFolder}}"
-            (String.join "." <| List.filter nonEmptyString ("Generated" :: String.split "." moduleName))
 
 
 routeTypes =

@@ -67,18 +67,25 @@ groupByFolder items =
         )
 
 
-type alias GroupedFiles =
-    { moduleName : String
-    , paths : List Filepath
-    }
-
-
-toGroupedFiles : Dict String (List Filepath) -> List GroupedFiles
-toGroupedFiles =
-    Dict.toList
-        >> List.map
+toGroupedFiles :
+    Dict String (List Filepath)
+    -> List File.GroupedFiles
+toGroupedFiles dict =
+    Dict.toList dict
+        |> List.map
             (\( moduleName, paths ) ->
+                let
+                    isFolder path =
+                        Dict.keys dict
+                            |> List.map (String.split ".")
+                            |> List.any ((==) path)
+
+                    ( folders, files ) =
+                        List.partition isFolder paths
+                in
                 { moduleName = moduleName
+                , folders = folders
+                , files = files
                 , paths = paths
                 }
             )
