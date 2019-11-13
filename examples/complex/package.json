@@ -1,5 +1,5 @@
 {
-  "name": "your-elm-spa",
+  "name": "complex-elm-spa-example",
   "version": "1.0.0",
   "description": "an example for elm-spa!",
   "main": "src/index.js",

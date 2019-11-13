@@ -61,35 +61,10 @@ these are for!
 
 ## layout
 
-A page that is comprimised of smaller pages, that is
-able to share a common layout (maybe a something like a sidebar!)
-
-    page =
-        Page.layout
-            { map = Html.map
-            , layout = Layout.view
-            , pages =
-                { init = init
-                , update = update
-                , bundle = bundle
-                }
-            }
-
 @docs layout
 
 
 ## recipe
-
-Implementing the `init`, `update` and `bundle` functions is much easier
-when you turn a `Page` type into `Recipe`.
-
-A `Recipe` contains a record waiting for page specific data.
-
-  - `init`: just needs a `route`
-
-  - `upgrade` : just needs a `msg` and `model`
-
-  - `bundle` (`view`/`subscriptions`) : just needs a `model`
 
 @docs recipe
 
@@ -151,36 +126,41 @@ type alias Page pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui
     Internals.Page.Page pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
 
 
-{-| Turns a page and some upgrade information into a recipe,
-for use in a layout's `init`, `update`, and `bundle` functions!
+{-| Implementing the `init`, `update` and `bundle` functions is much easier
+when you turn a `Page` type into `Recipe`.
 
-    import Utils.Spa as Spa
+A `Recipe` contains a record waiting for page specific data.
 
-    recipes : Recipes msg
-    recipes =
-        { top =
-            Spa.recipe
-                { page = Top.page
-                , toModel = TopModel
-                , toMsg = TopMsg
-                }
-        , counter =
-            Spa.recipe
-                { page = Counter.page
-                , toModel = CounterModel
-                , toMsg = CounterMsg
-                }
+  - `init`: just needs a `route`
 
-        -- ...
-        }
+  - `upgrade` : just needs a `msg` and `model`
+
+  - `bundle` (`view`/`subscriptions`) : just needs a `model`
+
+        import Utils.Spa as Spa
+
+        recipes : Recipes msg
+        recipes =
+            { top =
+                Spa.recipe
+                    { page = Top.page
+                    , toModel = TopModel
+                    , toMsg = TopMsg
+                    }
+            , counter =
+                Spa.recipe
+                    { page = Counter.page
+                    , toModel = CounterModel
+                    , toMsg = CounterMsg
+                    }
+
+            -- ...
+            }
 
 -}
 recipe :
-    { page : Page pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
-    , toModel : pageModel -> layoutModel
-    , toMsg : pageMsg -> layoutMsg
-    , map : (pageMsg -> layoutMsg) -> ui_pageMsg -> ui_layoutMsg
-    }
+    ((pageMsg -> layoutMsg) -> ui_pageMsg -> ui_layoutMsg)
+    -> Upgrade pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
     -> Recipe pageParams pageModel pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
 recipe =
     Internals.Page.upgrade
@@ -508,17 +488,10 @@ send =
 
 -}
 layout :
-    { map : (pageMsg -> msg) -> ui_pageMsg -> ui_msg
-    , view :
-        { page : ui_msg
-        , global : globalModel
-        , toMsg : globalMsg -> msg
-        }
-        -> ui_msg
-    , recipe : Recipe pageParams pageModel pageMsg pageModel pageMsg ui_pageMsg globalModel globalMsg msg ui_msg
-    }
+    ((pageMsg -> msg) -> ui_pageMsg -> ui_msg)
+    -> Layout pageParams pageModel pageMsg ui_pageMsg globalModel globalMsg msg ui_msg
     -> Page pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
-layout options =
+layout map options =
     Page
         (\{ toModel, toMsg } ->
             { init =
@@ -539,7 +512,7 @@ layout options =
                                 { fromGlobalMsg = context.fromGlobalMsg
                                 , fromPageMsg = toMsg >> context.fromPageMsg
                                 , global = context.global
-                                , map = options.map
+                                , map = map
                                 }
                     in
                     { title = bundle.title

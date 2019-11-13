@@ -14,12 +14,10 @@ as the entrypoint to your app.
     module Main exposing (main)
 
     import App
-    import Element
     import Global
     import Pages
     import Routes
 
-    main : App.Program Global.Flags Global.Model Global.Msg Pages.Model Pages.Msg
     main =
         App.create
             { ui = App.usingHtml
@@ -140,11 +138,10 @@ create :
 create config =
     let
         page =
-            Page.upgrade
+            Page.upgrade (always identity)
                 { toModel = identity
                 , toMsg = identity
                 , page = config.page
-                , map = always identity
                 }
     in
     Browser.application

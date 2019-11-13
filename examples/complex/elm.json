@@ -2,7 +2,7 @@
   "type": "application",
   "source-directories": [
     "src",
-    "../src",
+    "../../src",
     "elm-stuff/.elm-spa"
   ],
   "elm-version": "0.19.1",

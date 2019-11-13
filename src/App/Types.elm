@@ -4,6 +4,7 @@ module App.Types exposing
     , Init
     , Update
     , Bundle
+    , Layout, Upgrade
     )
 
 {-|
@@ -47,6 +48,11 @@ doing things by hand.
 # bundle
 
 @docs Bundle
+
+
+# layouts and recipes
+
+@docs Layout, Upgrade
 
 -}
 
@@ -225,3 +231,83 @@ type alias Update layoutModel layoutMsg globalModel globalMsg =
 -}
 type alias Bundle layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg =
     Page.Bundle layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
+
+
+{-|
+
+
+## creating your alias
+
+**`src/Utils/Spa.elm`**
+
+    -- if using mdgriffith/elm-ui
+
+    import App.Types
+    import Element exposing (Element)
+
+    type alias Bundle msg appMsg =
+        App.Types.Bundle msg (Element msg) Global.Model Global.Msg appMsg (Element appMsg)
+
+    -- if using elm/html
+
+    import App.Types
+    import Html exposing (Html)
+
+    type alias Bundle msg appMsg =
+        App.Types.Bundle msg (Html msg) Global.Model Global.Msg appMsg (Html appMsg)
+
+
+## using your alias
+
+**`.elm-spa/Generated/Pages.elm`**
+
+    import Utils.Spa as Spa
+
+    bundle : Model -> Spa.Bundle Msg msg
+    bundle model_ =
+        case model_ of
+            -- ...
+
+-}
+type alias Layout pageParams pageModel pageMsg ui_pageMsg globalModel globalMsg msg ui_msg =
+    Page.Layout pageParams pageModel pageMsg ui_pageMsg globalModel globalMsg msg ui_msg
+
+
+{-|
+
+
+## creating your alias
+
+**`src/Utils/Spa.elm`**
+
+    -- if using mdgriffith/elm-ui
+
+    import App.Types
+    import Element exposing (Element)
+
+    type alias Bundle msg appMsg =
+        App.Types.Bundle msg (Element msg) Global.Model Global.Msg appMsg (Element appMsg)
+
+    -- if using elm/html
+
+    import App.Types
+    import Html exposing (Html)
+
+    type alias Bundle msg appMsg =
+        App.Types.Bundle msg (Html msg) Global.Model Global.Msg appMsg (Html appMsg)
+
+
+## using your alias
+
+**`.elm-spa/Generated/Pages.elm`**
+
+    import Utils.Spa as Spa
+
+    bundle : Model -> Spa.Bundle Msg msg
+    bundle model_ =
+        case model_ of
+            -- ...
+
+-}
+type alias Upgrade pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg =
+    Page.Upgrade pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg

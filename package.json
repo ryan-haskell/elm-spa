@@ -2,11 +2,14 @@
   "name": "elm-spa",
   "version": "1.0.0",
   "description": "",
-  "main": "src/index.js",
+  "main": "cli/src/index.js",
   "scripts": {
     "start": "npm run dev",
-    "example": "npm run dev",
-    "dev": "(cd example && npm install && npm run dev)"
+    "build": "(cd cli && npm run build)",
+    "dev": "npm run example",
+    "example": "npm run examples:complex",
+    "examples:intro": "(cd examples/intro && npm install && npm run dev)",
+    "examples:complex": "(cd examples/complex && npm install && npm run dev)"
   },
   "dependencies": {},
   "devDependencies": {},

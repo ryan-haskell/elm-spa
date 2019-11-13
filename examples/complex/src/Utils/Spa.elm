@@ -34,18 +34,23 @@ type alias Bundle msg appMsg =
     App.Types.Bundle msg (Element msg) Global.Model Global.Msg appMsg (Element appMsg)
 
 
-layout config =
-    App.Page.layout
-        { map = Element.map
-        , view = config.view
-        , recipe = config.recipe
-        }
+type alias Layout params model msg appMsg =
+    App.Types.Layout params model msg (Element msg) Global.Model Global.Msg appMsg (Element appMsg)
 
 
-recipe config =
-    App.Page.recipe
-        { map = Element.map
-        , page = config.page
-        , toModel = config.toModel
-        , toMsg = config.toMsg
-        }
+type alias Upgrade params model msg layoutModel layoutMsg appMsg =
+    App.Types.Upgrade params model msg (Element msg) layoutModel layoutMsg (Element layoutMsg) Global.Model Global.Msg appMsg (Element appMsg)
+
+
+layout :
+    Layout params model msg appMsg
+    -> Page params model msg layoutModel layoutMsg appMsg
+layout =
+    App.Page.layout Element.map
+
+
+recipe :
+    Upgrade params model msg layoutModel layoutMsg appMsg
+    -> Recipe params model msg layoutModel layoutMsg appMsg
+recipe =
+    App.Page.recipe Element.map
