@@ -311,6 +311,102 @@ pages details =
     }
 
 
+pagesContents : Details -> String
+pagesContents details =
+    """
+module {{pagesModuleName}} exposing
+    ( Model
+    , Msg
+    , page
+    )
+
+import App.Page
+import Layout as Layout
+import Utils.Spa as Spa
+import {{paramsModuleName}} as Params
+import {{routeModuleName}} as Route exposing (Route)
+{{pagesPageImports}}
+{{pagesFolderRouteImports}}
+{{pagesFolderPagesImports}}
+
+
+{{pagesModelTypes}}
+
+
+{{pagesMsgTypes}}
+
+
+page : Spa.Page Route Model Msg layoutModel layoutMsg appMsg
+page =
+    Spa.layout
+        { view = Layout.view
+        , recipe =
+            { init = init
+            , update = update
+            , bundle = bundle
+            }
+        }
+
+
+
+-- RECIPES
+
+
+type alias Recipe flags model msg appMsg =
+    Spa.Recipe flags model msg Model Msg appMsg
+
+
+type alias Recipes msg =
+{{pagesRecipesTypeAliases}}
+
+
+recipes : Recipes msg
+recipes =
+{{pagesRecipesFunctions}}
+
+
+
+-- INIT
+
+
+init : Route -> Spa.Init Model Msg
+init route_ =
+{{pagesInitFunction}}
+
+
+
+-- UPDATE
+
+
+update : Msg -> Model -> Spa.Update Model Msg
+update bigMsg bigModel =
+{{pagesUpdateFunction}}
+
+
+
+-- BUNDLE
+
+
+bundle : Model -> Spa.Bundle Msg msg
+bundle bigModel =
+{{pagesBundleFunction}}
+    """
+        |> String.replace "{{pagesModuleName}}" (pagesModuleName details.moduleName)
+        |> String.replace "{{paramsModuleName}}" (paramsModuleName details.moduleName)
+        |> String.replace "{{routeModuleName}}" (routeModuleName details.moduleName)
+        |> String.replace "{{pagesPageImports}}" (pagesPageImports details.files)
+        |> String.replace "{{pagesFolderRouteImports}}" (pagesFolderImports "Route" details.folders)
+        |> String.replace "{{pagesFolderPagesImports}}" (pagesFolderImports "Pages" details.folders)
+        |> String.replace "{{pagesModelTypes}}" (pagesCustomTypes "Model" details)
+        |> String.replace "{{pagesMsgTypes}}" (pagesCustomTypes "Msg" details)
+        |> String.replace "{{pagesRecipesTypeAliases}}" (pagesRecipesTypeAliases details)
+        |> String.replace "{{pagesRecipesFunctions}}" (pagesRecipesFunctions details)
+        |> String.replace "{{pagesInitFunction}}" (pagesInitFunction details)
+        |> String.replace "{{pagesUpdateFunction}}" (pagesUpdateFunction details)
+        |> String.replace "{{pagesBundleFunction}}" (pagesBundleFunction details)
+        |> String.trim
+
+
 pagesModuleName : String -> String
 pagesModuleName =
     moduleNameFor "Pages"
@@ -544,102 +640,6 @@ pagesToBundle item =
 
         DynamicFolder path ->
             "Dynamic_Folder model ->\n    recipes.dynamic_folder.bundle model"
-
-
-pagesContents : Details -> String
-pagesContents details =
-    """
-module {{pagesModuleName}} exposing
-    ( Model
-    , Msg
-    , page
-    )
-
-import App.Page
-import Layout as Layout
-import Utils.Spa as Spa
-import {{paramsModuleName}} as Params
-import {{routeModuleName}} as Route exposing (Route)
-{{pagesPageImports}}
-{{pagesFolderRouteImports}}
-{{pagesFolderPagesImports}}
-
-
-{{pagesModelTypes}}
-
-
-{{pagesMsgTypes}}
-
-
-page : Spa.Page Route Model Msg layoutModel layoutMsg appMsg
-page =
-    Spa.layout
-        { view = Layout.view
-        , recipe =
-            { init = init
-            , update = update
-            , bundle = bundle
-            }
-        }
-
-
-
--- RECIPES
-
-
-type alias Recipe flags model msg appMsg =
-    Spa.Recipe flags model msg Model Msg appMsg
-
-
-type alias Recipes msg =
-{{pagesRecipesTypeAliases}}
-
-
-recipes : Recipes msg
-recipes =
-{{pagesRecipesFunctions}}
-
-
-
--- INIT
-
-
-init : Route -> Spa.Init Model Msg
-init route_ =
-{{pagesInitFunction}}
-
-
-
--- UPDATE
-
-
-update : Msg -> Model -> Spa.Update Model Msg
-update bigMsg bigModel =
-{{pagesUpdateFunction}}
-
-
-
--- BUNDLE
-
-
-bundle : Model -> Spa.Bundle Msg msg
-bundle bigModel =
-{{pagesBundleFunction}}
-    """
-        |> String.replace "{{pagesModuleName}}" (pagesModuleName details.moduleName)
-        |> String.replace "{{paramsModuleName}}" (paramsModuleName details.moduleName)
-        |> String.replace "{{routeModuleName}}" (routeModuleName details.moduleName)
-        |> String.replace "{{pagesPageImports}}" (pagesPageImports details.files)
-        |> String.replace "{{pagesFolderRouteImports}}" (pagesFolderImports "Route" details.folders)
-        |> String.replace "{{pagesFolderPagesImports}}" (pagesFolderImports "Pages" details.folders)
-        |> String.replace "{{pagesModelTypes}}" (pagesCustomTypes "Model" details)
-        |> String.replace "{{pagesMsgTypes}}" (pagesCustomTypes "Msg" details)
-        |> String.replace "{{pagesRecipesTypeAliases}}" (pagesRecipesTypeAliases details)
-        |> String.replace "{{pagesRecipesFunctions}}" (pagesRecipesFunctions details)
-        |> String.replace "{{pagesInitFunction}}" (pagesInitFunction details)
-        |> String.replace "{{pagesUpdateFunction}}" (pagesUpdateFunction details)
-        |> String.replace "{{pagesBundleFunction}}" (pagesBundleFunction details)
-        |> String.trim
 
 
 
