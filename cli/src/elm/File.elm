@@ -421,6 +421,7 @@ routesRecord path =
 routesRecordFunction : Filepath -> String
 routesRecordFunction path =
     let
+        inputs : Int -> String
         inputs count =
             "\\{{params}} ->"
                 |> String.replace "{{params}}"
@@ -430,6 +431,7 @@ routesRecordFunction path =
                         |> String.join " "
                     )
 
+        record : Int -> String
         record count =
             "{ "
                 ++ (List.range 1 count
@@ -439,6 +441,7 @@ routesRecordFunction path =
                    )
                 ++ " }"
 
+        everySubset : List a -> List (List a)
         everySubset path_ =
             List.length path_
                 |> List.range 1
@@ -446,10 +449,9 @@ routesRecordFunction path =
                 |> List.reverse
                 |> List.drop 1
 
-        swapLastTwo : String -> String
+        swapLastTwo : List a -> List a
         swapLastTwo =
-            String.split "."
-                >> List.reverse
+            List.reverse
                 >> (\list ->
                         case list of
                             [] ->
@@ -462,7 +464,6 @@ routesRecordFunction path =
                                 b :: a :: rest
                    )
                 >> List.reverse
-                >> String.join "."
 
         suffix : List String -> String
         suffix path_ =
@@ -472,9 +473,17 @@ routesRecordFunction path =
             else
                 ""
 
+        toRouteModule : List String -> String
+        toRouteModule =
+            routeModuleNameFromFilepath
+                >> String.split "."
+                >> swapLastTwo
+                >> String.join "."
+
+        body : String
         body =
             everySubset path
-                |> List.map (routeModuleNameFromFilepath >> swapLastTwo)
+                |> List.map toRouteModule
                 |> List.indexedMap
                     (\i value ->
                         let
@@ -492,10 +501,7 @@ routesRecordFunction path =
                 |> String.join "\n"
 
         finalPiece =
-            (path
-                |> (routeModuleNameFromFilepath >> swapLastTwo)
-            )
-                ++ suffix path
+            toRouteModule path ++ suffix path
     in
     case dynamicCount path of
         0 ->
