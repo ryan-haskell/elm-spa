@@ -26,13 +26,16 @@ main =
 
 parse : List Filepath -> Cmd msg
 parse files =
-    files
-        |> List.foldl groupByFolder Dict.empty
-        |> toDetails
-        |> generate
-            [ File.params
-            , File.route
-            ]
+    List.concat
+        [ files
+            |> List.foldl groupByFolder Dict.empty
+            |> toDetails
+            |> generate
+                [ File.params
+                , File.route
+                ]
+        , [ File [ "Routes" ] (File.routes files) ]
+        ]
         |> Ports.sendFiles
 
 
