@@ -2,6 +2,7 @@ module File exposing
     ( Details
     , File
     , encode
+    , pages
     , params
     , route
     , routes
@@ -297,6 +298,348 @@ toItems { folders, files } =
     , List.map DynamicFolder dynamicFolders
     ]
         |> List.concat
+
+
+
+-- PAGES
+
+
+pages : Details -> File
+pages details =
+    { filepath = filepathFor details.moduleName "Pages"
+    , contents = pagesContents details
+    }
+
+
+pagesModuleName : String -> String
+pagesModuleName =
+    moduleNameFor "Pages"
+
+
+pagesPageImports : List Filepath -> String
+pagesPageImports files =
+    files
+        |> List.map pagesPageModule
+        |> asImports
+
+
+pagesPageModule : Filepath -> String
+pagesPageModule path =
+    last path
+        |> String.append "Pages."
+
+
+pagesFolderImports : String -> List Filepath -> String
+pagesFolderImports suffix folders =
+    folders
+        |> List.map (String.join "." >> moduleNameFor suffix)
+        |> asImports
+
+
+pagesCustomTypes : String -> Details -> String
+pagesCustomTypes type_ { files, folders } =
+    let
+        toFileTuple : Filepath -> ( String, String )
+        toFileTuple path =
+            let
+                name =
+                    last path
+            in
+            ( name ++ type_
+            , pagesPageModule path ++ "." ++ type_
+            )
+
+        toFolderTuple : Filepath -> ( String, String )
+        toFolderTuple path =
+            let
+                name =
+                    last path
+            in
+            ( name ++ "_Folder_" ++ type_
+            , pagesModuleName name ++ "." ++ type_
+            )
+    in
+    List.concat
+        [ List.map toFileTuple files
+        , List.map toFolderTuple folders
+        ]
+        |> asCustomType type_
+
+
+asCustomType : String -> List ( String, String ) -> String
+asCustomType name items =
+    case items of
+        [] ->
+            ""
+
+        _ ->
+            items
+                |> List.map (\( a, b ) -> a ++ " " ++ b)
+                |> String.join "\n| "
+                |> (\str ->
+                        [ "type " ++ name ++ "\n"
+                        , indent 1 ("= " ++ str)
+                        ]
+                   )
+                |> String.concat
+
+
+pagesRecipesTypeAliases : Details -> String
+pagesRecipesTypeAliases { files, folders } =
+    let
+        toFileAlias : Filepath -> String
+        toFileAlias path =
+            "{{uncapitalizedName}} : Recipe Params.{{name}} {{pagesPageModule}}.Model {{pagesPageModule}}.Msg msg"
+                |> String.replace "{{uncapitalizedName}}" (uncapitalize (last path))
+                |> String.replace "{{name}}" (last path)
+                |> String.replace "{{pagesPageModule}}" (pagesPageModule path)
+
+        toFolderAlias : Filepath -> String
+        toFolderAlias path =
+            "{{uncapitalizedName}}_folder : Recipe {{routeModuleName}}.Route {{pagesModuleName}}.Model {{pagesModuleName}}.Msg msg"
+                |> String.replace "{{uncapitalizedName}}" (uncapitalize (last path))
+                |> String.replace "{{routeModuleName}}" (String.join "." path |> routeModuleName)
+                |> String.replace "{{pagesModuleName}}" (String.join "." path |> pagesModuleName)
+    in
+    [ List.map toFileAlias files
+    , List.map toFolderAlias folders
+    ]
+        |> List.concat
+        |> asRecord
+        |> indent 1
+
+
+pagesRecipesFunctions : Details -> String
+pagesRecipesFunctions { files, folders } =
+    let
+        fileRecipe : Filepath -> String
+        fileRecipe path =
+            [ "page = " ++ pagesPageModule path ++ ".page"
+            , "toModel = " ++ last path ++ "Model"
+            , "toMsg = " ++ last path ++ "Msg"
+            ]
+                |> asRecord
+                |> String.trim
+                |> indent 2
+
+        toFileFunction : Filepath -> String
+        toFileFunction path =
+            """
+{{uncapitalizedName}} =
+    Spa.recipe
+{{function}}
+            """
+                |> String.replace "{{uncapitalizedName}}" (uncapitalize (last path))
+                |> String.replace "{{function}}" (fileRecipe path)
+                |> String.trim
+
+        folderRecipe : Filepath -> String
+        folderRecipe path =
+            [ "page = " ++ (String.join "." path |> pagesModuleName) ++ ".page"
+            , "toModel = " ++ last path ++ "_Folder_Model"
+            , "toMsg = " ++ last path ++ "_Folder_Msg"
+            ]
+                |> asRecord
+                |> String.trim
+                |> indent 2
+
+        toFolderFunction : Filepath -> String
+        toFolderFunction path =
+            """
+{{uncapitalizedName}}_folder =
+    Spa.recipe
+{{function}}
+            """
+                |> String.replace "{{uncapitalizedName}}" (uncapitalize (last path))
+                |> String.replace "{{function}}" (folderRecipe path)
+                |> String.trim
+    in
+    [ List.map toFileFunction files
+    , List.map toFolderFunction folders
+    ]
+        |> List.concat
+        |> asRecord
+        |> indent 1
+
+
+pagesInitFunction : Details -> String
+pagesInitFunction details =
+    toItems details
+        |> List.map pagesToInit
+        |> asCaseExpression "route_"
+        |> indent 1
+
+
+pagesToInit : Item -> String
+pagesToInit item =
+    case item of
+        StaticFile path ->
+            "Route.{{name}} params ->\n    recipes.{{uncapitalized}}.init params"
+                |> String.replace "{{name}}" (last path)
+                |> String.replace "{{uncapitalized}}" (uncapitalize (last path))
+
+        DynamicFile path ->
+            "Route.Dynamic _ params ->\n    recipes.dynamic.init params"
+
+        StaticFolder path ->
+            "Route.{{name}}_Folder route ->\n    recipes.{{uncapitalized}}_folder.init route"
+                |> String.replace "{{name}}" (last path)
+                |> String.replace "{{uncapitalized}}" (uncapitalize (last path))
+
+        DynamicFolder path ->
+            "Route.Dynamic_Folder _ route ->\n    recipes.dynamic_folder.init route"
+
+
+pagesUpdateFunction : Details -> String
+pagesUpdateFunction details =
+    toItems details
+        |> List.map pagesToUpdate
+        |> asCaseExpression "route_"
+        |> indent 1
+
+
+pagesToUpdate : Item -> String
+pagesToUpdate item =
+    case item of
+        StaticFile path ->
+            "( {{name}}Msg msg, {{name}}Model model ) ->\n    recipes.{{uncapitalized}}.update msg model"
+                |> String.replace "{{name}}" (last path)
+                |> String.replace "{{uncapitalized}}" (uncapitalize (last path))
+
+        DynamicFile path ->
+            "( DynamicMsg msg, DynamicModel model ) ->\n    recipes.dynamic.update msg model"
+
+        StaticFolder path ->
+            "( {{name}}_Folder_Msg msg, {{name}}_Folder_Model model ) ->\n    recipes.{{uncapitalized}}_folder.update msg model"
+                |> String.replace "{{name}}" (last path)
+                |> String.replace "{{uncapitalized}}" (uncapitalize (last path))
+
+        DynamicFolder path ->
+            "( Dynamic_Folder_Msg msg, Dynamic_Folder_Model model ) ->\n    recipes.dynamic_folder.update msg model"
+
+
+pagesBundleFunction : Details -> String
+pagesBundleFunction details =
+    toItems details
+        |> List.map pagesToBundle
+        |> asCaseExpression "route_"
+        |> indent 1
+
+
+pagesToBundle : Item -> String
+pagesToBundle item =
+    case item of
+        StaticFile path ->
+            "{{name}}Model model ->\n    recipes.{{uncapitalized}}.bundle model"
+                |> String.replace "{{name}}" (last path)
+                |> String.replace "{{uncapitalized}}" (uncapitalize (last path))
+
+        DynamicFile path ->
+            "Dynamic model ->\n    recipes.dynamic.bundle model"
+
+        StaticFolder path ->
+            "{{name}}_Folder_Model model ->\n    recipes.{{uncapitalized}}_folder.bundle model"
+                |> String.replace "{{name}}" (last path)
+                |> String.replace "{{uncapitalized}}" (uncapitalize (last path))
+
+        DynamicFolder path ->
+            "Dynamic_Folder model ->\n    recipes.dynamic_folder.bundle model"
+
+
+pagesContents : Details -> String
+pagesContents details =
+    """
+module {{pagesModuleName}} exposing
+    ( Model
+    , Msg
+    , page
+    )
+
+import App.Page
+import Layout as Layout
+import Utils.Spa as Spa
+import {{paramsModuleName}} as Params
+import {{routeModuleName}} as Route exposing (Route)
+{{pagesPageImports}}
+{{pagesFolderRouteImports}}
+{{pagesFolderPagesImports}}
+
+
+{{pagesModelTypes}}
+
+
+{{pagesMsgTypes}}
+
+
+page : Spa.Page Route Model Msg layoutModel layoutMsg appMsg
+page =
+    Spa.layout
+        { view = Layout.view
+        , recipe =
+            { init = init
+            , update = update
+            , bundle = bundle
+            }
+        }
+
+
+
+-- RECIPES
+
+
+type alias Recipe flags model msg appMsg =
+    Spa.Recipe flags model msg Model Msg appMsg
+
+
+type alias Recipes msg =
+{{pagesRecipesTypeAliases}}
+
+
+recipes : Recipes msg
+recipes =
+{{pagesRecipesFunctions}}
+
+
+
+-- INIT
+
+
+init : Route -> Spa.Init Model Msg
+init route_ =
+{{pagesInitFunction}}
+
+
+
+-- UPDATE
+
+
+update : Msg -> Model -> Spa.Update Model Msg
+update bigMsg bigModel =
+{{pagesUpdateFunction}}
+
+
+
+-- BUNDLE
+
+
+bundle : Model -> Spa.Bundle Msg msg
+bundle bigModel =
+{{pagesBundleFunction}}
+    """
+        |> String.replace "{{pagesModuleName}}" (pagesModuleName details.moduleName)
+        |> String.replace "{{paramsModuleName}}" (paramsModuleName details.moduleName)
+        |> String.replace "{{routeModuleName}}" (routeModuleName details.moduleName)
+        |> String.replace "{{pagesPageImports}}" (pagesPageImports details.files)
+        |> String.replace "{{pagesFolderRouteImports}}" (pagesFolderImports "Route" details.folders)
+        |> String.replace "{{pagesFolderPagesImports}}" (pagesFolderImports "Pages" details.folders)
+        |> String.replace "{{pagesModelTypes}}" (pagesCustomTypes "Model" details)
+        |> String.replace "{{pagesMsgTypes}}" (pagesCustomTypes "Msg" details)
+        |> String.replace "{{pagesRecipesTypeAliases}}" (pagesRecipesTypeAliases details)
+        |> String.replace "{{pagesRecipesFunctions}}" (pagesRecipesFunctions details)
+        |> String.replace "{{pagesInitFunction}}" (pagesInitFunction details)
+        |> String.replace "{{pagesUpdateFunction}}" (pagesUpdateFunction details)
+        |> String.replace "{{pagesBundleFunction}}" (pagesBundleFunction details)
+        |> String.trim
 
 
 
@@ -608,6 +951,18 @@ asRecord =
 asList : List String -> String
 asList =
     asDataStructure "[" "]"
+
+
+asCaseExpression : String -> List String -> String
+asCaseExpression var cases =
+    if List.isEmpty cases then
+        ""
+
+    else
+        cases
+            |> String.join "\n\n"
+            |> indent 1
+            |> (++) ("case " ++ var ++ " of\n")
 
 
 asDataStructure : String -> String -> List String -> String

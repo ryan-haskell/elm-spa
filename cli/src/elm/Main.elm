@@ -27,14 +27,15 @@ main =
 parse : List Filepath -> Cmd msg
 parse files =
     List.concat
-        [ files
+        [ [ File [ "Routes" ] (File.routes files) ]
+        , files
             |> List.foldl groupByFolder Dict.empty
             |> toDetails
             |> generate
                 [ File.params
                 , File.route
+                , File.pages
                 ]
-        , [ File [ "Routes" ] (File.routes files) ]
         ]
         |> Ports.sendFiles
 
