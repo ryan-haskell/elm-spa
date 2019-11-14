@@ -1,17 +1,11 @@
-module Generated.Params exposing
-    ( Docs
-    , Guide
-    , NotFound
-    , SignIn
-    , Top
-    )
-
-
-type alias Top =
-    {}
+module Generated.Params exposing (..)
 
 
 type alias Docs =
+    {}
+
+
+type alias Guide =
     {}
 
 
@@ -23,5 +17,5 @@ type alias SignIn =
     {}
 
 
-type alias Guide =
+type alias Top =
     {}

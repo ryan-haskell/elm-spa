@@ -5,12 +5,14 @@ module Generated.Docs.Pages exposing
     )
 
 import App.Page
+import Layouts.Docs as Layout
+import Utils.Spa as Spa
 import Generated.Docs.Params as Params
 import Generated.Docs.Route as Route exposing (Route)
-import Layouts.Docs as Layout
 import Pages.Docs.Dynamic
 import Pages.Docs.Static
-import Utils.Spa as Spa exposing (Page)
+
+
 
 
 type Model
@@ -23,7 +25,7 @@ type Msg
     | StaticMsg Pages.Docs.Static.Msg
 
 
-page : Page Route Model Msg layoutModel layoutMsg appMsg
+page : Spa.Page Route Model Msg layoutModel layoutMsg appMsg
 page =
     Spa.layout
         { view = Layout.view
@@ -71,13 +73,13 @@ recipes =
 
 
 init : Route -> Spa.Init Model Msg
-init route =
-    case route of
-        Route.Dynamic _ flags ->
-            recipes.dynamic.init flags
-
-        Route.Static flags ->
-            recipes.static.init flags
+init route_ =
+    case route_ of
+        Route.Static params ->
+            recipes.static.init params
+        
+        Route.Dynamic _ params ->
+            recipes.dynamic.init params
 
 
 
@@ -87,15 +89,13 @@ init route =
 update : Msg -> Model -> Spa.Update Model Msg
 update bigMsg bigModel =
     case ( bigMsg, bigModel ) of
-        ( DynamicMsg msg, DynamicModel model ) ->
-            recipes.dynamic.update msg model
-
         ( StaticMsg msg, StaticModel model ) ->
             recipes.static.update msg model
-
+        
+        ( DynamicMsg msg, DynamicModel model ) ->
+            recipes.dynamic.update msg model
         _ ->
             App.Page.keep bigModel
-
 
 
 -- BUNDLE
@@ -104,8 +104,8 @@ update bigMsg bigModel =
 bundle : Model -> Spa.Bundle Msg msg
 bundle bigModel =
     case bigModel of
-        DynamicModel model ->
-            recipes.dynamic.bundle model
-
         StaticModel model ->
             recipes.static.bundle model
+        
+        DynamicModel model ->
+            recipes.dynamic.bundle model

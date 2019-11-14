@@ -321,7 +321,7 @@ module {{pagesModuleName}} exposing
     )
 
 import App.Page
-import Layout as Layout
+import {{layoutModuleName}} as Layout
 import Utils.Spa as Spa
 import {{paramsModuleName}} as Params
 import {{routeModuleName}} as Route exposing (Route)
@@ -381,7 +381,7 @@ init route_ =
 update : Msg -> Model -> Spa.Update Model Msg
 update bigMsg bigModel =
 {{pagesUpdateFunction}}
-
+{{defaultUpdateCase}}
 
 
 -- BUNDLE
@@ -392,6 +392,7 @@ bundle bigModel =
 {{pagesBundleFunction}}
     """
         |> String.replace "{{pagesModuleName}}" (pagesModuleName details.moduleName)
+        |> String.replace "{{layoutModuleName}}" (pagesLayoutModuleName details.moduleName)
         |> String.replace "{{paramsModuleName}}" (paramsModuleName details.moduleName)
         |> String.replace "{{routeModuleName}}" (routeModuleName details.moduleName)
         |> String.replace "{{pagesPageImports}}" (pagesPageImports details.files)
@@ -404,7 +405,24 @@ bundle bigModel =
         |> String.replace "{{pagesInitFunction}}" (pagesInitFunction details)
         |> String.replace "{{pagesUpdateFunction}}" (pagesUpdateFunction details)
         |> String.replace "{{pagesBundleFunction}}" (pagesBundleFunction details)
+        |> String.replace "{{defaultUpdateCase}}"
+            (if List.length (details.files ++ details.folders) < 2 then
+                ""
+
+             else
+                "_ ->\n    App.Page.keep bigModel" |> indent 2
+            )
         |> String.trim
+
+
+pagesLayoutModuleName : String -> String
+pagesLayoutModuleName str =
+    case str of
+        "" ->
+            "Layout"
+
+        _ ->
+            "Layouts." ++ str
 
 
 pagesModuleName : String -> String
@@ -421,7 +439,8 @@ pagesPageImports files =
 
 pagesPageModule : Filepath -> String
 pagesPageModule path =
-    last path
+    path
+        |> String.join "."
         |> String.append "Pages."
 
 
@@ -452,7 +471,7 @@ pagesCustomTypes type_ { files, folders } =
                     last path
             in
             ( name ++ "_Folder_" ++ type_
-            , pagesModuleName name ++ "." ++ type_
+            , pagesModuleName (String.join "." path) ++ "." ++ type_
             )
     in
     List.concat
@@ -590,7 +609,7 @@ pagesUpdateFunction : Details -> String
 pagesUpdateFunction details =
     toItems details
         |> List.map pagesToUpdate
-        |> asCaseExpression "route_"
+        |> asCaseExpression "( bigMsg, bigModel )"
         |> indent 1
 
 
@@ -618,7 +637,7 @@ pagesBundleFunction : Details -> String
 pagesBundleFunction details =
     toItems details
         |> List.map pagesToBundle
-        |> asCaseExpression "route_"
+        |> asCaseExpression "bigModel"
         |> indent 1
 
 
@@ -631,7 +650,7 @@ pagesToBundle item =
                 |> String.replace "{{uncapitalized}}" (uncapitalize (last path))
 
         DynamicFile path ->
-            "Dynamic model ->\n    recipes.dynamic.bundle model"
+            "DynamicModel model ->\n    recipes.dynamic.bundle model"
 
         StaticFolder path ->
             "{{name}}_Folder_Model model ->\n    recipes.{{uncapitalized}}_folder.bundle model"
@@ -639,7 +658,7 @@ pagesToBundle item =
                 |> String.replace "{{uncapitalized}}" (uncapitalize (last path))
 
         DynamicFolder path ->
-            "Dynamic_Folder model ->\n    recipes.dynamic_folder.bundle model"
+            "Dynamic_Folder_Model model ->\n    recipes.dynamic_folder.bundle model"
 
 
 

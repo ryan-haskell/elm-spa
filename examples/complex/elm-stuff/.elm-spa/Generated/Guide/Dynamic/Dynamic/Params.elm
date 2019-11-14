@@ -1,4 +1,4 @@
-module Generated.Guide.Dynamic.Dynamic.Params exposing (Top)
+module Generated.Guide.Dynamic.Dynamic.Params exposing (..)
 
 
 type alias Top =

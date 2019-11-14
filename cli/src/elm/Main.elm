@@ -8,7 +8,9 @@ import Set exposing (Set)
 
 
 type alias Flags =
-    List Filepath
+    { command : String
+    , paths : List Filepath
+    }
 
 
 type alias Filepath =
@@ -18,14 +20,24 @@ type alias Filepath =
 main : Program Flags () Never
 main =
     Platform.worker
-        { init = \json -> ( (), parse json )
+        { init = \flags -> ( (), handle flags )
         , update = \_ model -> ( model, Cmd.none )
         , subscriptions = always Sub.none
         }
 
 
-parse : List Filepath -> Cmd msg
-parse files =
+handle : Flags -> Cmd msg
+handle flags =
+    case flags.command of
+        "build" ->
+            build flags.paths
+
+        _ ->
+            Cmd.none
+
+
+build : List Filepath -> Cmd msg
+build files =
     List.concat
         [ [ File [ "Routes" ] (File.routes files) ]
         , files
@@ -37,7 +49,7 @@ parse files =
                 , File.pages
                 ]
         ]
-        |> Ports.sendFiles
+        |> Ports.generate
 
 
 

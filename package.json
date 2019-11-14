@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "cli/src/index.js",
+  "bin": "./cli/src/index.js",
   "scripts": {
     "start": "npm run dev",
     "build": "(cd cli && npm run build)",

@@ -1,6 +1,8 @@
+const path = require('path')
+const fs = require('fs')
+const cwd = process.cwd()
+
 const File = (_ => {
-  const path = require('path')
-  const fs = require('fs')
 
   const mkdir = (filepath) =>
     new Promise((resolve, reject) =>
@@ -8,6 +10,9 @@ const File = (_ => {
     )
 
   const create = (filepath, contents) => {
+    // this will surely break windows, im tired and sorry i wrote this line.
+    const folderOf = (path) => path.split('/').slice(0, -1).join('/')
+
     const write = (filepath, contents) =>
       new Promise((resolve, reject) =>
         fs.writeFile(filepath, contents, { encoding: 'utf8' }, (err) =>
@@ -61,20 +66,24 @@ const Elm = (_ => {
   const { Elm } = require('../dist/elm.compiled.js')
 
   const handlers = {
-    sendFiles: (data) =>
-      data.forEach(a =>
-        console.log() ||
-        console.log(bold(a.filepath.join('/') + '.elm')) ||
-        console.log('\n' + a.contents + '\n'))
+    generate: ({ relative }, files) =>
+      Promise.all(
+        files
+          .map(item => ({
+            ...item,
+            filepath: path.join(cwd, relative, 'elm-stuff', '.elm-spa', 'Generated', ...item.filepath) + '.elm'
+          }))
+          .map(item => File.create(item.filepath, item.contents))
+      )
   }
 
-  const run = paths =>
+  const run = (command, args) => (paths) =>
     new Promise((resolve, reject) => {
-      const app = Elm.Main.init({ flags: paths })
+      const app = Elm.Main.init({ flags: { command, paths } })
 
       app.ports.outgoing.subscribe(({ message, data }) =>
         handlers[message]
-          ? Promise.resolve(handlers[message](data)).then(resolve).catch(reject)
+          ? Promise.resolve(handlers[message](args, data)).then(resolve).catch(reject)
           : reject(`Didn't recognize message "${message}"– Yell at @ryannhg on the internet!\n`)
       )
     })
@@ -86,5 +95,6 @@ const bold = str => '\033[1m' + str + '\033[0m'
 
 module.exports = {
   Elm,
-  File
+  File,
+  bold
 }

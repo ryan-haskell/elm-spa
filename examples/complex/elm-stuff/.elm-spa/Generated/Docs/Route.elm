@@ -7,8 +7,8 @@ import Generated.Docs.Params as Params
 
 
 type Route
-    = Static Params.Static
-    | Dynamic String Params.Dynamic
+    = Dynamic String Params.Dynamic
+    | Static Params.Static
 
 
 toPath : Route -> String
@@ -16,6 +16,7 @@ toPath route =
     case route of
         Static _ ->
             "/static"
-
+        
+        
         Dynamic value _ ->
             "/" ++ value

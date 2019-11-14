@@ -1,8 +1,4 @@
-module Generated.Guide.Params exposing
-    ( Elm
-    , ElmSpa
-    , Programming
-    )
+module Generated.Guide.Params exposing (..)
 
 
 type alias Elm =

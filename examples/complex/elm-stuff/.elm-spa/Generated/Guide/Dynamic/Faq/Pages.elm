@@ -5,11 +5,13 @@ module Generated.Guide.Dynamic.Faq.Pages exposing
     )
 
 import App.Page
+import Layouts.Guide.Dynamic.Faq as Layout
+import Utils.Spa as Spa
 import Generated.Guide.Dynamic.Faq.Params as Params
 import Generated.Guide.Dynamic.Faq.Route as Route exposing (Route)
-import Layouts.Guide.Dynamic.Faq as Layout
 import Pages.Guide.Dynamic.Faq.Top
-import Utils.Spa as Spa exposing (Page)
+
+
 
 
 type Model
@@ -20,7 +22,7 @@ type Msg
     = TopMsg Pages.Guide.Dynamic.Faq.Top.Msg
 
 
-page : Page Route Model Msg layoutModel layoutMsg appMsg
+page : Spa.Page Route Model Msg layoutModel layoutMsg appMsg
 page =
     Spa.layout
         { view = Layout.view
@@ -61,10 +63,10 @@ recipes =
 
 
 init : Route -> Spa.Init Model Msg
-init route =
-    case route of
-        Route.Top flags ->
-            recipes.top.init flags
+init route_ =
+    case route_ of
+        Route.Top params ->
+            recipes.top.init params
 
 
 
