@@ -14,4 +14,4 @@ toPath : Route -> String
 toPath route =
     case route of
         Top _ ->
-            "/top"
+            "/"

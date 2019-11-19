@@ -38,7 +38,7 @@ toPath route =
         
         
         Top _ ->
-            "/top"
+            "/"
         
         
         Docs_Folder subRoute ->

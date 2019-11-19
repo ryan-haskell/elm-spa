@@ -119,6 +119,8 @@ You only need **one** case expression: (woohoo, less boilerplate!)
 -}
 
 import Internals.Page exposing (..)
+import Internals.Pattern as Pattern exposing (Pattern)
+import Internals.Transition as Transition exposing (Transition)
 import Internals.Utils as Utils
 
 
@@ -505,6 +507,21 @@ layout map options =
             , bundle =
                 \model context ->
                     let
+                        viewLayout page =
+                            options.view
+                                { page = page
+                                , global = context.global
+                                , toMsg = context.fromGlobalMsg
+                                }
+
+                        myLayoutsVisibility : Transition.Visibility
+                        myLayoutsVisibility =
+                            if context.transitioningPattern == options.pattern then
+                                context.visibility
+
+                            else
+                                Transition.visible
+
                         bundle : { title : String, view : ui_msg, subscriptions : Sub msg }
                         bundle =
                             options.recipe.bundle
@@ -513,14 +530,17 @@ layout map options =
                                 , fromPageMsg = toMsg >> context.fromPageMsg
                                 , global = context.global
                                 , map = map
+                                , transitioningPattern = context.transitioningPattern
+                                , visibility = context.visibility
                                 }
                     in
                     { title = bundle.title
                     , view =
-                        options.view
-                            { page = bundle.view
-                            , global = context.global
-                            , toMsg = context.fromGlobalMsg
+                        Transition.view
+                            options.transition
+                            myLayoutsVisibility
+                            { layout = viewLayout
+                            , page = bundle.view
                             }
                     , subscriptions = bundle.subscriptions
                     }

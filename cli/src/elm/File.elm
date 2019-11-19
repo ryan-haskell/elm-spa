@@ -231,16 +231,29 @@ type Item
     | DynamicFolder Filepath
 
 
-routeCaseTemplate : Item -> String
-routeCaseTemplate item =
-    case item of
-        StaticFile filepath ->
+staticRouteCase : String -> String
+staticRouteCase word =
+    case word of
+        "Top" ->
+            """
+Top _ ->
+    "/"
+            """
+
+        last_ ->
             """
 {{name}} _ ->
     "/{{slug}}"
             """
-                |> String.replace "{{name}}" (last filepath)
-                |> String.replace "{{slug}}" (sluggify (last filepath))
+                |> String.replace "{{name}}" last_
+                |> String.replace "{{slug}}" (sluggify last_)
+
+
+routeCaseTemplate : Item -> String
+routeCaseTemplate item =
+    case item of
+        StaticFile filepath ->
+            staticRouteCase (last filepath)
 
         DynamicFile _ ->
             """
@@ -321,6 +334,7 @@ module {{pagesModuleName}} exposing
     )
 
 import App.Page
+import App.Pattern exposing (static, dynamic)
 import {{layoutModuleName}} as Layout
 import Utils.Spa as Spa
 import {{paramsModuleName}} as Params
@@ -339,7 +353,9 @@ import {{routeModuleName}} as Route exposing (Route)
 page : Spa.Page Route Model Msg layoutModel layoutMsg appMsg
 page =
     Spa.layout
-        { view = Layout.view
+        { pattern = {{pagesLayoutPattern}}
+        , transition = Layout.transition
+        , view = Layout.view
         , recipe =
             { init = init
             , update = update
@@ -400,6 +416,7 @@ bundle bigModel =
         |> String.replace "{{pagesFolderPagesImports}}" (pagesFolderImports "Pages" details.folders)
         |> String.replace "{{pagesModelTypes}}" (pagesCustomTypes "Model" details)
         |> String.replace "{{pagesMsgTypes}}" (pagesCustomTypes "Msg" details)
+        |> String.replace "{{pagesLayoutPattern}}" (pagesLayoutPattern details)
         |> String.replace "{{pagesRecipesTypeAliases}}" (pagesRecipesTypeAliases details)
         |> String.replace "{{pagesRecipesFunctions}}" (pagesRecipesFunctions details)
         |> String.replace "{{pagesInitFunction}}" (pagesInitFunction details)
@@ -449,6 +466,27 @@ pagesFolderImports suffix folders =
     folders
         |> List.map (String.join "." >> moduleNameFor suffix)
         |> asImports
+
+
+pagesLayoutPattern : Details -> String
+pagesLayoutPattern { moduleName } =
+    String.split "." moduleName
+        |> List.map
+            (\piece ->
+                case piece of
+                    "Dynamic" ->
+                        "dynamic"
+
+                    _ ->
+                        "static \"" ++ sluggify piece ++ "\""
+            )
+        |> (\pieces ->
+                if List.isEmpty pieces || pieces == [ "static \"\"" ] then
+                    "[]"
+
+                else
+                    "[ " ++ String.join ", " pieces ++ " ]"
+           )
 
 
 pagesCustomTypes : String -> Details -> String

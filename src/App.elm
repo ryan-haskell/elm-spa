@@ -61,6 +61,7 @@ import Browser
 import Browser.Navigation as Nav
 import Html exposing (Html)
 import Internals.Page as Page
+import Internals.Pattern as Pattern exposing (Pattern)
 import Internals.Transition as Transition exposing (Transition)
 import Internals.Utils as Utils
 import Url exposing (Url)
@@ -117,6 +118,7 @@ create :
         , routes : List (Parser (route -> route) route)
         , toPath : route -> String
         , notFound : route
+        , patterns : List ( Pattern, Transition ui_msg )
         }
     , global :
         { init :
@@ -163,6 +165,7 @@ create config =
                     { fromUrl = fromUrl config.routing
                     , toPath = config.routing.toPath
                     , routes = config.routing.routes
+                    , patterns = config.routing.patterns
                     }
                 , init = page.init
                 , update =
@@ -175,6 +178,7 @@ create config =
                 { bundle = page.bundle
                 , map = config.ui.map
                 , global = config.global.subscriptions
+                , transition = config.routing.transition
                 }
         , view =
             view
@@ -212,6 +216,7 @@ type alias Model flags globalModel model =
     , key : Nav.Key
     , global : globalModel
     , page : model
+    , transitioningPattern : Pattern
     , visibilities :
         { layout : Transition.Visibility
         , page : Transition.Visibility
@@ -256,6 +261,7 @@ init config flags url key =
                   , key = key
                   , global = globalModel
                   , page = pageModel
+                  , transitioningPattern = []
                   , visibilities =
                         { layout = Transition.invisible
                         , page = Transition.visible
@@ -282,6 +288,7 @@ type Msg globalMsg msg
     | Global globalMsg
     | Page msg
     | FadeInLayout
+    | FadeInPage Url
 
 
 update :
@@ -289,6 +296,7 @@ update :
         { fromUrl : Url -> route
         , toPath : route -> String
         , routes : Routes route a
+        , patterns : List ( Pattern, Transition ui_msg )
         }
     , init : route -> Page.Init layoutModel layoutMsg globalModel globalMsg
     , update :
@@ -318,6 +326,22 @@ update config msg model =
             , Cmd.none
             )
 
+        FadeInPage url ->
+            url
+                |> config.routing.fromUrl
+                |> (\route -> config.init route { global = model.global })
+                |> (\( pageModel, pageCmd, globalCmd ) ->
+                        ( { model
+                            | visibilities = { layout = Transition.visible, page = Transition.visible }
+                            , page = pageModel
+                          }
+                        , Cmd.batch
+                            [ Cmd.map Page pageCmd
+                            , Cmd.map Global globalCmd
+                            ]
+                        )
+                   )
+
         ClickedLink (Browser.Internal url) ->
             if url == model.url then
                 ( model, Cmd.none )
@@ -333,20 +357,32 @@ update config msg model =
             )
 
         ChangedUrl url ->
-            url
-                |> config.routing.fromUrl
-                |> (\route -> config.init route { global = model.global })
-                |> (\( pageModel, pageCmd, globalCmd ) ->
-                        ( { model
-                            | url = url
-                            , page = pageModel
-                          }
-                        , Cmd.batch
-                            [ Cmd.map Page pageCmd
-                            , Cmd.map Global globalCmd
-                            ]
-                        )
-                   )
+            let
+                ( pattern, speed ) =
+                    chooseFrom
+                        { patternTransitions = config.routing.patterns
+                        , from = model.url
+                        , to = url
+                        }
+                        |> Just
+                        |> Maybe.withDefault (List.head config.routing.patterns)
+                        |> Maybe.map (Tuple.mapSecond Transition.speed)
+                        |> Maybe.withDefault ( [], 0 )
+            in
+            ( { model
+                | url = url
+                , visibilities =
+                    { layout = Transition.visible
+                    , page = Transition.invisible
+                    }
+                , transitioningPattern = pattern
+              }
+            , Cmd.batch
+                [ Utils.delay
+                    speed
+                    (FadeInPage url)
+                ]
+            )
 
         Global globalMsg ->
             config.update.global
@@ -391,6 +427,7 @@ subscriptions :
         layoutModel
         -> Page.Bundle layoutMsg ui_layoutMsg globalModel globalMsg (Msg globalMsg layoutMsg) ui_msg
     , global : globalModel -> Sub globalMsg
+    , transition : Transition ui_msg
     }
     -> Model flags globalModel layoutModel
     -> Sub (Msg globalMsg layoutMsg)
@@ -402,6 +439,8 @@ subscriptions config model =
             , fromPageMsg = Page
             , global = model.global
             , map = config.map
+            , transitioningPattern = model.transitioningPattern
+            , visibility = model.visibilities.page
             }
           ).subscriptions
         , Sub.map Global (config.global model.global)
@@ -431,6 +470,8 @@ view config model =
                 , fromPageMsg = Page
                 , global = model.global
                 , map = config.map
+                , transitioningPattern = model.transitioningPattern
+                , visibility = model.visibilities.page
                 }
     in
     { title = bundle.title
@@ -442,3 +483,35 @@ view config model =
                 { layout = identity, page = bundle.view }
         ]
     }
+
+
+
+-- Transition magic
+
+
+chooseFrom :
+    { patternTransitions : List ( Pattern, Transition ui_msg )
+    , from : Url
+    , to : Url
+    }
+    -> Maybe ( Pattern, Transition ui_msg )
+chooseFrom options =
+    let
+        ( fromPath, toPath ) =
+            ( options.from, options.to )
+                |> Tuple.mapBoth urlPath urlPath
+    in
+    options.patternTransitions
+        |> List.reverse
+        |> List.filter
+            (\( pattern, transition ) ->
+                Pattern.matches fromPath pattern
+                    && Pattern.matches toPath pattern
+                    && (transition /= Transition.optOut)
+            )
+        |> List.head
+
+
+urlPath : Url -> List String
+urlPath url =
+    url.path |> String.dropLeft 1 |> String.split "/"

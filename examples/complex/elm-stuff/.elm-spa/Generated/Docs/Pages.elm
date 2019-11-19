@@ -5,6 +5,7 @@ module Generated.Docs.Pages exposing
     )
 
 import App.Page
+import App.Pattern exposing (static, dynamic)
 import Layouts.Docs as Layout
 import Utils.Spa as Spa
 import Generated.Docs.Params as Params
@@ -28,7 +29,9 @@ type Msg
 page : Spa.Page Route Model Msg layoutModel layoutMsg appMsg
 page =
     Spa.layout
-        { view = Layout.view
+        { pattern = [ static "docs" ]
+        , transition = Layout.transition
+        , view = Layout.view
         , recipe =
             { init = init
             , update = update

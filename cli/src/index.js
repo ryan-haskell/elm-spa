@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 const path = require('path')
 const cwd = process.cwd()
 const { File, Elm, bold } = require('./utils.js')

@@ -1,7 +1,7 @@
 module Internals.Transition exposing
     ( Transition
     , speed, view
-    , optOut, none, fadeHtml, fadeUi
+    , optOut, none, fadeHtml, fadeUi, custom
     , Visibility
     , visible, invisible
     )
@@ -9,7 +9,7 @@ module Internals.Transition exposing
 {-|
 
 @docs Transition
-@docs speed, view
+@docs speed, view, chooseFrom
 @docs optOut, none, fadeHtml, fadeUi
 
 @docs Visibility
@@ -20,6 +20,7 @@ module Internals.Transition exposing
 import Element exposing (Element)
 import Html exposing (Html)
 import Html.Attributes as Attr
+import Url exposing (Url)
 
 
 type Visibility
@@ -40,10 +41,10 @@ invisible =
 type Transition ui_msg
     = OptOut
     | None
-    | Transition (Transition_ ui_msg)
+    | Transition (Options ui_msg)
 
 
-type alias Transition_ ui_msg =
+type alias Options ui_msg =
     { speed : Int
     , invisible : View ui_msg
     , visible : View ui_msg
@@ -160,3 +161,11 @@ fadeUi speed_ =
         , invisible = withOpacity 0
         , visible = withOpacity 1
         }
+
+custom : 
+    { speed : Int
+    , invisible : View ui_msg
+    , visible : View ui_msg
+    } -> Transition ui_msg
+custom =
+    Transition

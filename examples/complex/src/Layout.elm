@@ -1,6 +1,7 @@
-module Layout exposing (view)
+module Layout exposing (transition, view)
 
 import App.Page
+import App.Transition as Transition exposing (Transition)
 import Components.Button
 import Components.Styles as Styles
 import Element exposing (..)
@@ -17,6 +18,11 @@ type alias Context msg =
     , global : Global.Model
     , toMsg : Global.Msg -> msg
     }
+
+
+transition : Transition (Element msg)
+transition =
+    Transition.fadeUi 300
 
 
 view : Context msg -> Element msg
@@ -93,14 +99,3 @@ viewButtonLink ( label, url ) =
         { url = url
         , label = text label
         }
-
-
-transition :
-    { property : String, speed : Int }
-    -> Element.Attribute msg
-transition { property, speed } =
-    Element.htmlAttribute
-        (Attr.style
-            "transition"
-            (property ++ " " ++ String.fromInt speed ++ "ms ease-in-out")
-        )

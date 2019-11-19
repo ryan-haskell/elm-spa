@@ -1,5 +1,6 @@
-module Layouts.Docs exposing (view)
+module Layouts.Docs exposing (transition, view)
 
+import App.Transition as Transition exposing (Transition)
 import Element exposing (..)
 import Global
 
@@ -11,6 +12,17 @@ type alias Context msg =
     }
 
 
+transition : Transition (Element msg)
+transition =
+    Transition.fadeUi 200
+
+
 view : Context msg -> Element msg
 view { page } =
-    page
+    column [ width fill ]
+        [ row [ spacing 16 ]
+            [ link [] { label = text "apples", url = "/docs/apples" }
+            , link [] { label = text "bananas", url = "/docs/bananas" }
+            ]
+        , page
+        ]

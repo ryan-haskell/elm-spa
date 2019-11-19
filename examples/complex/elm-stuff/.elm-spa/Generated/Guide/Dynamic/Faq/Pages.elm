@@ -5,6 +5,7 @@ module Generated.Guide.Dynamic.Faq.Pages exposing
     )
 
 import App.Page
+import App.Pattern exposing (static, dynamic)
 import Layouts.Guide.Dynamic.Faq as Layout
 import Utils.Spa as Spa
 import Generated.Guide.Dynamic.Faq.Params as Params
@@ -25,7 +26,9 @@ type Msg
 page : Spa.Page Route Model Msg layoutModel layoutMsg appMsg
 page =
     Spa.layout
-        { view = Layout.view
+        { pattern = [ static "guide", dynamic, static "faq" ]
+        , transition = Layout.transition
+        , view = Layout.view
         , recipe =
             { init = init
             , update = update

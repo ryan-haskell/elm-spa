@@ -1,6 +1,7 @@
 module Main exposing (main)
 
 import App
+import App.Pattern as Pattern
 import App.Transition as Transition
 import Element
 import Generated.Pages as Pages
@@ -17,6 +18,11 @@ main =
             }
         , routing =
             { transition = Transition.fadeUi 300
+            , patterns =
+                [ ( [], Transition.fadeUi 300 )
+                , ( [ Pattern.static "guide" ], Transition.fadeUi 3000 )
+                , ( [ Pattern.static "docs" ], Transition.fadeUi 200 )
+                ]
             , routes = Routes.parsers
             , toPath = Routes.toPath
             , notFound = Routes.routes.notFound

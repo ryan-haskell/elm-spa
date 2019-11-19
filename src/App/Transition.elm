@@ -1,12 +1,12 @@
 module App.Transition exposing
     ( Transition
-    , optOut, none, fadeHtml, fadeUi
+    , optOut, none, fadeHtml, fadeUi, custom
     )
 
 {-|
 
 @docs Transition
-@docs optOut, none, fadeHtml, fadeUi
+@docs optOut, none, fadeHtml, fadeUi, custom
 
 -}
 
@@ -41,3 +41,20 @@ fadeHtml =
 fadeUi : Int -> Transition (Element msg)
 fadeUi =
     Internals.Transition.fadeUi
+
+
+custom :
+    { speed : Int
+    , invisible : View ui_msg
+    , visible : View ui_msg
+    }
+    -> Transition ui_msg
+custom =
+    Internals.Transition.custom
+
+
+type alias View ui_msg =
+    { layout : ui_msg -> ui_msg
+    , page : ui_msg
+    }
+    -> ui_msg

@@ -9,6 +9,9 @@ module Internals.Page exposing
     , upgrade
     )
 
+import Internals.Pattern exposing (Pattern)
+import Internals.Transition as Transition exposing (Transition)
+
 
 type Page pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
     = Page (Page_ pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg)
@@ -67,6 +70,8 @@ type alias Bundle layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg =
     , fromGlobalMsg : globalMsg -> msg
     , fromPageMsg : layoutMsg -> msg
     , map : (layoutMsg -> msg) -> ui_layoutMsg -> ui_msg
+    , visibility : Transition.Visibility
+    , transitioningPattern : Pattern
     }
     ->
         { title : String
@@ -76,7 +81,9 @@ type alias Bundle layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg =
 
 
 type alias Layout pageParams pageModel pageMsg ui_pageMsg globalModel globalMsg msg ui_msg =
-    { view :
+    { pattern : Pattern
+    , transition : Transition ui_msg
+    , view :
         { page : ui_msg
         , global : globalModel
         , toMsg : globalMsg -> msg

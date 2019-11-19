@@ -1,7 +1,13 @@
-module Layouts.Guide.Dynamic exposing (view)
+module Layouts.Guide.Dynamic exposing (transition, view)
 
+import App.Transition as Transition exposing (Transition)
 import Element exposing (..)
 import Global
+
+
+transition : Transition (Element msg)
+transition =
+    Transition.optOut
 
 
 type alias Context msg =
