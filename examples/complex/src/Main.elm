@@ -1,6 +1,7 @@
 module Main exposing (main)
 
 import App
+import App.Transition as Transition
 import Element
 import Generated.Pages as Pages
 import Generated.Routes as Routes
@@ -15,7 +16,8 @@ main =
             , map = Element.map
             }
         , routing =
-            { routes = Routes.parsers
+            { transition = Transition.fadeUi 300
+            , routes = Routes.parsers
             , toPath = Routes.toPath
             , notFound = Routes.routes.notFound
             }

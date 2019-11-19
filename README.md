@@ -2,8 +2,9 @@
 > for building single page apps
 
 
-## run the example!
+## local development
 
 ```
-npm run example
+npm run dev
 ```
+

@@ -11,8 +11,6 @@ module App exposing
 `App.create` replaces [Browser.application](https://package.elm-lang.org/packages/elm/browser/latest/Browser#application)
 as the entrypoint to your app.
 
-    module Main exposing (main)
-
     import App
     import Global
     import Pages
@@ -63,6 +61,7 @@ import Browser
 import Browser.Navigation as Nav
 import Html exposing (Html)
 import Internals.Page as Page
+import Internals.Transition as Transition exposing (Transition)
 import Internals.Utils as Utils
 import Url exposing (Url)
 import Url.Parser as Parser exposing (Parser)
@@ -114,7 +113,8 @@ create :
         , map : (layoutMsg -> Msg globalMsg layoutMsg) -> ui_layoutMsg -> ui_msg
         }
     , routing :
-        { routes : List (Parser (route -> route) route)
+        { transition : Transition ui_msg
+        , routes : List (Parser (route -> route) route)
         , toPath : route -> String
         , notFound : route
         }
@@ -154,6 +154,7 @@ create config =
                 , routing =
                     { fromUrl = fromUrl config.routing
                     , toPath = config.routing.toPath
+                    , transition = config.routing.transition
                     }
                 }
         , update =
@@ -180,6 +181,7 @@ create config =
                 { toHtml = config.ui.toHtml
                 , bundle = page.bundle
                 , map = config.ui.map
+                , transition = config.routing.transition
                 }
         , onUrlChange = ChangedUrl
         , onUrlRequest = ClickedLink
@@ -210,6 +212,10 @@ type alias Model flags globalModel model =
     , key : Nav.Key
     , global : globalModel
     , page : model
+    , visibilities :
+        { layout : Transition.Visibility
+        , page : Transition.Visibility
+        }
     }
 
 
@@ -217,6 +223,7 @@ init :
     { routing :
         { fromUrl : Url -> route
         , toPath : route -> String
+        , transition : Transition ui_msg
         }
     , init :
         { global :
@@ -249,11 +256,16 @@ init config flags url key =
                   , key = key
                   , global = globalModel
                   , page = pageModel
+                  , visibilities =
+                        { layout = Transition.invisible
+                        , page = Transition.visible
+                        }
                   }
                 , Cmd.batch
                     [ Cmd.map Page pageCmd
                     , Cmd.map Global pageGlobalCmd
                     , Cmd.map Global globalCmd
+                    , Utils.delay (Transition.speed config.routing.transition) FadeInLayout
                     , cmd
                     ]
                 )
@@ -269,6 +281,7 @@ type Msg globalMsg msg
     | ClickedLink Browser.UrlRequest
     | Global globalMsg
     | Page msg
+    | FadeInLayout
 
 
 update :
@@ -295,6 +308,16 @@ update :
     -> ( Model flags globalModel layoutModel, Cmd (Msg globalMsg layoutMsg) )
 update config msg model =
     case msg of
+        FadeInLayout ->
+            ( { model
+                | visibilities =
+                    { layout = Transition.visible
+                    , page = model.visibilities.page
+                    }
+              }
+            , Cmd.none
+            )
+
         ClickedLink (Browser.Internal url) ->
             if url == model.url then
                 ( model, Cmd.none )
@@ -395,6 +418,7 @@ view :
     , bundle :
         layoutModel
         -> Page.Bundle layoutMsg ui_layoutMsg globalModel globalMsg (Msg globalMsg layoutMsg) ui_msg
+    , transition : Transition ui_msg
     }
     -> Model flags globalModel layoutModel
     -> Browser.Document (Msg globalMsg layoutMsg)
@@ -411,6 +435,10 @@ view config model =
     in
     { title = bundle.title
     , body =
-        [ config.toHtml bundle.view
+        [ config.toHtml <|
+            Transition.view
+                config.transition
+                model.visibilities.layout
+                { layout = identity, page = bundle.view }
         ]
     }

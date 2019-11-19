@@ -3,7 +3,7 @@
   "source-directories": [
     "src",
     "../../src",
-    "elm-stuff/.generated"
+    "elm-stuff/.elm-spa"
   ],
   "elm-version": "0.19.1",
   "dependencies": {
