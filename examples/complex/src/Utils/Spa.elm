@@ -1,7 +1,7 @@
 module Utils.Spa exposing
     ( Bundle
-    , LayoutContext
     , Init
+    , LayoutContext
     , Page
     , PageContext
     , Recipe
@@ -26,11 +26,11 @@ type alias Recipe params model msg layoutModel layoutMsg appMsg =
 
 
 type alias Init model msg =
-    App.Types.Init model msg Global.Model Global.Msg
+    App.Types.Init Route model msg Global.Model Global.Msg
 
 
 type alias Update model msg =
-    App.Types.Update model msg Global.Model Global.Msg
+    App.Types.Update Route model msg Global.Model Global.Msg
 
 
 type alias Bundle msg appMsg =
@@ -50,7 +50,7 @@ type alias LayoutContext msg =
 
 
 type alias PageContext =
-    App.Types.PageContext Global.Model
+    App.Types.PageContext Route Global.Model
 
 
 layout :

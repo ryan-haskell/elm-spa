@@ -124,8 +124,8 @@ import Internals.Transition as Transition exposing (Transition)
 import Internals.Utils as Utils
 
 
-type alias PageContext globalModel =
-    Internals.Page.PageContext globalModel
+type alias PageContext route globalModel =
+    Internals.Page.PageContext route globalModel
 
 
 type alias Page route pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg =
@@ -193,7 +193,7 @@ match up with it's `model`, we use `keep` to leave the page as-is.
 -}
 keep :
     layoutModel
-    -> Update layoutModel layoutMsg globalModel globalMsg
+    -> Update route layoutModel layoutMsg globalModel globalMsg
 keep model =
     always ( model, Cmd.none, Cmd.none )
 
@@ -220,7 +220,7 @@ keep model =
 -}
 static :
     { title : { global : globalModel } -> String
-    , view : PageContext globalModel -> ui_pageMsg
+    , view : PageContext route globalModel -> ui_pageMsg
     }
     -> Page route pageParams () Never ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
 static page =
@@ -297,9 +297,9 @@ static page =
 -}
 sandbox :
     { title : { global : globalModel, model : pageModel } -> String
-    , init : PageContext globalModel -> pageParams -> pageModel
-    , update : PageContext globalModel -> pageMsg -> pageModel -> pageModel
-    , view : PageContext globalModel -> pageModel -> ui_pageMsg
+    , init : PageContext route globalModel -> pageParams -> pageModel
+    , update : PageContext route globalModel -> pageMsg -> pageModel -> pageModel
+    , view : PageContext route globalModel -> pageModel -> ui_pageMsg
     }
     -> Page route pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
 sandbox page =
@@ -376,10 +376,10 @@ sandbox page =
 -}
 element :
     { title : { global : globalModel, model : pageModel } -> String
-    , init : PageContext globalModel -> pageParams -> ( pageModel, Cmd pageMsg )
-    , update : PageContext globalModel -> pageMsg -> pageModel -> ( pageModel, Cmd pageMsg )
-    , view : PageContext globalModel -> pageModel -> ui_pageMsg
-    , subscriptions : PageContext globalModel -> pageModel -> Sub pageMsg
+    , init : PageContext route globalModel -> pageParams -> ( pageModel, Cmd pageMsg )
+    , update : PageContext route globalModel -> pageMsg -> pageModel -> ( pageModel, Cmd pageMsg )
+    , view : PageContext route globalModel -> pageModel -> ui_pageMsg
+    , subscriptions : PageContext route globalModel -> pageModel -> Sub pageMsg
     }
     -> Page route pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
 element page =
@@ -456,10 +456,10 @@ element page =
 -}
 component :
     { title : { global : globalModel, model : pageModel } -> String
-    , init : PageContext globalModel -> pageParams -> ( pageModel, Cmd pageMsg, Cmd globalMsg )
-    , update : PageContext globalModel -> pageMsg -> pageModel -> ( pageModel, Cmd pageMsg, Cmd globalMsg )
-    , view : PageContext globalModel -> pageModel -> ui_pageMsg
-    , subscriptions : PageContext globalModel -> pageModel -> Sub pageMsg
+    , init : PageContext route globalModel -> pageParams -> ( pageModel, Cmd pageMsg, Cmd globalMsg )
+    , update : PageContext route globalModel -> pageMsg -> pageModel -> ( pageModel, Cmd pageMsg, Cmd globalMsg )
+    , view : PageContext route globalModel -> pageModel -> ui_pageMsg
+    , subscriptions : PageContext route globalModel -> pageModel -> Sub pageMsg
     }
     -> Page route pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
 component page =
@@ -549,7 +549,7 @@ layout map options =
                                 { page = page
                                 , global = context.global
                                 , fromGlobalMsg = private.fromGlobalMsg
-                                , route = private.route
+                                , route = context.route
                                 }
 
                         myLayoutsVisibility : Transition.Visibility
@@ -569,7 +569,6 @@ layout map options =
                                 , map = map
                                 , transitioningPattern = private.transitioningPattern
                                 , visibility = private.visibility
-                                , route = private.route
                                 }
                                 context
                     in

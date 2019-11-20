@@ -163,8 +163,8 @@ type alias Recipe route params pageModel pageMsg layoutModel layoutMsg ui_layout
             -- ...
 
 -}
-type alias Init layoutModel layoutMsg globalModel globalMsg =
-    Page.Init layoutModel layoutMsg globalModel globalMsg
+type alias Init route layoutModel layoutMsg globalModel globalMsg =
+    Page.Init route layoutModel layoutMsg globalModel globalMsg
 
 
 {-|
@@ -190,8 +190,8 @@ type alias Init layoutModel layoutMsg globalModel globalMsg =
             -- ...
 
 -}
-type alias Update layoutModel layoutMsg globalModel globalMsg =
-    Page.Update layoutModel layoutMsg globalModel globalMsg
+type alias Update route layoutModel layoutMsg globalModel globalMsg =
+    Page.Update route layoutModel layoutMsg globalModel globalMsg
 
 
 {-|
@@ -276,8 +276,8 @@ type alias Layout route pageParams pageModel pageMsg ui_pageMsg globalModel glob
 
 {-| TODO: PageContext docs
 -}
-type alias PageContext globalModel =
-    Page.PageContext globalModel
+type alias PageContext route globalModel =
+    Page.PageContext route globalModel
 
 
 {-| TODO: LayoutContext docs

@@ -241,7 +241,7 @@ init :
             { navigate : route -> Cmd (Msg globalMsg layoutMsg) }
             -> flags
             -> ( globalModel, Cmd globalMsg, Cmd (Msg globalMsg layoutMsg) )
-        , pages : route -> Page.Init layoutModel layoutMsg globalModel globalMsg
+        , pages : route -> Page.Init route layoutModel layoutMsg globalModel globalMsg
         }
     }
     -> flags
@@ -263,6 +263,7 @@ init config flags url key =
                         config.init.pages route
                             { global = globalModel
                             , queryParameters = queryParameters url
+                            , route = route
                             }
                 in
                 ( { flags = flags
@@ -307,7 +308,7 @@ update :
         , routes : Routes route a
         , transitions : List ( Pattern, Transition ui_msg )
         }
-    , init : route -> Page.Init layoutModel layoutMsg globalModel globalMsg
+    , init : route -> Page.Init route layoutModel layoutMsg globalModel globalMsg
     , update :
         { global :
             { navigate : route -> Cmd (Msg globalMsg layoutMsg) }
@@ -317,7 +318,7 @@ update :
         , pages :
             layoutMsg
             -> layoutModel
-            -> Page.Update layoutModel layoutMsg globalModel globalMsg
+            -> Page.Update route layoutModel layoutMsg globalModel globalMsg
         }
     }
     -> Msg globalMsg layoutMsg
@@ -342,6 +343,7 @@ update config msg model =
                         config.init route
                             { global = model.global
                             , queryParameters = queryParameters model.url
+                            , route = route
                             }
                    )
                 |> (\( pageModel, pageCmd, globalCmd ) ->
@@ -418,6 +420,7 @@ update config msg model =
                 model.page
                 { global = model.global
                 , queryParameters = queryParameters model.url
+                , route = config.routing.fromUrl model.url
                 }
                 |> (\( page, pageCmd, globalCmd ) ->
                         ( { model | page = page }
@@ -459,9 +462,9 @@ subscriptions config model =
             , map = config.map
             , transitioningPattern = model.transitioningPattern
             , visibility = model.visibilities.page
-            , route = config.fromUrl model.url
             }
             { global = model.global
+            , route = config.fromUrl model.url
             , queryParameters = queryParameters model.url
             }
           ).subscriptions
@@ -494,9 +497,9 @@ view config model =
                 , map = config.map
                 , transitioningPattern = model.transitioningPattern
                 , visibility = model.visibilities.page
-                , route = config.fromUrl model.url
                 }
                 { global = model.global
+                , route = config.fromUrl model.url
                 , queryParameters = queryParameters model.url
                 }
     in

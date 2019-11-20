@@ -16,8 +16,9 @@ import Internals.Pattern exposing (Pattern)
 import Internals.Transition as Transition exposing (Transition)
 
 
-type alias PageContext globalModel =
+type alias PageContext route globalModel =
     { global : globalModel
+    , route : route
     , queryParameters : Dict String String
     }
 
@@ -35,8 +36,8 @@ type alias Page_ route pageParams pageModel pageMsg ui_pageMsg layoutModel layou
 
 
 type alias Recipe route pageParams pageModel pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg =
-    { init : pageParams -> Init layoutModel layoutMsg globalModel globalMsg
-    , update : pageMsg -> pageModel -> Update layoutModel layoutMsg globalModel globalMsg
+    { init : pageParams -> Init route layoutModel layoutMsg globalModel globalMsg
+    , update : pageMsg -> pageModel -> Update route layoutModel layoutMsg globalModel globalMsg
     , bundle : pageModel -> Bundle route layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
     }
 
@@ -64,13 +65,13 @@ upgrade map config =
         }
 
 
-type alias Init layoutModel layoutMsg globalModel globalMsg =
-    PageContext globalModel
+type alias Init route layoutModel layoutMsg globalModel globalMsg =
+    PageContext route globalModel
     -> ( layoutModel, Cmd layoutMsg, Cmd globalMsg )
 
 
-type alias Update layoutModel layoutMsg globalModel globalMsg =
-    PageContext globalModel
+type alias Update route layoutModel layoutMsg globalModel globalMsg =
+    PageContext route globalModel
     -> ( layoutModel, Cmd layoutMsg, Cmd globalMsg )
 
 
@@ -78,11 +79,10 @@ type alias Bundle route layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg 
     { fromGlobalMsg : globalMsg -> msg
     , fromPageMsg : layoutMsg -> msg
     , map : (layoutMsg -> msg) -> ui_layoutMsg -> ui_msg
-    , route : route
     , visibility : Transition.Visibility
     , transitioningPattern : Pattern
     }
-    -> PageContext globalModel
+    -> PageContext route globalModel
     ->
         { title : String
         , view : ui_msg
