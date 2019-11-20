@@ -11,13 +11,7 @@ import Element.Font as Font
 import Element.Input as Input
 import Global
 import Html.Attributes as Attr
-
-
-type alias Context msg =
-    { page : Element msg
-    , global : Global.Model
-    , toMsg : Global.Msg -> msg
-    }
+import Utils.Spa as Spa
 
 
 transition : Transition (Element msg)
@@ -25,7 +19,7 @@ transition =
     Transition.fadeUi 300
 
 
-view : Context msg -> Element msg
+view : Spa.Context msg -> Element msg
 view { page, global, toMsg } =
     column
         [ Font.size 16

@@ -20,8 +20,8 @@ main =
             { transition = Transition.fadeUi 300
             , patterns =
                 [ ( [], Transition.fadeUi 300 )
-                , ( [ Pattern.static "guide" ], Transition.fadeUi 3000 )
-                , ( [ Pattern.static "docs" ], Transition.fadeUi 200 )
+                , ( [ Pattern.static "guide" ], Transition.none )
+                , ( [ Pattern.static "docs" ], Transition.fadeUi 500 )
                 ]
             , routes = Routes.parsers
             , toPath = Routes.toPath

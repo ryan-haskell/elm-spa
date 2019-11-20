@@ -33,10 +33,10 @@ toPath =
 
 type alias Routes =
     { top : Route
-    , docs : Route
     , signIn : Route
     , notFound : Route
     , guide : Route
+    , docs_top : Route
     , guide_elm : Route
     , guide_programming : Route
     , docs_static : Route
@@ -53,14 +53,15 @@ routes : Routes
 routes =
     { top =
         Generated.Route.Top {}
-    , docs =
-        Generated.Route.Docs {}
     , signIn =
         Generated.Route.SignIn {}
     , notFound =
         Generated.Route.NotFound {}
     , guide =
         Generated.Route.Guide {}
+    , docs_top =
+        Generated.Route.Docs_Folder <|
+            Generated.Docs.Route.Top {}
     , guide_elm =
         Generated.Route.Guide_Folder <|
             Generated.Guide.Route.Elm {}
@@ -106,14 +107,14 @@ parsers : List (Parser (Route -> a) a)
 parsers =
     [ map routes.top
         (top)
-    , map routes.docs
-        (s "docs")
     , map routes.signIn
         (s "sign-in")
     , map routes.notFound
         (s "not-found")
     , map routes.guide
         (s "guide")
+    , map routes.docs_top
+        (s "docs" </> top)
     , map routes.guide_elm
         (s "guide" </> s "elm")
     , map routes.guide_programming

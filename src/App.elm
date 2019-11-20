@@ -134,7 +134,7 @@ create :
             -> ( globalModel, Cmd globalMsg, Cmd (Msg globalMsg layoutMsg) )
         , subscriptions : globalModel -> Sub globalMsg
         }
-    , page : Page.Page route layoutModel layoutMsg ui_layoutMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg (Msg globalMsg layoutMsg) ui_msg
+    , page : Page.Page route route layoutModel layoutMsg ui_layoutMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg (Msg globalMsg layoutMsg) ui_msg
     }
     -> Program flags globalModel globalMsg layoutModel layoutMsg
 create config =
@@ -179,6 +179,7 @@ create config =
                 , map = config.ui.map
                 , global = config.global.subscriptions
                 , transition = config.routing.transition
+                , fromUrl = fromUrl config.routing
                 }
         , view =
             view
@@ -186,6 +187,7 @@ create config =
                 , bundle = page.bundle
                 , map = config.ui.map
                 , transition = config.routing.transition
+                , fromUrl = fromUrl config.routing
                 }
         , onUrlChange = ChangedUrl
         , onUrlRequest = ClickedLink
@@ -425,9 +427,10 @@ subscriptions :
     { map : (layoutMsg -> Msg globalMsg layoutMsg) -> ui_layoutMsg -> ui_msg
     , bundle :
         layoutModel
-        -> Page.Bundle layoutMsg ui_layoutMsg globalModel globalMsg (Msg globalMsg layoutMsg) ui_msg
+        -> Page.Bundle route layoutMsg ui_layoutMsg globalModel globalMsg (Msg globalMsg layoutMsg) ui_msg
     , global : globalModel -> Sub globalMsg
     , transition : Transition ui_msg
+    , fromUrl : Url -> route
     }
     -> Model flags globalModel layoutModel
     -> Sub (Msg globalMsg layoutMsg)
@@ -441,6 +444,7 @@ subscriptions config model =
             , map = config.map
             , transitioningPattern = model.transitioningPattern
             , visibility = model.visibilities.page
+            , route = config.fromUrl model.url
             }
           ).subscriptions
         , Sub.map Global (config.global model.global)
@@ -456,8 +460,9 @@ view :
     , toHtml : ui_msg -> Html (Msg globalMsg layoutMsg)
     , bundle :
         layoutModel
-        -> Page.Bundle layoutMsg ui_layoutMsg globalModel globalMsg (Msg globalMsg layoutMsg) ui_msg
+        -> Page.Bundle route layoutMsg ui_layoutMsg globalModel globalMsg (Msg globalMsg layoutMsg) ui_msg
     , transition : Transition ui_msg
+    , fromUrl : Url -> route
     }
     -> Model flags globalModel layoutModel
     -> Browser.Document (Msg globalMsg layoutMsg)
@@ -472,6 +477,7 @@ view config model =
                 , map = config.map
                 , transitioningPattern = model.transitioningPattern
                 , visibility = model.visibilities.page
+                , route = config.fromUrl model.url
                 }
     in
     { title = bundle.title

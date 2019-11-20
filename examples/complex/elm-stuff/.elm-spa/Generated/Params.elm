@@ -1,10 +1,6 @@
 module Generated.Params exposing (..)
 
 
-type alias Docs =
-    {}
-
-
 type alias Guide =
     {}
 

@@ -5,6 +5,7 @@ module App.Types exposing
     , Update
     , Bundle
     , Layout, Upgrade
+    , Context
     )
 
 {-|
@@ -94,8 +95,8 @@ import Internals.Page as Page
         App.Page.static { ... }
 
 -}
-type alias Page params pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg =
-    Page.Page params pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
+type alias Page route params pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg =
+    Page.Page route params pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
 
 
 {-|
@@ -135,8 +136,8 @@ type alias Page params pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_lay
         }
 
 -}
-type alias Recipe params pageModel pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg =
-    Page.Recipe params pageModel pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
+type alias Recipe route params pageModel pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg =
+    Page.Recipe route params pageModel pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
 
 
 {-|
@@ -229,8 +230,8 @@ type alias Update layoutModel layoutMsg globalModel globalMsg =
             -- ...
 
 -}
-type alias Bundle layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg =
-    Page.Bundle layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
+type alias Bundle route layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg =
+    Page.Bundle route layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
 
 
 {-|
@@ -269,8 +270,14 @@ type alias Bundle layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg =
             -- ...
 
 -}
-type alias Layout pageParams pageModel pageMsg ui_pageMsg globalModel globalMsg msg ui_msg =
-    Page.Layout pageParams pageModel pageMsg ui_pageMsg globalModel globalMsg msg ui_msg
+type alias Layout route pageParams pageModel pageMsg ui_pageMsg globalModel globalMsg msg ui_msg =
+    Page.Layout route pageParams pageModel pageMsg ui_pageMsg globalModel globalMsg msg ui_msg
+
+
+{-| TODO: Context docs
+-}
+type alias Context route msg ui_msg globalModel globalMsg =
+    Page.Context route msg ui_msg globalModel globalMsg
 
 
 {-|
@@ -309,5 +316,5 @@ type alias Layout pageParams pageModel pageMsg ui_pageMsg globalModel globalMsg 
             -- ...
 
 -}
-type alias Upgrade pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg =
-    Page.Upgrade pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
+type alias Upgrade route pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg =
+    Page.Upgrade route pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg

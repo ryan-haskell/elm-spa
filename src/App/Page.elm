@@ -124,8 +124,8 @@ import Internals.Transition as Transition exposing (Transition)
 import Internals.Utils as Utils
 
 
-type alias Page pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg =
-    Internals.Page.Page pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
+type alias Page route pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg =
+    Internals.Page.Page route pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
 
 
 {-| Implementing the `init`, `update` and `bundle` functions is much easier
@@ -162,8 +162,8 @@ A `Recipe` contains a record waiting for page specific data.
 -}
 recipe :
     ((pageMsg -> layoutMsg) -> ui_pageMsg -> ui_layoutMsg)
-    -> Upgrade pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
-    -> Recipe pageParams pageModel pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
+    -> Upgrade route pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
+    -> Recipe route pageParams pageModel pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
 recipe =
     Internals.Page.upgrade
 
@@ -218,7 +218,7 @@ static :
     { title : { global : globalModel } -> String
     , view : globalModel -> ui_pageMsg
     }
-    -> Page pageParams () Never ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
+    -> Page route pageParams () Never ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
 static page =
     Page
         (\{ toModel, toMsg, map } ->
@@ -290,7 +290,7 @@ sandbox :
     , update : globalModel -> pageMsg -> pageModel -> pageModel
     , view : globalModel -> pageModel -> ui_pageMsg
     }
-    -> Page pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
+    -> Page route pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
 sandbox page =
     Page
         (\{ toModel, toMsg, map } ->
@@ -362,7 +362,7 @@ element :
     , view : globalModel -> pageModel -> ui_pageMsg
     , subscriptions : globalModel -> pageModel -> Sub pageMsg
     }
-    -> Page pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
+    -> Page route pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
 element page =
     Page
         (\{ toModel, toMsg, map } ->
@@ -433,7 +433,7 @@ component :
     , view : globalModel -> pageModel -> ui_pageMsg
     , subscriptions : globalModel -> pageModel -> Sub pageMsg
     }
-    -> Page pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
+    -> Page route pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
 component page =
     Page
         (\{ toModel, toMsg, map } ->
@@ -491,8 +491,8 @@ send =
 -}
 layout :
     ((pageMsg -> msg) -> ui_pageMsg -> ui_msg)
-    -> Layout pageParams pageModel pageMsg ui_pageMsg globalModel globalMsg msg ui_msg
-    -> Page pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
+    -> Layout route pageParams pageModel pageMsg ui_pageMsg globalModel globalMsg msg ui_msg
+    -> Page route pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
 layout map options =
     Page
         (\{ toModel, toMsg } ->
@@ -512,6 +512,7 @@ layout map options =
                                 { page = page
                                 , global = context.global
                                 , toMsg = context.fromGlobalMsg
+                                , route = context.route
                                 }
 
                         myLayoutsVisibility : Transition.Visibility
@@ -532,6 +533,7 @@ layout map options =
                                 , map = map
                                 , transitioningPattern = context.transitioningPattern
                                 , visibility = context.visibility
+                                , route = context.route
                                 }
                     in
                     { title = bundle.title

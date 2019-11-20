@@ -8,3 +8,7 @@ type alias Dynamic =
 
 type alias Static =
     {}
+
+
+type alias Top =
+    {}

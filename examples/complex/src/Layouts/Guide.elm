@@ -4,27 +4,23 @@ import App.Transition as Transition exposing (Transition)
 import Components.Styles as Styles
 import Element exposing (..)
 import Global
-
-
-type alias Context msg =
-    { page : Element msg
-    , global : Global.Model
-    , toMsg : Global.Msg -> msg
-    }
+import Utils.Spa as Spa
 
 
 transition : Transition (Element msg)
 transition =
-    Transition.fadeUi 3000
+    Transition.none
 
 
-view : Context msg -> Element msg
+view : Spa.Context msg -> Element msg
 view { page } =
     column
         [ width fill
         , spacing -128
         ]
         [ page
-        , el [ centerX ] <|
-            link Styles.link { label = text "back to guide", url = "/guide" }
+        , row [ centerX, spacing 16 ]
+            [ link Styles.link { label = text "programming", url = "/guide/programming" }
+            , link Styles.link { label = text "elm", url = "/guide/elm" }
+            ]
         ]

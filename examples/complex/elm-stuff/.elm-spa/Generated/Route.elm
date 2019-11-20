@@ -9,8 +9,7 @@ import Generated.Guide.Route
 
 
 type Route
-    = Docs Params.Docs
-    | Guide Params.Guide
+    = Guide Params.Guide
     | NotFound Params.NotFound
     | SignIn Params.SignIn
     | Top Params.Top
@@ -21,10 +20,6 @@ type Route
 toPath : Route -> String
 toPath route =
     case route of
-        Docs _ ->
-            "/docs"
-        
-        
         Guide _ ->
             "/guide"
         
