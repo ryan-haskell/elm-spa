@@ -1,6 +1,7 @@
 module App exposing
     ( Program, create
     , usingHtml
+    , queryParameters
     )
 
 {-|
@@ -59,6 +60,7 @@ Providing `App.create` with these `ui` options will do the trick!
 
 import Browser
 import Browser.Navigation as Nav
+import Dict exposing (Dict)
 import Html exposing (Html)
 import Internals.Page as Page
 import Internals.Pattern as Pattern exposing (Pattern)
@@ -258,7 +260,10 @@ init config flags url key =
                             flags
 
                     ( pageModel, pageCmd, pageGlobalCmd ) =
-                        config.init.pages route { global = globalModel }
+                        config.init.pages route
+                            { global = globalModel
+                            , queryParameters = queryParameters url
+                            }
                 in
                 ( { flags = flags
                   , url = url
@@ -333,7 +338,12 @@ update config msg model =
         FadeInPage url ->
             url
                 |> config.routing.fromUrl
-                |> (\route -> config.init route { global = model.global })
+                |> (\route ->
+                        config.init route
+                            { global = model.global
+                            , queryParameters = queryParameters model.url
+                            }
+                   )
                 |> (\( pageModel, pageCmd, globalCmd ) ->
                         ( { model
                             | visibilities = { layout = Transition.visible, page = Transition.visible }
@@ -404,7 +414,11 @@ update config msg model =
                    )
 
         Page pageMsg ->
-            config.update.pages pageMsg model.page { global = model.global }
+            config.update.pages pageMsg
+                model.page
+                { global = model.global
+                , queryParameters = queryParameters model.url
+                }
                 |> (\( page, pageCmd, globalCmd ) ->
                         ( { model | page = page }
                         , Cmd.batch
@@ -442,11 +456,13 @@ subscriptions config model =
             model.page
             { fromGlobalMsg = Global
             , fromPageMsg = Page
-            , global = model.global
             , map = config.map
             , transitioningPattern = model.transitioningPattern
             , visibility = model.visibilities.page
             , route = config.fromUrl model.url
+            }
+            { global = model.global
+            , queryParameters = queryParameters model.url
             }
           ).subscriptions
         , Sub.map Global (config.global model.global)
@@ -475,11 +491,13 @@ view config model =
                 model.page
                 { fromGlobalMsg = Global
                 , fromPageMsg = Page
-                , global = model.global
                 , map = config.map
                 , transitioningPattern = model.transitioningPattern
                 , visibility = model.visibilities.page
                 , route = config.fromUrl model.url
+                }
+                { global = model.global
+                , queryParameters = queryParameters model.url
                 }
     in
     { title = bundle.title
@@ -523,3 +541,23 @@ chooseFrom options =
 urlPath : Url -> List String
 urlPath url =
     url.path |> String.dropLeft 1 |> String.split "/"
+
+
+
+-- QUERY PARAMETERS
+
+
+queryParameters : { a | query : Maybe String } -> Dict String String
+queryParameters url =
+    let
+        toDict : String -> Dict String String
+        toDict query =
+            query
+                |> String.split "&"
+                |> List.map (String.split "=")
+                |> List.map (\pieces -> ( List.head pieces, List.drop 1 pieces |> List.head ))
+                |> List.map (Tuple.mapBoth (Maybe.withDefault "") (Maybe.withDefault ""))
+                |> List.filter (\( key, _ ) -> not (String.isEmpty key))
+                |> Dict.fromList
+    in
+    Maybe.map toDict url.query |> Maybe.withDefault Dict.empty

@@ -19,8 +19,8 @@ transition =
                     el
                         [ alpha 0
                         , width fill
-                        , rotate (2 * pi)
-                        , moveLeft 1000
+                        , rotate (4 * pi)
+                        , scale 0
                         , Styles.transition
                             { property = "all"
                             , speed = 500
@@ -42,7 +42,7 @@ transition =
         }
 
 
-view : Spa.Context msg -> Element msg
+view : Spa.LayoutContext msg -> Element msg
 view { page, route } =
     column [ width fill ]
         [ row [ spacing 16 ] <|

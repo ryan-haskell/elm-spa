@@ -14,13 +14,19 @@ import Html.Attributes as Attr
 import Utils.Spa as Spa
 
 
+
+-- TODO: either
+-- 1. delete this completely, and only define in Transitions.elm
+-- 2. generate the Transitions file, and pull out transitions.layout to main
+
+
 transition : Transition (Element msg)
 transition =
     Transition.fadeUi 300
 
 
-view : Spa.Context msg -> Element msg
-view { page, global, toMsg } =
+view : Spa.LayoutContext msg -> Element msg
+view { page, global, fromGlobalMsg } =
     column
         [ Font.size 16
         , Font.color Styles.colors.jet
@@ -36,7 +42,7 @@ view { page, global, toMsg } =
         , height fill
         , centerX
         ]
-        [ Element.map toMsg (viewNavbar global.user)
+        [ Element.map fromGlobalMsg (viewNavbar global.user)
         , page
         ]
 

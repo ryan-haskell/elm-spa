@@ -5,7 +5,7 @@ module App.Types exposing
     , Update
     , Bundle
     , Layout, Upgrade
-    , Context
+    , LayoutContext, PageContext
     )
 
 {-|
@@ -274,10 +274,16 @@ type alias Layout route pageParams pageModel pageMsg ui_pageMsg globalModel glob
     Page.Layout route pageParams pageModel pageMsg ui_pageMsg globalModel globalMsg msg ui_msg
 
 
-{-| TODO: Context docs
+{-| TODO: PageContext docs
 -}
-type alias Context route msg ui_msg globalModel globalMsg =
-    Page.Context route msg ui_msg globalModel globalMsg
+type alias PageContext globalModel =
+    Page.PageContext globalModel
+
+
+{-| TODO: LayoutContext docs
+-}
+type alias LayoutContext route msg ui_msg globalModel globalMsg =
+    Page.LayoutContext route msg ui_msg globalModel globalMsg
 
 
 {-|

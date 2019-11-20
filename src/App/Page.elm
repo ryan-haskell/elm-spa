@@ -124,6 +124,10 @@ import Internals.Transition as Transition exposing (Transition)
 import Internals.Utils as Utils
 
 
+type alias PageContext globalModel =
+    Internals.Page.PageContext globalModel
+
+
 type alias Page route pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg =
     Internals.Page.Page route pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
 
@@ -216,7 +220,7 @@ keep model =
 -}
 static :
     { title : { global : globalModel } -> String
-    , view : globalModel -> ui_pageMsg
+    , view : PageContext globalModel -> ui_pageMsg
     }
     -> Page route pageParams () Never ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
 static page =
@@ -225,9 +229,16 @@ static page =
             { init = \_ _ -> ( toModel (), Cmd.none, Cmd.none )
             , update = \_ model _ -> ( toModel model, Cmd.none, Cmd.none )
             , bundle =
-                \_ context ->
-                    { title = page.title { global = context.global }
-                    , view = page.view context.global |> map toMsg |> context.map context.fromPageMsg
+                \_ private context ->
+                    { title =
+                        page.title
+                            { global = context.global
+                            }
+                    , view =
+                        page.view
+                            context
+                            |> map toMsg
+                            |> private.map private.fromPageMsg
                     , subscriptions = Sub.none
                     }
             }
@@ -286,9 +297,9 @@ static page =
 -}
 sandbox :
     { title : { global : globalModel, model : pageModel } -> String
-    , init : globalModel -> pageParams -> pageModel
-    , update : globalModel -> pageMsg -> pageModel -> pageModel
-    , view : globalModel -> pageModel -> ui_pageMsg
+    , init : PageContext globalModel -> pageParams -> pageModel
+    , update : PageContext globalModel -> pageMsg -> pageModel -> pageModel
+    , view : PageContext globalModel -> pageModel -> ui_pageMsg
     }
     -> Page route pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
 sandbox page =
@@ -296,20 +307,28 @@ sandbox page =
         (\{ toModel, toMsg, map } ->
             { init =
                 \pageParams context ->
-                    ( toModel (page.init context.global pageParams)
+                    ( toModel (page.init context pageParams)
                     , Cmd.none
                     , Cmd.none
                     )
             , update =
                 \msg model context ->
-                    ( page.update context.global msg model |> toModel
+                    ( page.update context msg model
+                        |> toModel
                     , Cmd.none
                     , Cmd.none
                     )
             , bundle =
-                \model context ->
-                    { title = page.title { global = context.global, model = model }
-                    , view = page.view context.global model |> map toMsg |> context.map context.fromPageMsg
+                \model private context ->
+                    { title =
+                        page.title
+                            { global = context.global
+                            , model = model
+                            }
+                    , view =
+                        page.view context model
+                            |> map toMsg
+                            |> private.map private.fromPageMsg
                     , subscriptions = Sub.none
                     }
             }
@@ -357,10 +376,10 @@ sandbox page =
 -}
 element :
     { title : { global : globalModel, model : pageModel } -> String
-    , init : globalModel -> pageParams -> ( pageModel, Cmd pageMsg )
-    , update : globalModel -> pageMsg -> pageModel -> ( pageModel, Cmd pageMsg )
-    , view : globalModel -> pageModel -> ui_pageMsg
-    , subscriptions : globalModel -> pageModel -> Sub pageMsg
+    , init : PageContext globalModel -> pageParams -> ( pageModel, Cmd pageMsg )
+    , update : PageContext globalModel -> pageMsg -> pageModel -> ( pageModel, Cmd pageMsg )
+    , view : PageContext globalModel -> pageModel -> ui_pageMsg
+    , subscriptions : PageContext globalModel -> pageModel -> Sub pageMsg
     }
     -> Page route pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
 element page =
@@ -368,17 +387,26 @@ element page =
         (\{ toModel, toMsg, map } ->
             { init =
                 \pageParams context ->
-                    page.init context.global pageParams
+                    page.init context pageParams
                         |> tuple toModel toMsg
             , update =
                 \msg model context ->
-                    page.update context.global msg model
+                    page.update context msg model
                         |> tuple toModel toMsg
             , bundle =
-                \model context ->
-                    { title = page.title { global = context.global, model = model }
-                    , view = page.view context.global model |> map toMsg |> context.map context.fromPageMsg
-                    , subscriptions = page.subscriptions context.global model |> Sub.map (toMsg >> context.fromPageMsg)
+                \model private context ->
+                    { title =
+                        page.title
+                            { global = context.global
+                            , model = model
+                            }
+                    , view =
+                        page.view context model
+                            |> map toMsg
+                            |> private.map private.fromPageMsg
+                    , subscriptions =
+                        page.subscriptions context model
+                            |> Sub.map (toMsg >> private.fromPageMsg)
                     }
             }
         )
@@ -428,10 +456,10 @@ element page =
 -}
 component :
     { title : { global : globalModel, model : pageModel } -> String
-    , init : globalModel -> pageParams -> ( pageModel, Cmd pageMsg, Cmd globalMsg )
-    , update : globalModel -> pageMsg -> pageModel -> ( pageModel, Cmd pageMsg, Cmd globalMsg )
-    , view : globalModel -> pageModel -> ui_pageMsg
-    , subscriptions : globalModel -> pageModel -> Sub pageMsg
+    , init : PageContext globalModel -> pageParams -> ( pageModel, Cmd pageMsg, Cmd globalMsg )
+    , update : PageContext globalModel -> pageMsg -> pageModel -> ( pageModel, Cmd pageMsg, Cmd globalMsg )
+    , view : PageContext globalModel -> pageModel -> ui_pageMsg
+    , subscriptions : PageContext globalModel -> pageModel -> Sub pageMsg
     }
     -> Page route pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
 component page =
@@ -439,17 +467,26 @@ component page =
         (\{ toModel, toMsg, map } ->
             { init =
                 \pageParams context ->
-                    page.init context.global pageParams
+                    page.init context pageParams
                         |> truple toModel toMsg
             , update =
                 \msg model context ->
-                    page.update context.global msg model
+                    page.update context msg model
                         |> truple toModel toMsg
             , bundle =
-                \model context ->
-                    { title = page.title { global = context.global, model = model }
-                    , view = page.view context.global model |> map toMsg |> context.map context.fromPageMsg
-                    , subscriptions = page.subscriptions context.global model |> Sub.map (toMsg >> context.fromPageMsg)
+                \model private context ->
+                    { title =
+                        page.title
+                            { global = context.global
+                            , model = model
+                            }
+                    , view =
+                        page.view context model
+                            |> map toMsg
+                            |> private.map private.fromPageMsg
+                    , subscriptions =
+                        page.subscriptions context model
+                            |> Sub.map (toMsg >> private.fromPageMsg)
                     }
             }
         )
@@ -505,20 +542,20 @@ layout map options =
                     options.recipe.update msg model global
                         |> truple toModel toMsg
             , bundle =
-                \model context ->
+                \model private context ->
                     let
                         viewLayout page =
                             options.view
                                 { page = page
                                 , global = context.global
-                                , toMsg = context.fromGlobalMsg
-                                , route = context.route
+                                , fromGlobalMsg = private.fromGlobalMsg
+                                , route = private.route
                                 }
 
                         myLayoutsVisibility : Transition.Visibility
                         myLayoutsVisibility =
-                            if context.transitioningPattern == options.pattern then
-                                context.visibility
+                            if private.transitioningPattern == options.pattern then
+                                private.visibility
 
                             else
                                 Transition.visible
@@ -527,14 +564,14 @@ layout map options =
                         bundle =
                             options.recipe.bundle
                                 model
-                                { fromGlobalMsg = context.fromGlobalMsg
-                                , fromPageMsg = toMsg >> context.fromPageMsg
-                                , global = context.global
+                                { fromGlobalMsg = private.fromGlobalMsg
+                                , fromPageMsg = toMsg >> private.fromPageMsg
                                 , map = map
-                                , transitioningPattern = context.transitioningPattern
-                                , visibility = context.visibility
-                                , route = context.route
+                                , transitioningPattern = private.transitioningPattern
+                                , visibility = private.visibility
+                                , route = private.route
                                 }
+                                context
                     in
                     { title = bundle.title
                     , view =

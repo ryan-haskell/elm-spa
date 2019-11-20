@@ -1,8 +1,9 @@
 module Utils.Spa exposing
     ( Bundle
-    , Context
+    , LayoutContext
     , Init
     , Page
+    , PageContext
     , Recipe
     , Update
     , layout
@@ -44,8 +45,12 @@ type alias Upgrade params model msg layoutModel layoutMsg appMsg =
     App.Types.Upgrade Route params model msg (Element msg) layoutModel layoutMsg (Element layoutMsg) Global.Model Global.Msg appMsg (Element appMsg)
 
 
-type alias Context msg =
-    App.Types.Context Route msg (Element msg) Global.Model Global.Msg
+type alias LayoutContext msg =
+    App.Types.LayoutContext Route msg (Element msg) Global.Model Global.Msg
+
+
+type alias PageContext =
+    App.Types.PageContext Global.Model
 
 
 layout :

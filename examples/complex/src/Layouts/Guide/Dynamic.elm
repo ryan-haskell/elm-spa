@@ -12,6 +12,6 @@ transition =
     Transition.optOut
 
 
-view : Spa.Context msg -> Element msg
+view : Spa.LayoutContext msg -> Element msg
 view { page } =
     page

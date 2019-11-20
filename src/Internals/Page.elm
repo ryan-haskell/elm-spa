@@ -1,17 +1,25 @@
 module Internals.Page exposing
     ( Bundle
-    , Context
     , Init
     , Layout
+    , LayoutContext
     , Page(..)
+    , PageContext
     , Recipe
     , Update
     , Upgrade
     , upgrade
     )
 
+import Dict exposing (Dict)
 import Internals.Pattern exposing (Pattern)
 import Internals.Transition as Transition exposing (Transition)
+
+
+type alias PageContext globalModel =
+    { global : globalModel
+    , queryParameters : Dict String String
+    }
 
 
 type Page route pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
@@ -57,24 +65,24 @@ upgrade map config =
 
 
 type alias Init layoutModel layoutMsg globalModel globalMsg =
-    { global : globalModel }
+    PageContext globalModel
     -> ( layoutModel, Cmd layoutMsg, Cmd globalMsg )
 
 
 type alias Update layoutModel layoutMsg globalModel globalMsg =
-    { global : globalModel }
+    PageContext globalModel
     -> ( layoutModel, Cmd layoutMsg, Cmd globalMsg )
 
 
 type alias Bundle route layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg =
-    { global : globalModel
-    , fromGlobalMsg : globalMsg -> msg
+    { fromGlobalMsg : globalMsg -> msg
     , fromPageMsg : layoutMsg -> msg
     , map : (layoutMsg -> msg) -> ui_layoutMsg -> ui_msg
     , route : route
     , visibility : Transition.Visibility
     , transitioningPattern : Pattern
     }
+    -> PageContext globalModel
     ->
         { title : String
         , view : ui_msg
@@ -82,17 +90,17 @@ type alias Bundle route layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg 
         }
 
 
-type alias Context route msg ui_msg globalModel globalMsg =
+type alias LayoutContext route msg ui_msg globalModel globalMsg =
     { page : ui_msg
     , route : route
     , global : globalModel
-    , toMsg : globalMsg -> msg
+    , fromGlobalMsg : globalMsg -> msg
     }
 
 
 type alias Layout route pageParams pageModel pageMsg ui_pageMsg globalModel globalMsg msg ui_msg =
     { pattern : Pattern
     , transition : Transition ui_msg
-    , view : Context route msg ui_msg globalModel globalMsg -> ui_msg
+    , view : LayoutContext route msg ui_msg globalModel globalMsg -> ui_msg
     , recipe : Recipe route pageParams pageModel pageMsg pageModel pageMsg ui_pageMsg globalModel globalMsg msg ui_msg
     }

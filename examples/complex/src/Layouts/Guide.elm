@@ -12,7 +12,7 @@ transition =
     Transition.none
 
 
-view : Spa.Context msg -> Element msg
+view : Spa.LayoutContext msg -> Element msg
 view { page } =
     column
         [ width fill

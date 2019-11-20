@@ -2,10 +2,12 @@ module Pages.Docs.Dynamic exposing (Model, Msg, page)
 
 import App.Page
 import Components.Hero
+import Dict exposing (Dict)
 import Element exposing (..)
+import Element.Font as Font
 import Generated.Docs.Params as Params
 import Global
-import Utils.Spa exposing (Page)
+import Utils.Spa as Spa exposing (Page)
 
 
 type alias Model =
@@ -23,7 +25,7 @@ page =
         { title = always "Dynamic"
         , init = always init
         , update = always update
-        , view = view
+        , view = always view
         }
 
 
@@ -50,8 +52,8 @@ update msg model =
 -- VIEW
 
 
-view : Global.Model -> Model -> Element Msg
-view global model =
+view : Model -> Element Msg
+view model =
     column
         [ width fill
         ]
@@ -62,9 +64,4 @@ view global model =
                 [ { label = text "back to docs", action = Components.Hero.Link "/docs" }
                 ]
             }
-        , global.user
-            |> Maybe.map (\name -> "Oh hey there, " ++ name ++ "!")
-            |> Maybe.withDefault "Sign in if you want me to say hello!"
-            |> text
-            |> el [ centerX ]
         ]
