@@ -1,12 +1,11 @@
 module Main exposing (main)
 
 import App
-import App.Pattern as Pattern
-import App.Transition as Transition
 import Element
 import Generated.Pages as Pages
 import Generated.Routes as Routes
 import Global
+import Transitions
 
 
 main : App.Program Global.Flags Global.Model Global.Msg Pages.Model Pages.Msg
@@ -17,12 +16,7 @@ main =
             , map = Element.map
             }
         , routing =
-            { transition = Transition.fadeUi 300
-            , patterns =
-                [ ( [], Transition.fadeUi 300 )
-                , ( [ Pattern.static "guide" ], Transition.none )
-                , ( [ Pattern.static "docs" ], Transition.fadeUi 500 )
-                ]
+            { transitions = Transitions.transitions
             , routes = Routes.parsers
             , toPath = Routes.toPath
             , notFound = Routes.routes.notFound

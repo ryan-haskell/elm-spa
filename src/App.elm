@@ -114,11 +114,13 @@ create :
         , map : (layoutMsg -> Msg globalMsg layoutMsg) -> ui_layoutMsg -> ui_msg
         }
     , routing :
-        { transition : Transition ui_msg
-        , routes : List (Parser (route -> route) route)
+        { routes : List (Parser (route -> route) route)
         , toPath : route -> String
         , notFound : route
-        , patterns : List ( Pattern, Transition ui_msg )
+        , transitions :
+            { layout : Transition ui_msg
+            , pages : List ( Pattern, Transition ui_msg )
+            }
         }
     , global :
         { init :
@@ -156,7 +158,7 @@ create config =
                 , routing =
                     { fromUrl = fromUrl config.routing
                     , toPath = config.routing.toPath
-                    , transition = config.routing.transition
+                    , transition = config.routing.transitions.layout
                     }
                 }
         , update =
@@ -165,7 +167,7 @@ create config =
                     { fromUrl = fromUrl config.routing
                     , toPath = config.routing.toPath
                     , routes = config.routing.routes
-                    , patterns = config.routing.patterns
+                    , transitions = config.routing.transitions.pages
                     }
                 , init = page.init
                 , update =
@@ -178,7 +180,7 @@ create config =
                 { bundle = page.bundle
                 , map = config.ui.map
                 , global = config.global.subscriptions
-                , transition = config.routing.transition
+                , transition = config.routing.transitions.layout
                 , fromUrl = fromUrl config.routing
                 }
         , view =
@@ -186,7 +188,7 @@ create config =
                 { toHtml = config.ui.toHtml
                 , bundle = page.bundle
                 , map = config.ui.map
-                , transition = config.routing.transition
+                , transition = config.routing.transitions.layout
                 , fromUrl = fromUrl config.routing
                 }
         , onUrlChange = ChangedUrl
@@ -298,7 +300,7 @@ update :
         { fromUrl : Url -> route
         , toPath : route -> String
         , routes : Routes route a
-        , patterns : List ( Pattern, Transition ui_msg )
+        , transitions : List ( Pattern, Transition ui_msg )
         }
     , init : route -> Page.Init layoutModel layoutMsg globalModel globalMsg
     , update :
@@ -362,12 +364,12 @@ update config msg model =
             let
                 ( pattern, speed ) =
                     chooseFrom
-                        { patternTransitions = config.routing.patterns
+                        { patternTransitions = config.routing.transitions
                         , from = model.url
                         , to = url
                         }
                         |> Just
-                        |> Maybe.withDefault (List.head config.routing.patterns)
+                        |> Maybe.withDefault (List.head config.routing.transitions)
                         |> Maybe.map (Tuple.mapSecond Transition.speed)
                         |> Maybe.withDefault ( [], 0 )
             in
