@@ -5,6 +5,6 @@
 ## local development
 
 ```
-npm run dev
+npm start
 ```
 

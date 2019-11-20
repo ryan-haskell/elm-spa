@@ -5,9 +5,9 @@
   "main": "cli/src/index.js",
   "bin": "./cli/src/index.js",
   "scripts": {
-    "start": "npm run dev",
+    "start": "npm link && npm run dev",
     "build": "(cd cli && npm run build)",
-    "dev": "npm run example",
+    "dev": "npm run build && npm run example",
     "example": "npm run examples:complex",
     "examples:intro": "(cd examples/intro && npm install && npm run dev)",
     "examples:complex": "(cd examples/complex && npm install && npm run dev)"

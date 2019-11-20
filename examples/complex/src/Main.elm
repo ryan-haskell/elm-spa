@@ -1,10 +1,10 @@
 module Main exposing (main)
 
-import Spa
 import Element
 import Generated.Pages as Pages
 import Generated.Routes as Routes
 import Global
+import Spa
 import Transitions
 
 

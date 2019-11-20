@@ -1,5 +1,4 @@
 .DS_Store
 ./dist
 elm-stuff
-!elm-stuff/.elm-spa
 ./node_modules
