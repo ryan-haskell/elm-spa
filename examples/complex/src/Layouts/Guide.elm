@@ -1,6 +1,6 @@
 module Layouts.Guide exposing (transition, view)
 
-import App.Transition as Transition exposing (Transition)
+import Spa.Transition as Transition exposing (Transition)
 import Components.Styles as Styles
 import Element exposing (..)
 import Global

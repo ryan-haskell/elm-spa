@@ -1,4 +1,4 @@
-module App.Pattern exposing
+module Spa.Pattern exposing
     ( Pattern
     , dynamic
     , static

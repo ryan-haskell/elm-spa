@@ -1,6 +1,6 @@
 module Pages.Guide.Dynamic.Intro exposing (Model, Msg, page)
 
-import App.Page
+import Spa.Page
 import Components.Hero
 import Element exposing (..)
 import Generated.Guide.Dynamic.Params as Params
@@ -18,7 +18,7 @@ type alias Msg =
 
 page : Page Params.Intro Model Msg model msg appMsg
 page =
-    App.Page.sandbox
+    Spa.Page.sandbox
         { title = always "Guide.Dynamic.Intro"
         , init = always init
         , update = always update

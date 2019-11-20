@@ -1,6 +1,6 @@
 module Pages.Docs.Dynamic exposing (Model, Msg, page)
 
-import App.Page
+import Spa.Page
 import Components.Hero
 import Dict exposing (Dict)
 import Element exposing (..)
@@ -21,7 +21,7 @@ type alias Msg =
 
 page : Page Params.Dynamic Model Msg model msg appMsg
 page =
-    App.Page.sandbox
+    Spa.Page.sandbox
         { title = always "Dynamic"
         , init = always init
         , update = always update

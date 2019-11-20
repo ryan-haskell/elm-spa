@@ -1,6 +1,6 @@
 module Pages.Top exposing (Model, Msg, page)
 
-import App.Page
+import Spa.Page
 import Components.Hero
 import Components.Section
 import Components.Styles as Styles
@@ -17,7 +17,7 @@ type alias Model =
 
 page : Page Params.Top Model Msg model msg appMsg
 page =
-    App.Page.element
+    Spa.Page.element
         { title = always "elm-spa"
         , init = always init
         , update = always update

@@ -1,4 +1,4 @@
-module App.Transition exposing
+module Spa.Transition exposing
     ( Transition
     , optOut, none, fadeHtml, fadeUi, custom
     )

@@ -1,6 +1,6 @@
 module Pages.Guide exposing (Model, Msg, page)
 
-import App.Page
+import Spa.Page
 import Components.Hero
 import Element exposing (..)
 import Generated.Params as Params
@@ -17,7 +17,7 @@ type alias Msg =
 
 page : Page Params.Guide Model Msg model msg appMsg
 page =
-    App.Page.static
+    Spa.Page.static
         { title = always "Guide"
         , view = always view
         }

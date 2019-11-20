@@ -1,6 +1,6 @@
 module Pages.Docs.Static exposing (Model, Msg, page)
 
-import App.Page
+import Spa.Page
 import Components.Hero
 import Element exposing (..)
 import Generated.Docs.Params as Params
@@ -17,7 +17,7 @@ type alias Msg =
 
 page : Page Params.Static Model Msg model msg appMsg
 page =
-    App.Page.static
+    Spa.Page.static
         { title = always "Static"
         , view = always view
         }

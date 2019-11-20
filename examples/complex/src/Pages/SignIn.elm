@@ -1,6 +1,6 @@
 module Pages.SignIn exposing (Model, Msg, page)
 
-import App.Page
+import Spa.Page
 import Components.Button
 import Components.Styles as Styles
 import Element exposing (..)
@@ -33,7 +33,7 @@ type Field
 
 page : Page Params.SignIn Model Msg model msg appMsg
 page =
-    App.Page.component
+    Spa.Page.component
         { title = always "sign in | elm-spa"
         , init = always init
         , update = always update
@@ -78,7 +78,7 @@ update msg model =
         ClickedSignIn ->
             ( model
             , Cmd.none
-            , App.Page.send <|
+            , Spa.Page.send <|
                 Global.SignIn model.username
             )
 

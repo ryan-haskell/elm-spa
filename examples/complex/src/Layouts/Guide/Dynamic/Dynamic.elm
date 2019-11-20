@@ -1,6 +1,6 @@
 module Layouts.Guide.Dynamic.Dynamic exposing (transition, view)
 
-import App.Transition as Transition exposing (Transition)
+import Spa.Transition as Transition exposing (Transition)
 import Element exposing (..)
 import Global
 import Utils.Spa as Spa

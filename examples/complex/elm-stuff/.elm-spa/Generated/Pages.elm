@@ -4,8 +4,8 @@ module Generated.Pages exposing
     , page
     )
 
-import App.Page
-import App.Pattern exposing (static, dynamic)
+import Spa.Page
+import Spa.Pattern exposing (static, dynamic)
 import Layout as Layout
 import Utils.Spa as Spa
 import Generated.Params as Params
@@ -162,7 +162,7 @@ update bigMsg bigModel =
         ( Guide_Folder_Msg msg, Guide_Folder_Model model ) ->
             recipes.guide_folder.update msg model
         _ ->
-            App.Page.keep bigModel
+            Spa.Page.keep bigModel
 
 
 -- BUNDLE

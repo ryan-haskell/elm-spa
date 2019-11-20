@@ -1,7 +1,7 @@
 module Transitions exposing (transitions)
 
-import App.Pattern as Pattern exposing (Pattern, dynamic, static)
-import App.Transition as Transition exposing (Transition)
+import Spa.Pattern as Pattern exposing (Pattern, dynamic, static)
+import Spa.Transition as Transition exposing (Transition)
 import Element exposing (Element)
 import Layout
 import Layouts.Docs

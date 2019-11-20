@@ -1,6 +1,6 @@
 module Main exposing (main)
 
-import App
+import Spa
 import Element
 import Generated.Pages as Pages
 import Generated.Routes as Routes
@@ -8,9 +8,9 @@ import Global
 import Transitions
 
 
-main : App.Program Global.Flags Global.Model Global.Msg Pages.Model Pages.Msg
+main : Spa.Program Global.Flags Global.Model Global.Msg Pages.Model Pages.Msg
 main =
-    App.create
+    Spa.create
         { ui =
             { toHtml = Element.layout []
             , map = Element.map

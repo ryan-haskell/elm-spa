@@ -1,7 +1,7 @@
 module Layout exposing (transition, view)
 
-import App.Page
-import App.Transition as Transition exposing (Transition)
+import Spa.Page
+import Spa.Transition as Transition exposing (Transition)
 import Components.Button
 import Components.Styles as Styles
 import Element exposing (..)

@@ -4,8 +4,8 @@ module Generated.Docs.Pages exposing
     , page
     )
 
-import App.Page
-import App.Pattern exposing (static, dynamic)
+import Spa.Page
+import Spa.Pattern exposing (static, dynamic)
 import Layouts.Docs as Layout
 import Utils.Spa as Spa
 import Generated.Docs.Params as Params
@@ -114,7 +114,7 @@ update bigMsg bigModel =
         ( DynamicMsg msg, DynamicModel model ) ->
             recipes.dynamic.update msg model
         _ ->
-            App.Page.keep bigModel
+            Spa.Page.keep bigModel
 
 
 -- BUNDLE

@@ -1,4 +1,4 @@
-module App exposing
+module Spa exposing
     ( Program, create
     , usingHtml
     , queryParameters
@@ -9,17 +9,17 @@ module App exposing
 
 ## Let's build some single page applications!
 
-`App.create` replaces [Browser.application](https://package.elm-lang.org/packages/elm/browser/latest/Browser#application)
+`Spa.create` replaces [Browser.application](https://package.elm-lang.org/packages/elm/browser/latest/Browser#application)
 as the entrypoint to your app.
 
-    import App
     import Global
     import Pages
     import Routes
+    import Spa
 
     main =
-        App.create
-            { ui = App.usingHtml
+        Spa.create
+            { ui = Spa.usingHtml
             , routing =
                 { routes = Routes.parsers
                 , toPath = Routes.toPath
@@ -41,12 +41,12 @@ as the entrypoint to your app.
 If you're a big fan of [mdgriffith/elm-ui](https://package.elm-lang.org/packages/mdgriffith/elm-ui/latest/) (or not-so-big-fan of CSS),
 this package supports using `Element msg` instead of `Html msg` for your pages and components.
 
-Providing `App.create` with these `ui` options will do the trick!
+Providing `Spa.create` with these `ui` options will do the trick!
 
     import Element
 
     main =
-        App.create
+        Spa.create
             { ui =
                 { toHtml = Element.layout []
                 , map = Element.map
@@ -80,11 +80,11 @@ type alias Program flags globalModel globalMsg layoutModel layoutMsg =
     Platform.Program flags (Model flags globalModel layoutModel) (Msg globalMsg layoutMsg)
 
 
-{-| Pass this in when calling `App.create`
+{-| Pass this in when calling `Spa.create`
 
     main =
-        App.create
-            { ui = App.usingHtml
+        Spa.create
+            { ui = Spa.usingHtml
             , -- ...
             }
 

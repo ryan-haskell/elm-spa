@@ -87,8 +87,17 @@ const Elm = (_ => {
           : reject(`Didn't recognize message "${message}"– Yell at @ryannhg on the internet!\n`)
       )
     })
+
+  const checkForElmJson = (paths) =>
+    new Promise((resolve, reject) =>
+      fs.exists(path.join(paths, 'elm.json'), (exists) =>
+        exists
+          ? resolve(true)
+          : reject(`Couldn't find an ${bold('elm.json')} file at:\n${paths}`)
+      )
+    )
  
-  return { run }
+  return { run, checkForElmJson }
 })()
 
 const bold = str => '\033[1m' + str + '\033[0m'

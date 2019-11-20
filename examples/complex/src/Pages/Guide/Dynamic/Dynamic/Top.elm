@@ -1,6 +1,6 @@
 module Pages.Guide.Dynamic.Dynamic.Top exposing (Model, Msg, page)
 
-import App.Page
+import Spa.Page
 import Components.Hero
 import Element exposing (..)
 import Generated.Guide.Dynamic.Dynamic.Params as Params
@@ -19,7 +19,7 @@ type alias Msg =
 
 page : Page Params.Top Model Msg model msg appMsg
 page =
-    App.Page.sandbox
+    Spa.Page.sandbox
         { title = always "Guide.Dynamic.Top"
         , init = always init
         , update = always update

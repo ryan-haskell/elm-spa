@@ -333,8 +333,8 @@ module {{pagesModuleName}} exposing
     , page
     )
 
-import App.Page
-import App.Pattern exposing (static, dynamic)
+import Spa.Page
+import Spa.Pattern exposing (static, dynamic)
 import {{layoutModuleName}} as Layout
 import Utils.Spa as Spa
 import {{paramsModuleName}} as Params
@@ -427,7 +427,7 @@ bundle bigModel =
                 ""
 
              else
-                "_ ->\n    App.Page.keep bigModel" |> indent 2
+                "_ ->\n    Spa.Page.keep bigModel" |> indent 2
             )
         |> String.trim
 

@@ -1,4 +1,4 @@
-module App.Page exposing
+module Spa.Page exposing
     ( static
     , sandbox
     , element

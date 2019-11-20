@@ -1,6 +1,6 @@
 module Pages.Guide.Elm exposing (Model, Msg, page)
 
-import App.Page
+import Spa.Page
 import Components.Hero
 import Element exposing (..)
 import Generated.Guide.Params as Params
@@ -17,7 +17,7 @@ type alias Msg =
 
 page : Page Params.Elm Model Msg model msg appMsg
 page =
-    App.Page.static
+    Spa.Page.static
         { title = always "Guide.Elm"
         , view = always view
         }

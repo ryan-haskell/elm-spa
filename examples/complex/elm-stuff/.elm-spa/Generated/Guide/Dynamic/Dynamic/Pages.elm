@@ -4,8 +4,8 @@ module Generated.Guide.Dynamic.Dynamic.Pages exposing
     , page
     )
 
-import App.Page
-import App.Pattern exposing (static, dynamic)
+import Spa.Page
+import Spa.Pattern exposing (static, dynamic)
 import Layouts.Guide.Dynamic.Dynamic as Layout
 import Utils.Spa as Spa
 import Generated.Guide.Dynamic.Dynamic.Params as Params

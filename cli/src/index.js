@@ -3,18 +3,20 @@ const path = require('path')
 const cwd = process.cwd()
 const { File, Elm, bold } = require('./utils.js')
 
-const start = ([ command, ...args ] = []) =>
+const main = ([ command, ...args ] = []) =>
   commands[command]
     ? commands[command](args)
     : commands.help(args)
 
 // elm-spa build
 const build = ([ relative = '.' ]) =>
-  File.paths(path.join(cwd, relative, 'src', 'Pages'))
+  Elm.checkForElmJson(path.join(cwd, relative))
+    .then(_ => File.paths(path.join(cwd, relative, 'src', 'Pages')))
     .then(Elm.run('build', { relative }))
     .then(console.info)
     .catch(console.error)
 
+// elm-spa help
 const help = () => console.info(`
 usage: ${bold('elm-spa')} <command> [...]
 
@@ -59,4 +61,4 @@ const commands = {
   help
 }
 
-start(process.argv.slice(2))
+main(process.argv.slice(2))
