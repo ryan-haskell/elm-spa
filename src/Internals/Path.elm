@@ -1,13 +1,13 @@
-module Internals.Pattern exposing
-    ( Pattern
+module Internals.Path exposing
+    ( Path
     , Piece
     , dynamic
-    , matches
     , static
+    , within
     )
 
 
-type alias Pattern =
+type alias Path =
     List Piece
 
 
@@ -26,23 +26,23 @@ dynamic =
     Dynamic
 
 
-matches : List String -> List Piece -> Bool
-matches strings pieces =
+within : List String -> List Piece -> Bool
+within strings pieces =
     List.length pieces
         <= List.length strings
         && (List.map2
-                comparePiece
+                matches
                 strings
                 pieces
                 |> List.all ((==) True)
            )
 
 
-comparePiece : String -> Piece -> Bool
-comparePiece str piece =
+matches : String -> Piece -> Bool
+matches str piece =
     case piece of
-        Static xyz ->
-            str == xyz
+        Static value ->
+            str == value
 
         Dynamic ->
             True

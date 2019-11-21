@@ -119,7 +119,7 @@ You only need **one** case expression: (woohoo, less boilerplate!)
 -}
 
 import Internals.Page exposing (..)
-import Internals.Pattern as Pattern exposing (Pattern)
+import Internals.Path as Path exposing (Path)
 import Internals.Transition as Transition exposing (Transition)
 import Internals.Utils as Utils
 
@@ -554,7 +554,7 @@ layout map options =
 
                         myLayoutsVisibility : Transition.Visibility
                         myLayoutsVisibility =
-                            if private.pattern == options.pattern then
+                            if private.path == options.path then
                                 private.visibility
 
                             else
@@ -567,19 +567,19 @@ layout map options =
                                 { fromGlobalMsg = private.fromGlobalMsg
                                 , fromPageMsg = toMsg >> private.fromPageMsg
                                 , map = map
-                                , pattern = private.pattern
+                                , path = private.path
                                 , transitions = private.transitions
                                 , visibility = private.visibility
                                 }
                                 context
 
                         lookupTransitionFrom :
-                            Pattern
-                            -> List { pattern : Pattern, transition : Transition ui_msg }
+                            Path
+                            -> List { path : Path, transition : Transition ui_msg }
                             -> Transition ui_msg
-                        lookupTransitionFrom pattern list =
+                        lookupTransitionFrom path list =
                             list
-                                |> List.filter (.pattern >> (==) pattern)
+                                |> List.filter (.path >> (==) path)
                                 |> List.map .transition
                                 |> List.head
                                 |> Maybe.withDefault Transition.optOut
@@ -588,7 +588,7 @@ layout map options =
                     , view =
                         viewLayout <|
                             Transition.view
-                                (lookupTransitionFrom options.pattern private.transitions)
+                                (lookupTransitionFrom options.path private.transitions)
                                 myLayoutsVisibility
                                 bundle.view
                     , subscriptions = bundle.subscriptions

@@ -337,11 +337,11 @@ module {{pagesModuleName}} exposing
     ( Model
     , Msg
     , page
-    , pattern
+    , path
     )
 
 import Spa.Page
-import Spa.Pattern exposing (Pattern, static, dynamic)
+import Spa.Path exposing (Path, static, dynamic)
 import {{layoutModuleName}} as Layout
 import Utils.Spa as Spa
 import {{paramsModuleName}} as Params
@@ -360,7 +360,7 @@ import {{routeModuleName}} as Route exposing (Route)
 page : Spa.Page Route Model Msg layoutModel layoutMsg appMsg
 page =
     Spa.layout
-        { pattern = pattern
+        { path = path
         , view = Layout.view
         , recipe =
             { init = init
@@ -370,9 +370,9 @@ page =
         }
 
 
-pattern : Pattern
-pattern =
-    {{pagesLayoutPattern}}
+path : Path
+path =
+    {{pagesLayoutPath}}
 
 
 -- RECIPES
@@ -426,7 +426,7 @@ bundle bigModel =
         |> String.replace "{{pagesFolderPagesImports}}" (pagesFolderImports "Pages" details.folders)
         |> String.replace "{{pagesModelTypes}}" (pagesCustomTypes "Model" details)
         |> String.replace "{{pagesMsgTypes}}" (pagesCustomTypes "Msg" details)
-        |> String.replace "{{pagesLayoutPattern}}" (pagesLayoutPattern details)
+        |> String.replace "{{pagesLayoutPath}}" (pagesLayoutPath details)
         |> String.replace "{{pagesRecipesTypeAliases}}" (pagesRecipesTypeAliases details)
         |> String.replace "{{pagesRecipesFunctions}}" (pagesRecipesFunctions details)
         |> String.replace "{{pagesInitFunction}}" (pagesInitFunction details)
@@ -478,8 +478,8 @@ pagesFolderImports suffix folders =
         |> asImports
 
 
-pagesLayoutPattern : Details -> String
-pagesLayoutPattern { moduleName } =
+pagesLayoutPath : Details -> String
+pagesLayoutPath { moduleName } =
     String.split "." moduleName
         |> List.map
             (\piece ->

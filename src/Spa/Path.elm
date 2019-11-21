@@ -1,14 +1,14 @@
-module Spa.Pattern exposing
-    ( Pattern
+module Spa.Path exposing
+    ( Path
     , dynamic
     , static
     )
 
-import Internals.Pattern as Internals
+import Internals.Path as Internals
 
 
-type alias Pattern =
-    Internals.Pattern
+type alias Path =
+    Internals.Path
 
 
 static : String -> Internals.Piece

@@ -12,7 +12,7 @@ module Internals.Page exposing
     )
 
 import Dict exposing (Dict)
-import Internals.Pattern exposing (Pattern)
+import Internals.Path exposing (Path)
 import Internals.Transition as Transition exposing (Transition)
 
 
@@ -80,10 +80,10 @@ type alias Bundle route layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg 
     , fromPageMsg : layoutMsg -> msg
     , map : (layoutMsg -> msg) -> ui_layoutMsg -> ui_msg
     , visibility : Transition.Visibility
-    , pattern : Pattern
+    , path : Path
     , transitions :
         List
-            { pattern : Pattern
+            { path : Path
             , transition : Transition ui_msg
             }
     }
@@ -104,7 +104,7 @@ type alias LayoutContext route msg ui_msg globalModel globalMsg =
 
 
 type alias Layout route pageParams pageModel pageMsg ui_pageMsg globalModel globalMsg msg ui_msg =
-    { pattern : Pattern
+    { path : Path
     , view : LayoutContext route msg ui_msg globalModel globalMsg -> ui_msg
     , recipe : Recipe route pageParams pageModel pageMsg pageModel pageMsg ui_pageMsg globalModel globalMsg msg ui_msg
     }

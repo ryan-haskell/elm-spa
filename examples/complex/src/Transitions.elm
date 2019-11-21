@@ -6,7 +6,7 @@ import Generated.Docs.Pages
 import Layout
 import Layouts.Docs
 import Layouts.Guide
-import Spa.Pattern exposing (Pattern)
+import Spa.Path exposing (Path)
 import Spa.Transition as Transition exposing (Transition)
 
 
@@ -15,7 +15,7 @@ transitions :
     , page : Transition (Element msg)
     , pages :
         List
-            { pattern : Pattern
+            { path : Path
             , transition : Transition (Element msg)
             }
     }
@@ -23,7 +23,7 @@ transitions =
     { layout = Transition.fadeUi 300
     , page = Transition.fadeUi 300
     , pages =
-        [ { pattern = Generated.Docs.Pages.pattern
+        [ { path = Generated.Docs.Pages.path
           , transition = batmanNewspaper 600
           }
         ]

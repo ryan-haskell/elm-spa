@@ -63,7 +63,7 @@ import Browser.Navigation as Nav
 import Dict exposing (Dict)
 import Html exposing (Html)
 import Internals.Page as Page
-import Internals.Pattern as Pattern exposing (Pattern)
+import Internals.Path as Path exposing (Path)
 import Internals.Transition as Transition exposing (Transition)
 import Internals.Utils as Utils
 import Url exposing (Url)
@@ -125,7 +125,7 @@ create :
         , page : Transition ui_msg
         , pages :
             List
-                { pattern : Pattern
+                { path : Path
                 , transition : Transition ui_msg
                 }
         }
@@ -227,7 +227,7 @@ type alias Model flags globalModel model =
     , key : Nav.Key
     , global : globalModel
     , page : model
-    , pattern : Pattern
+    , path : Path
     , visibilities :
         { layout : Transition.Visibility
         , page : Transition.Visibility
@@ -276,7 +276,7 @@ init config flags url key =
                   , key = key
                   , global = globalModel
                   , page = pageModel
-                  , pattern = []
+                  , path = []
                   , visibilities =
                         { layout = Transition.invisible
                         , page = Transition.visible
@@ -313,7 +313,7 @@ update :
         , routes : Routes route a
         , transitions :
             List
-                { pattern : Pattern
+                { path : Path
                 , transition : Transition ui_msg
                 }
         }
@@ -383,7 +383,7 @@ update config msg model =
 
         ChangedUrl url ->
             let
-                ( pattern, speed ) =
+                ( path, speed ) =
                     chooseFrom
                         { transitions = config.routing.transitions
                         , from = model.url
@@ -391,7 +391,7 @@ update config msg model =
                         }
                         |> Just
                         |> Maybe.withDefault (List.head config.routing.transitions)
-                        |> Maybe.map (\item -> ( item.pattern, Transition.speed item.transition ))
+                        |> Maybe.map (\item -> ( item.path, Transition.speed item.transition ))
                         |> Maybe.withDefault ( [], 0 )
             in
             ( { model
@@ -400,7 +400,7 @@ update config msg model =
                     { layout = Transition.visible
                     , page = Transition.invisible
                     }
-                , pattern = pattern
+                , path = path
               }
             , Cmd.batch
                 [ Utils.delay
@@ -469,7 +469,7 @@ subscriptions config model =
             { fromGlobalMsg = Global
             , fromPageMsg = Page
             , map = config.map
-            , pattern = model.pattern
+            , path = model.path
             , transitions = []
             , visibility = model.visibilities.page
             }
@@ -491,7 +491,7 @@ type alias Transitions ui_msg =
     , page : Transition ui_msg
     , pages :
         List
-            { pattern : Pattern
+            { path : Path
             , transition : Transition ui_msg
             }
     }
@@ -516,7 +516,7 @@ view config model =
                 { fromGlobalMsg = Global
                 , fromPageMsg = Page
                 , map = config.map
-                , pattern = model.pattern
+                , path = model.path
                 , visibility = model.visibilities.page
                 , transitions = pageTransitions config.transitions
                 }
@@ -541,11 +541,11 @@ view config model =
 
 
 chooseFrom :
-    { transitions : List { pattern : Pattern, transition : Transition ui_msg }
+    { transitions : List { path : Path, transition : Transition ui_msg }
     , from : Url
     , to : Url
     }
-    -> Maybe { pattern : Pattern, transition : Transition ui_msg }
+    -> Maybe { path : Path, transition : Transition ui_msg }
 chooseFrom options =
     let
         ( fromPath, toPath ) =
@@ -555,9 +555,9 @@ chooseFrom options =
     options.transitions
         |> List.reverse
         |> List.filter
-            (\{ pattern, transition } ->
-                Pattern.matches fromPath pattern
-                    && Pattern.matches toPath pattern
+            (\{ path, transition } ->
+                Path.within fromPath path
+                    && Path.within toPath path
                     && (transition /= Transition.optOut)
             )
         |> List.head
@@ -568,10 +568,10 @@ urlPath url =
     url.path |> String.dropLeft 1 |> String.split "/"
 
 
-pageTransitions : Transitions ui_msg -> List { pattern : Pattern, transition : Transition ui_msg }
+pageTransitions : Transitions ui_msg -> List { path : Path, transition : Transition ui_msg }
 pageTransitions transitions =
-    ({ pattern = [], transition = transitions.page } :: transitions.pages)
-        |> List.sortBy (.pattern >> List.length)
+    ({ path = [], transition = transitions.page } :: transitions.pages)
+        |> List.sortBy (.path >> List.length)
 
 
 
