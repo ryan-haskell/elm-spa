@@ -3,7 +3,6 @@ module Transitions exposing (transitions)
 import Components.Styles as Styles
 import Element exposing (..)
 import Generated.Docs.Pages
-import Generated.Guide.Pages
 import Layout
 import Layouts.Docs
 import Layouts.Guide

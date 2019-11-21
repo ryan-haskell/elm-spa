@@ -15,9 +15,9 @@ main =
             { toHtml = Element.layout []
             , map = Element.map
             }
+        , transitions = Transitions.transitions
         , routing =
-            { transitions = Transitions.transitions
-            , routes = Routes.parsers
+            { routes = Routes.parsers
             , toPath = Routes.toPath
             , notFound = Routes.routes.notFound
             }

@@ -119,7 +119,15 @@ create :
         { routes : List (Parser (route -> route) route)
         , toPath : route -> String
         , notFound : route
-        , transitions : Transitions ui_msg
+        }
+    , transitions :
+        { layout : Transition ui_msg
+        , page : Transition ui_msg
+        , pages :
+            List
+                { pattern : Pattern
+                , transition : Transition ui_msg
+                }
         }
     , global :
         { init :
@@ -157,7 +165,7 @@ create config =
                 , routing =
                     { fromUrl = fromUrl config.routing
                     , toPath = config.routing.toPath
-                    , transition = config.routing.transitions.layout
+                    , transition = config.transitions.layout
                     }
                 }
         , update =
@@ -166,7 +174,7 @@ create config =
                     { fromUrl = fromUrl config.routing
                     , toPath = config.routing.toPath
                     , routes = config.routing.routes
-                    , transitions = pageTransitions config.routing.transitions
+                    , transitions = pageTransitions config.transitions
                     }
                 , init = page.init
                 , update =
@@ -179,7 +187,7 @@ create config =
                 { bundle = page.bundle
                 , map = config.ui.map
                 , global = config.global.subscriptions
-                , transition = config.routing.transitions.layout
+                , transition = config.transitions.layout
                 , fromUrl = fromUrl config.routing
                 }
         , view =
@@ -187,7 +195,7 @@ create config =
                 { toHtml = config.ui.toHtml
                 , bundle = page.bundle
                 , map = config.ui.map
-                , transitions = config.routing.transitions
+                , transitions = config.transitions
                 , fromUrl = fromUrl config.routing
                 }
         , onUrlChange = ChangedUrl
