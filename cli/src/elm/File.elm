@@ -1,5 +1,6 @@
 module File exposing
-    ( Details
+    ( Config
+    , Details
     , File
     , encode
     , pages
@@ -10,6 +11,11 @@ module File exposing
 
 import Json.Encode as Json
 import Set exposing (Set)
+
+
+type alias Config =
+    { ui : String
+    }
 
 
 type alias Filepath =

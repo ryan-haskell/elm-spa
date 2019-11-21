@@ -1,4 +1,7 @@
-port module Ports exposing (generate)
+port module Ports exposing
+    ( createFiles
+    , error
+    )
 
 import File exposing (File)
 import Json.Encode as Json
@@ -11,9 +14,17 @@ port outgoing :
     -> Cmd msg
 
 
-generate : List File -> Cmd msg
-generate files =
+createFiles : List File -> Cmd msg
+createFiles files =
     outgoing
-        { message = "generate"
+        { message = "createFiles"
         , data = Json.list File.encode files
+        }
+
+
+error : String -> Cmd msg
+error reason =
+    outgoing
+        { message = "error"
+        , data = Json.string reason
         }

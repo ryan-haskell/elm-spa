@@ -8,13 +8,34 @@ const main = ([ command, ...args ] = []) =>
     ? commands[command](args)
     : commands.help(args)
 
-// elm-spa build
-const build = ([ relative = '.' ]) =>
-  Elm.checkForElmJson(path.join(cwd, relative))
-    .then(_ => File.paths(path.join(cwd, relative, 'src', 'Pages')))
-    .then(Elm.run('build', { relative }))
+// elm-spa add
+const add = ([ pageType, moduleName, relative = '.' ]) => {
+  const dir = path.join(cwd, relative)
+
+  return Elm.checkForElmJson(dir)
+    .then(({ 'elm-spa': config }) =>
+      Elm.run('add', { relative })({ pageType, moduleName, ui: config.ui  })
+        .then(Elm.formatOutput)
+    )
+    .then(str => `\n${str}\n`)
     .then(console.info)
     .catch(console.error)
+  }
+
+// elm-spa build
+const build = ([ relative = '.' ]) => {
+  const dir = path.join(cwd, relative)
+
+  return Elm.checkForElmJson(dir)
+    .then(json =>
+      File.paths(path.join(dir, 'src', 'Pages'))
+        .then(Elm.run('build', { relative }, json['elm-spa']))
+        .then(Elm.formatOutput)
+    )
+    .then(str => `\n${str}\n`)
+    .then(console.info)
+    .catch(console.error)
+  }
 
 // elm-spa help
 const help = () => console.info(`
@@ -57,6 +78,7 @@ commands:
 `)
 
 const commands = {
+  add,
   build,
   help
 }

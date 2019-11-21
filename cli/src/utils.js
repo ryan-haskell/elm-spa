@@ -66,7 +66,9 @@ const Elm = (_ => {
   const { Elm } = require('../dist/elm.compiled.js')
 
   const handlers = {
-    generate: ({ relative }, files) =>
+    error: (_, message) =>
+      Promise.reject(message),
+    createFiles: ({ relative }, files) =>
       Promise.all(
         files
           .map(item => ({
@@ -77,9 +79,9 @@ const Elm = (_ => {
       )
   }
 
-  const run = (command, args) => (paths) =>
+  const run = (command, args) => (data) =>
     new Promise((resolve, reject) => {
-      const app = Elm.Main.init({ flags: { command, paths } })
+      const app = Elm.Main.init({ flags: { command, data } })
 
       app.ports.outgoing.subscribe(({ message, data }) =>
         handlers[message]
@@ -90,14 +92,25 @@ const Elm = (_ => {
 
   const checkForElmJson = (paths) =>
     new Promise((resolve, reject) =>
-      fs.exists(path.join(paths, 'elm.json'), (exists) =>
-        exists
-          ? resolve(true)
+      fs.readFile(path.join(paths, 'elm.json'), (_, contents) =>
+        contents
+          ? Promise.resolve(contents.toString())
+              .then(JSON.parse)
+              .then(resolve)
+              .catch(_ => `Couldn't understand the ${bold('elm.json')} file at:\n${paths}`)
           : reject(`Couldn't find an ${bold('elm.json')} file at:\n${paths}`)
       )
     )
+
+  const alphabetically = (a, b) =>
+    (a < b) ? -1 : (a > b) ? 1 : 0
+
+  const formatOutput = files => [
+    bold('elm-spa') + ` created ${bold(files.length)} file${files === 1 ? '' : 's'}:`,
+    files.sort(alphabetically).map(file => '  ' + file).join('\n'),
+  ].join('\n\n')
  
-  return { run, checkForElmJson }
+  return { run, checkForElmJson, formatOutput }
 })()
 
 const bold = str => '\033[1m' + str + '\033[0m'

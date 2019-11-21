@@ -2,6 +2,7 @@ module Main exposing (main)
 
 import Dict exposing (Dict)
 import File exposing (File)
+import Json.Decode as D exposing (Decoder)
 import Json.Encode as Json
 import Ports
 import Set exposing (Set)
@@ -9,8 +10,44 @@ import Set exposing (Set)
 
 type alias Flags =
     { command : String
-    , paths : List Filepath
+    , data : Json.Value
     }
+
+
+type Args
+    = BuildArgs BuildConfig
+    | AddArgs AddConfig
+
+
+type alias BuildConfig =
+    { paths : List Filepath
+    }
+
+
+type alias AddConfig =
+    { ui : String
+    , pageType : PageType
+    , moduleName : List String
+    }
+
+
+type PageType
+    = Static
+    | Sandbox
+    | Element
+    | Component
+
+
+argsDecoder : String -> Decoder Args
+argsDecoder command =
+    case command of
+        "build" ->
+            D.map BuildArgs <|
+                D.map BuildConfig
+                    (D.list (D.list D.string))
+
+        _ ->
+            D.fail <| "Couldn't recognize command: " ++ command
 
 
 type alias Filepath =
@@ -28,19 +65,34 @@ main =
 
 handle : Flags -> Cmd msg
 handle flags =
-    case flags.command of
-        "build" ->
-            build flags.paths
+    D.decodeValue
+        (argsDecoder flags.command)
+        flags.data
+        |> (\result ->
+                case result of
+                    Ok args ->
+                        case args of
+                            BuildArgs config ->
+                                build config
 
-        _ ->
-            Cmd.none
+                            AddArgs config ->
+                                add config
+
+                    Err error ->
+                        case error of
+                            D.Failure reason _ ->
+                                Ports.error reason
+
+                            _ ->
+                                Cmd.none
+           )
 
 
-build : List Filepath -> Cmd msg
-build files =
+build : BuildConfig -> Cmd msg
+build { paths } =
     List.concat
-        [ [ File [ "Routes" ] (File.routes files) ]
-        , files
+        [ [ File [ "Routes" ] (File.routes paths) ]
+        , paths
             |> List.foldl groupByFolder Dict.empty
             |> toDetails
             |> generate
@@ -49,7 +101,12 @@ build files =
                 , File.pages
                 ]
         ]
-        |> Ports.generate
+        |> Ports.createFiles
+
+
+add : AddConfig -> Cmd msg
+add config =
+    Cmd.none
 
 
 
