@@ -39,29 +39,27 @@ batmanNewspaper speed =
     Transition.custom
         { speed = speed
         , invisible =
-            \{ layout, page } ->
-                layout <|
-                    el
-                        [ alpha 0
-                        , width fill
-                        , rotate (4 * pi)
-                        , scale 0
-                        , Styles.transition
-                            { property = "all"
-                            , speed = speed
-                            }
-                        ]
-                        page
+            \page ->
+                el
+                    [ alpha 0
+                    , width fill
+                    , rotate (4 * pi)
+                    , scale 0
+                    , Styles.transition
+                        { property = "all"
+                        , speed = speed
+                        }
+                    ]
+                    page
         , visible =
-            \{ layout, page } ->
-                layout <|
-                    el
-                        [ alpha 1
-                        , width fill
-                        , Styles.transition
-                            { property = "all"
-                            , speed = speed
-                            }
-                        ]
-                        page
+            \page ->
+                el
+                    [ alpha 1
+                    , width fill
+                    , Styles.transition
+                        { property = "all"
+                        , speed = speed
+                        }
+                    ]
+                    page
         }

@@ -49,7 +49,4 @@ custom =
 
 
 type alias View ui_msg =
-    { layout : ui_msg -> ui_msg
-    , page : ui_msg
-    }
-    -> ui_msg
+    ui_msg -> ui_msg
