@@ -570,7 +570,8 @@ urlPath url =
 
 pageTransitions : Transitions ui_msg -> List { pattern : Pattern, transition : Transition ui_msg }
 pageTransitions transitions =
-    { pattern = [], transition = transitions.page } :: transitions.pages
+    ({ pattern = [], transition = transitions.page } :: transitions.pages)
+        |> List.sortBy (.pattern >> List.length)
 
 
 
