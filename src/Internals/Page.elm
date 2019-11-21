@@ -80,7 +80,12 @@ type alias Bundle route layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg 
     , fromPageMsg : layoutMsg -> msg
     , map : (layoutMsg -> msg) -> ui_layoutMsg -> ui_msg
     , visibility : Transition.Visibility
-    , transitioningPattern : Pattern
+    , pattern : Pattern
+    , transitions :
+        List
+            { pattern : Pattern
+            , transition : Transition ui_msg
+            }
     }
     -> PageContext route globalModel
     ->
@@ -100,7 +105,6 @@ type alias LayoutContext route msg ui_msg globalModel globalMsg =
 
 type alias Layout route pageParams pageModel pageMsg ui_pageMsg globalModel globalMsg msg ui_msg =
     { pattern : Pattern
-    , transition : Transition ui_msg
     , view : LayoutContext route msg ui_msg globalModel globalMsg -> ui_msg
     , recipe : Recipe route pageParams pageModel pageMsg pageModel pageMsg ui_pageMsg globalModel globalMsg msg ui_msg
     }

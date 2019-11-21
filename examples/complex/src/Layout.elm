@@ -1,7 +1,5 @@
-module Layout exposing (transition, view)
+module Layout exposing (view)
 
-import Spa.Page
-import Spa.Transition as Transition exposing (Transition)
 import Components.Button
 import Components.Styles as Styles
 import Element exposing (..)
@@ -11,18 +9,8 @@ import Element.Font as Font
 import Element.Input as Input
 import Global
 import Html.Attributes as Attr
+import Spa.Page
 import Utils.Spa as Spa
-
-
-
--- TODO: either
--- 1. delete this completely, and only define in Transitions.elm
--- 2. generate the Transitions file, and pull out transitions.layout to main
-
-
-transition : Transition (Element msg)
-transition =
-    Transition.fadeUi 300
 
 
 view : Spa.LayoutContext msg -> Element msg

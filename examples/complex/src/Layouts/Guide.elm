@@ -1,15 +1,8 @@
-module Layouts.Guide exposing (transition, view)
+module Layouts.Guide exposing (view)
 
 import Components.Styles as Styles
 import Element exposing (..)
-import Global
-import Spa.Transition as Transition exposing (Transition)
 import Utils.Spa as Spa
-
-
-transition : Transition (Element msg)
-transition =
-    Transition.none
 
 
 view : Spa.LayoutContext msg -> Element msg

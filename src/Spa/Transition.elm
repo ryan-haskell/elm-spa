@@ -1,12 +1,12 @@
 module Spa.Transition exposing
     ( Transition
-    , optOut, none, fadeHtml, fadeUi, custom
+    , none, fadeHtml, fadeUi, custom
     )
 
 {-|
 
 @docs Transition
-@docs optOut, none, fadeHtml, fadeUi, custom
+@docs none, fadeHtml, fadeUi, custom
 
 -}
 
@@ -21,11 +21,6 @@ type alias Transition ui_msg =
 
 
 -- TRANSITIONS
-
-
-optOut : Transition ui_msg
-optOut =
-    Internals.Transition.optOut
 
 
 none : Transition ui_msg

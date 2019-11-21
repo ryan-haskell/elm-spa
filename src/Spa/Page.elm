@@ -554,7 +554,7 @@ layout map options =
 
                         myLayoutsVisibility : Transition.Visibility
                         myLayoutsVisibility =
-                            if private.transitioningPattern == options.pattern then
+                            if private.pattern == options.pattern then
                                 private.visibility
 
                             else
@@ -567,15 +567,27 @@ layout map options =
                                 { fromGlobalMsg = private.fromGlobalMsg
                                 , fromPageMsg = toMsg >> private.fromPageMsg
                                 , map = map
-                                , transitioningPattern = private.transitioningPattern
+                                , pattern = private.pattern
+                                , transitions = private.transitions
                                 , visibility = private.visibility
                                 }
                                 context
+
+                        lookupTransitionFrom :
+                            Pattern
+                            -> List { pattern : Pattern, transition : Transition ui_msg }
+                            -> Transition ui_msg
+                        lookupTransitionFrom pattern list =
+                            list
+                                |> List.filter (.pattern >> (==) pattern)
+                                |> List.map .transition
+                                |> List.head
+                                |> Maybe.withDefault Transition.optOut
                     in
                     { title = bundle.title
                     , view =
                         Transition.view
-                            options.transition
+                            (lookupTransitionFrom options.pattern private.transitions)
                             myLayoutsVisibility
                             { layout = viewLayout
                             , page = bundle.view

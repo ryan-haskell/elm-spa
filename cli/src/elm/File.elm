@@ -337,10 +337,11 @@ module {{pagesModuleName}} exposing
     ( Model
     , Msg
     , page
+    , pattern
     )
 
 import Spa.Page
-import Spa.Pattern exposing (static, dynamic)
+import Spa.Pattern exposing (Pattern, static, dynamic)
 import {{layoutModuleName}} as Layout
 import Utils.Spa as Spa
 import {{paramsModuleName}} as Params
@@ -359,8 +360,7 @@ import {{routeModuleName}} as Route exposing (Route)
 page : Spa.Page Route Model Msg layoutModel layoutMsg appMsg
 page =
     Spa.layout
-        { pattern = {{pagesLayoutPattern}}
-        , transition = Layout.transition
+        { pattern = pattern
         , view = Layout.view
         , recipe =
             { init = init
@@ -369,6 +369,10 @@ page =
             }
         }
 
+
+pattern : Pattern
+pattern =
+    {{pagesLayoutPattern}}
 
 
 -- RECIPES
