@@ -24,11 +24,8 @@ transitions =
     { layout = Transition.fadeUi 300
     , page = Transition.fadeUi 300
     , pages =
-        [ { pattern = Generated.Guide.Pages.pattern
-          , transition = Transition.none
-          }
-        , { pattern = Generated.Docs.Pages.pattern
-          , transition = batmanNewspaper 500
+        [ { pattern = Generated.Docs.Pages.pattern
+          , transition = batmanNewspaper 600
           }
         ]
     }
