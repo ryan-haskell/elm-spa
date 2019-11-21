@@ -586,12 +586,11 @@ layout map options =
                     in
                     { title = bundle.title
                     , view =
-                        Transition.view
-                            (lookupTransitionFrom options.pattern private.transitions)
-                            myLayoutsVisibility
-                            { layout = viewLayout
-                            , page = bundle.view
-                            }
+                        viewLayout <|
+                            Transition.view
+                                (lookupTransitionFrom options.pattern private.transitions)
+                                myLayoutsVisibility
+                                bundle.view
                     , subscriptions = bundle.subscriptions
                     }
             }

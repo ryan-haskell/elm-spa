@@ -531,7 +531,7 @@ view config model =
             Transition.view
                 config.transitions.layout
                 model.visibilities.layout
-                { layout = identity, page = bundle.view }
+                bundle.view
         ]
     }
 

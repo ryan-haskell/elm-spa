@@ -73,26 +73,23 @@ speed transition =
 view :
     Transition ui_msg
     -> Visibility
-    ->
-        { layout : ui_msg -> ui_msg
-        , page : ui_msg
-        }
     -> ui_msg
-view transition visibility { layout, page } =
+    -> ui_msg
+view transition visibility page =
     case transition of
         OptOut ->
-            layout page
+            page
 
         None ->
-            layout page
+            page
 
         Transition t ->
             case visibility of
                 Visible ->
-                    layout (t.visible page)
+                    t.visible page
 
                 Invisible ->
-                    layout (t.invisible page)
+                    t.invisible page
 
 
 
