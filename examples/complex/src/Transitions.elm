@@ -8,8 +8,8 @@ import Spa.Transition as Transition exposing (Transition)
 
 transitions : Transition.Transitions (Element msg)
 transitions =
-    { layout = Transition.fadeUi 300
-    , page = Transition.fadeUi 300
+    { layout = Transition.fadeElmUi 300
+    , page = Transition.fadeElmUi 300
     , pages =
         [ { path = Docs.path
           , transition = batmanNewspaper 600

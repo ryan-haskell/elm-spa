@@ -12,7 +12,7 @@ module Spa.Types exposing
 {-|
 
 
-## types so spooky, they got their own module!
+## Types so spooky, they got their own module!
 
 This module is all about exposing the types that `ryannhg/elm-spa` uses
 under the hood.

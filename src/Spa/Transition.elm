@@ -1,6 +1,6 @@
 module Spa.Transition exposing
     ( Transition
-    , none, fadeHtml, fadeUi
+    , none, fadeElmUi, fadeHtml
     , custom
     )
 
@@ -17,12 +17,12 @@ This package is designed to make creating page transitions a breeze!
 @docs Transition
 
 
-# use one of these transitions
+## Use one of these transitions
 
-@docs none, fadeHtml, fadeUi
+@docs none, fadeElmUi, fadeHtml
 
 
-# ot roll your own
+## Or create your own
 
 @docs custom
 
@@ -30,7 +30,6 @@ This package is designed to make creating page transitions a breeze!
 
 import Element exposing (Element)
 import Html exposing (Html)
-import Internals.Path exposing (Path)
 import Internals.Transition
 
 
@@ -40,9 +39,9 @@ import Internals.Transition
     transition =
         Transition.none
 
-    anotherTransition : Transition (Element msg)
-    anotherTransition =
-        Transition.fadeUi 300
+    otherTransition : Transition (Element msg)
+    otherTransition =
+        Transition.fadeElmUi 300
 
 -}
 type alias Transition ui_msg =
@@ -53,12 +52,21 @@ type alias Transition ui_msg =
 -- TRANSITIONS
 
 
-{-| Don't transition from one page to another
+{-| Don't transition from one page to another.
+
+Can be used with `Html msg` or `Element msg` (or another view library)
 
     transitions : Transitions (Html msg)
     transitions =
         { layout = Transition.none -- page loads instantly
         , page = Transition.fadeHtml 300
+        , pages = []
+        }
+
+    otherTransitions : Transitions (Element msg)
+    otherTransitions =
+        { layout = Transition.none -- page loads instantly
+        , page = Transition.fadeElmUi 300
         , pages = []
         }
 
@@ -70,7 +78,7 @@ none =
 
 {-| Fade one page out and another one in. (For use with `elm/html`)
 
-    Animation duration is represented in **milliseconds**
+Animation duration is represented in **milliseconds**
 
     transitions : Spa.Types.Transitions (Html msg)
     transitions =
@@ -87,30 +95,30 @@ fadeHtml =
 
 {-| Fade one page out and another one in. (For use with `mdgriffith/elm-ui`)
 
-    Animation duration is represented in **milliseconds**
+Animation duration is represented in **milliseconds**
 
     transitions : Spa.Types.Transitions (Element msg)
     transitions =
         { layout = Transition.none
-        , page = Transition.fadeUi 300 -- 300 milliseconds
+        , page = Transition.fadeElmUi 300 -- 300 milliseconds
         , pages = []
         }
 
 -}
-fadeUi : Int -> Transition (Element msg)
-fadeUi =
-    Internals.Transition.fadeUi
+fadeElmUi : Int -> Transition (Element msg)
+fadeElmUi =
+    Internals.Transition.fadeElmUi
 
 
 {-| Create your own custom transition!
 
 Just provide three things:
 
-  - How long (in milliseconds) the transition lasts.
+  - `duration` – how long (in milliseconds) the transition should last.
 
-  - What the page looks like when invisible.
+  - `invisible` – what the page looks like when **invisible**.
 
-  - What the page looks like when **visible**.
+  - `visible` – what the page looks like when **visible**.
 
 ```
 batmanNewspaper : Int -> Transition (Element msg)
@@ -157,13 +165,9 @@ transitions =
 -}
 custom :
     { duration : Int
-    , invisible : View ui_msg
-    , visible : View ui_msg
+    , invisible : ui_msg -> ui_msg
+    , visible : ui_msg -> ui_msg
     }
     -> Transition ui_msg
 custom =
     Internals.Transition.custom
-
-
-type alias View ui_msg =
-    ui_msg -> ui_msg

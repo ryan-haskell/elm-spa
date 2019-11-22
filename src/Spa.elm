@@ -1,5 +1,6 @@
 module Spa exposing
-    ( Program, create
+    ( create, Program
+    , usingElmUi
     , usingHtml
     )
 
@@ -21,22 +22,22 @@ as the entrypoint to your app.
     main : Utils.Spa.Program Pages.Model Pages.Msg
     main =
         Spa.create
-            { ui = Spa.usingHtml
+            { global =
+                { init = Global.init
+                , update = Global.update
+                , subscriptions = Global.subscriptions
+                }
+            , page = Pages.page
             , routing =
                 { routes = Routes.parsers
                 , toPath = Routes.toPath
                 , notFound = routes.notFound
                 }
             , transitions = Transitions.transitions
-            , global =
-                { init = Global.init
-                , update = Global.update
-                , subscriptions = Global.subscriptions
-                }
-            , page = Pages.page
+            , ui = Spa.usingElmUi   
             }
 
-@docs Program, create
+@docs create, Program
 
 
 # using elm-ui?
@@ -44,18 +45,10 @@ as the entrypoint to your app.
 If you're a big fan of [mdgriffith/elm-ui](https://package.elm-lang.org/packages/mdgriffith/elm-ui/latest/) (or a "not-so-big-fan of CSS"),
 this package supports using `Element msg` instead of `Html msg` for your pages and components.
 
-Providing `Spa.create` with these `ui` options will do the trick!
+@docs usingElmUi
 
-    import Element
 
-    main =
-        Spa.create
-            { ui =
-                { toHtml = Element.layout []
-                , map = Element.map
-                }
-            , -- ...
-            }
+## using html?
 
 @docs usingHtml
 
@@ -64,6 +57,7 @@ Providing `Spa.create` with these `ui` options will do the trick!
 import Browser
 import Browser.Navigation as Nav
 import Dict exposing (Dict)
+import Element exposing (Element)
 import Html exposing (Html)
 import Internals.Page as Page
 import Internals.Path as Path exposing (Path)
@@ -105,6 +99,28 @@ usingHtml =
     }
 
 
+{-| If you're just using `mdgriffith/elm-ui`, you can pass this into `Spa.create`
+
+    main =
+        Spa.create
+            { ui = Spa.usingElmUi
+            , -- ...
+            }
+
+-}
+usingElmUi :
+    { map :
+        (layoutMsg -> Msg globalMsg layoutMsg)
+        -> Element layoutMsg
+        -> Element (Msg globalMsg layoutMsg)
+    , toHtml : Element msg -> Html msg
+    }
+usingElmUi =
+    { toHtml = Element.layout []
+    , map = Element.map
+    }
+
+
 {-| Creates a new `Program` given some one-time configuration:
 
   - `ui` - How do we convert our views into `Html msg`?
@@ -115,25 +131,7 @@ usingHtml =
 
 -}
 create :
-    { ui :
-        { toHtml : ui_msg -> Html (Msg globalMsg layoutMsg)
-        , map : (layoutMsg -> Msg globalMsg layoutMsg) -> ui_layoutMsg -> ui_msg
-        }
-    , routing :
-        { routes : List (Parser (route -> route) route)
-        , toPath : route -> String
-        , notFound : route
-        }
-    , transitions :
-        { layout : Transition ui_msg
-        , page : Transition ui_msg
-        , pages :
-            List
-                { path : Path
-                , transition : Transition ui_msg
-                }
-        }
-    , global :
+    { global :
         { init :
             { navigate : route -> Cmd (Msg globalMsg layoutMsg)
             }
@@ -148,6 +146,24 @@ create :
         , subscriptions : globalModel -> Sub globalMsg
         }
     , page : Page.Page route route layoutModel layoutMsg ui_layoutMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg (Msg globalMsg layoutMsg) ui_msg
+    , routing :
+        { routes : List (Parser (route -> route) route)
+        , toPath : route -> String
+        , notFound : route
+        }
+    , transitions :
+        { layout : Transition ui_msg
+        , page : Transition ui_msg
+        , pages :
+            List
+                { path : Path
+                , transition : Transition ui_msg
+                }
+        }
+    , ui :
+        { toHtml : ui_msg -> Html (Msg globalMsg layoutMsg)
+        , map : (layoutMsg -> Msg globalMsg layoutMsg) -> ui_layoutMsg -> ui_msg
+        }
     }
     -> Program flags globalModel globalMsg layoutModel layoutMsg
 create config =

@@ -6,10 +6,12 @@ module Spa.Path exposing
 {-|
 
 
-## specify transitions for different routes!
+## Modify transitions at different routes!
 
 If you're using the [CLI companion tool](https://github.com/ryannhg/elm-spa/tree/master/cli),
 these are **automatically generated**.
+
+(So feel free to ignore these docs!)
 
 If you're doing things by hand, this documentation might be helpful!
 
@@ -31,14 +33,14 @@ import Internals.Path as Internals
         , pages =
             [ -- applies fade to all pages under `/guide/*`
               { path = [ static "guide" ]
-              , transition = Transition.fadeUi 300
+              , transition = Transition.fadeElmUi 300
               }
             ]
         }
 
 -}
 type alias Path =
-    Internals.Path
+    List Internals.Piece
 
 
 {-| A static segment of a path.

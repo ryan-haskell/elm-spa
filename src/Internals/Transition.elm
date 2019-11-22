@@ -1,7 +1,7 @@
 module Internals.Transition exposing
     ( Transition
     , duration, view
-    , optOut, none, fadeHtml, fadeUi
+    , optOut, none, fadeHtml, fadeElmUi
     , Visibility
     , visible, invisible
     , custom
@@ -11,7 +11,7 @@ module Internals.Transition exposing
 
 @docs Transition
 @docs duration, view, chooseFrom
-@docs optOut, none, fadeHtml, fadeUi
+@docs optOut, none, fadeHtml, fadeElmUi
 
 @docs Visibility
 @docs visible, invisible
@@ -129,8 +129,8 @@ fadeHtml duration_ =
         }
 
 
-fadeUi : Int -> Transition (Element msg)
-fadeUi duration_ =
+fadeElmUi : Int -> Transition (Element msg)
+fadeElmUi duration_ =
     let
         withOpacity : Float -> View (Element msg)
         withOpacity opacity page =
