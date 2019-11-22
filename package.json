@@ -5,10 +5,11 @@
   "main": "cli/src/index.js",
   "bin": "./cli/src/index.js",
   "scripts": {
-    "start": "npm link && npm run dev",
-    "build": "(cd cli && npm run build)",
+    "start": "npm run dev",
+    "build": "npm link && (cd cli && npm run build)",
     "dev": "npm run build && npm run example",
     "docs": "elm-doc-preview",
+    "build:example": "npm run build && (cd examples/complex && npm install && npm run build)",
     "example": "npm run examples:complex",
     "examples:intro": "(cd examples/intro && npm install && npm run dev)",
     "examples:complex": "(cd examples/complex && npm install && npm run dev)"
