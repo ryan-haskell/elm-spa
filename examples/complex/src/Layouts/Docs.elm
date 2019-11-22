@@ -1,6 +1,6 @@
 module Layouts.Docs exposing (view)
 
-import Components.Styles as Styles
+import Utils.Styles as Styles
 import Element exposing (..)
 import Element.Font as Font
 import Generated.Routes as Routes exposing (Route, routes)

@@ -1,7 +1,6 @@
 module Spa exposing
     ( Program, create
     , usingHtml
-    , queryParameters
     )
 
 {-|
@@ -14,17 +13,21 @@ as the entrypoint to your app.
 
     import Global
     import Pages
-    import Routes
+    import Routes exposing (routes)
     import Spa
+    import Transitions
+    import Utils.Spa
 
+    main : Utils.Spa.Program Pages.Model Pages.Msg
     main =
         Spa.create
             { ui = Spa.usingHtml
             , routing =
                 { routes = Routes.parsers
                 , toPath = Routes.toPath
-                , notFound = Routes.routes.notFound
+                , notFound = routes.notFound
                 }
+            , transitions = Transitions.transitions
             , global =
                 { init = Global.init
                 , update = Global.update
@@ -38,7 +41,7 @@ as the entrypoint to your app.
 
 # using elm-ui?
 
-If you're a big fan of [mdgriffith/elm-ui](https://package.elm-lang.org/packages/mdgriffith/elm-ui/latest/) (or not-so-big-fan of CSS),
+If you're a big fan of [mdgriffith/elm-ui](https://package.elm-lang.org/packages/mdgriffith/elm-ui/latest/) (or a "not-so-big-fan of CSS"),
 this package supports using `Element msg` instead of `Html msg` for your pages and components.
 
 Providing `Spa.create` with these `ui` options will do the trick!
@@ -80,7 +83,7 @@ type alias Program flags globalModel globalMsg layoutModel layoutMsg =
     Platform.Program flags (Model flags globalModel layoutModel) (Msg globalMsg layoutMsg)
 
 
-{-| Pass this in when calling `Spa.create`
+{-| If you're just using `elm/html`, you can pass this into `Spa.create`
 
     main =
         Spa.create
@@ -104,10 +107,11 @@ usingHtml =
 
 {-| Creates a new `Program` given some one-time configuration:
 
-  - `ui` - How do we convert the view to `Html msg`?
+  - `ui` - How do we convert our views into `Html msg`?
   - `routing` - What are the app's routes?
-  - `global` - How do we manage shared state between pages?
-  - `page` - What pages do we have available?
+  - `transitions` - How should we transition between routes?
+  - `global` - How do we share state between pages?
+  - `page` - What page should we render?
 
 -}
 create :
@@ -286,7 +290,7 @@ init config flags url key =
                     [ Cmd.map Page pageCmd
                     , Cmd.map Global pageGlobalCmd
                     , Cmd.map Global globalCmd
-                    , Utils.delay (Transition.speed config.routing.transition) FadeInLayout
+                    , Utils.delay (Transition.duration config.routing.transition) FadeInLayout
                     , cmd
                     ]
                 )
@@ -383,7 +387,7 @@ update config msg model =
 
         ChangedUrl url ->
             let
-                ( path, speed ) =
+                ( path, duration ) =
                     chooseFrom
                         { transitions = config.routing.transitions
                         , from = model.url
@@ -391,7 +395,7 @@ update config msg model =
                         }
                         |> Just
                         |> Maybe.withDefault (List.head config.routing.transitions)
-                        |> Maybe.map (\item -> ( item.path, Transition.speed item.transition ))
+                        |> Maybe.map (\item -> ( item.path, Transition.duration item.transition ))
                         |> Maybe.withDefault ( [], 0 )
             in
             ( { model
@@ -404,7 +408,7 @@ update config msg model =
               }
             , Cmd.batch
                 [ Utils.delay
-                    speed
+                    duration
                     (FadeInPage url)
                 ]
             )

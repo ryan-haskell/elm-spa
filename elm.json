@@ -7,7 +7,9 @@
     "exposed-modules": [
         "Spa",
         "Spa.Page",
-        "Spa.Types"
+        "Spa.Types",
+        "Spa.Transition",
+        "Spa.Path"
     ],
     "elm-version": "0.19.0 <= v < 0.20.0",
     "dependencies": {

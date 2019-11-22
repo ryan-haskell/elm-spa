@@ -5,24 +5,25 @@ module Spa.Types exposing
     , Update
     , Bundle
     , Layout, Upgrade
+    , Transitions
     , LayoutContext, PageContext
     )
 
 {-|
 
 
-## types so spooky, they got their own module! 👻
+## types so spooky, they got their own module!
 
 This module is all about exposing the types that `ryannhg/elm-app` uses
 under the hood.
 
-At a glance, there are a **lot of generic types**.
+You might notice that there are a **lot of generic types**.
 
-In practice, we can handle this with a single
+In practice, we can avoid the messy types with a single
 [`Utils/Spa.elm`](https://github.com/ryannhg/elm-spa/blob/master/example/src/Utils/Spa.elm) file that
 makes your types easier to understand!
 
-`elm-spa init` generates that file for you, but I've added examples below if you're
+`elm-spa init` will generate that file for you, but I've added examples below if you're
 doing things by hand.
 
 
@@ -55,9 +56,22 @@ doing things by hand.
 
 @docs Layout, Upgrade
 
+
+# transitions
+
+@docs Transitions
+
+
+# context
+
+@docs LayoutContext, PageContext
+
 -}
 
+import Dict exposing (Dict)
 import Internals.Page as Page
+import Internals.Path exposing (Path)
+import Internals.Transition exposing (Transition)
 
 
 {-|
@@ -73,7 +87,7 @@ import Internals.Page as Page
     import Element exposing (Element)
 
     type alias Page params model msg layoutModel layoutMsg appMsg =
-        Spa.Types.Page params model msg (Element msg) layoutModel layoutMsg (Element layoutMsg) Global.Model Global.Msg appMsg (Element appMsg)
+        Spa.Types.Page Route params model msg (Element msg) layoutModel layoutMsg (Element layoutMsg) Global.Model Global.Msg appMsg (Element appMsg)
 
     -- if using elm/html
 
@@ -81,7 +95,7 @@ import Internals.Page as Page
     import Html exposing (Html)
 
     type alias Page params model msg layoutModel layoutMsg appMsg =
-        Spa.Types.Page params model msg (Html msg) layoutModel layoutMsg (Html layoutMsg) Global.Model Global.Msg appMsg (Html appMsg)
+        Spa.Types.Page Route params model msg (Html msg) layoutModel layoutMsg (Html layoutMsg) Global.Model Global.Msg appMsg (Html appMsg)
 
 
 ## using your alias
@@ -112,7 +126,7 @@ type alias Page route params pageModel pageMsg ui_pageMsg layoutModel layoutMsg 
     import Element exposing (Element)
 
     type alias Recipe params model msg layoutModel layoutMsg appMsg =
-        Spa.Types.Recipe params model msg layoutModel layoutMsg (Element layoutMsg) Global.Model Global.Msg appMsg (Element appMsg)
+        Spa.Types.Recipe Route params model msg layoutModel layoutMsg (Element layoutMsg) Global.Model Global.Msg appMsg (Element appMsg)
 
     -- if using elm/html
 
@@ -120,7 +134,7 @@ type alias Page route params pageModel pageMsg ui_pageMsg layoutModel layoutMsg 
     import Html exposing (Html)
 
     type alias Recipe params model msg layoutModel layoutMsg appMsg =
-        Spa.Types.Recipe params model msg layoutModel layoutMsg (Html layoutMsg) Global.Model Global.Msg appMsg (Html appMsg)
+        Spa.Types.Recipe Route params model msg layoutModel layoutMsg (Html layoutMsg) Global.Model Global.Msg appMsg (Html appMsg)
 
 
 ## using your alias
@@ -148,7 +162,7 @@ type alias Recipe route params pageModel pageMsg layoutModel layoutMsg ui_layout
 **`src/Utils/Spa.elm`**
 
     type alias Init model msg =
-        Spa.Types.Init model msg Global.Model Global.Msg
+        Spa.Types.Init Route model msg Global.Model Global.Msg
 
 
 ## using your alias
@@ -175,7 +189,7 @@ type alias Init route layoutModel layoutMsg globalModel globalMsg =
 **`src/Utils/Spa.elm`**
 
     type alias Update model msg =
-        Spa.Types.Update model msg Global.Model Global.Msg
+        Spa.Types.Update Route model msg Global.Model Global.Msg
 
 
 ## using your alias
@@ -207,7 +221,7 @@ type alias Update route layoutModel layoutMsg globalModel globalMsg =
     import Element exposing (Element)
 
     type alias Bundle msg appMsg =
-        Spa.Types.Bundle msg (Element msg) Global.Model Global.Msg appMsg (Element appMsg)
+        Spa.Types.Bundle Route msg (Element msg) Global.Model Global.Msg appMsg (Element appMsg)
 
     -- if using elm/html
 
@@ -215,7 +229,7 @@ type alias Update route layoutModel layoutMsg globalModel globalMsg =
     import Html exposing (Html)
 
     type alias Bundle msg appMsg =
-        Spa.Types.Bundle msg (Html msg) Global.Model Global.Msg appMsg (Html appMsg)
+        Spa.Types.Bundle Route msg (Html msg) Global.Model Global.Msg appMsg (Html appMsg)
 
 
 ## using your alias
@@ -246,44 +260,135 @@ type alias Bundle route layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg 
     import Spa.Types
     import Element exposing (Element)
 
-    type alias Bundle msg appMsg =
-        Spa.Types.Bundle msg (Element msg) Global.Model Global.Msg appMsg (Element appMsg)
+    type alias Layout params model msg appMsg =
+        Spa.Types.Layout Route params model msg (Element msg) Global.Model Global.Msg appMsg (Element appMsg)
+
 
     -- if using elm/html
 
     import Spa.Types
     import Html exposing (Html)
 
-    type alias Bundle msg appMsg =
-        Spa.Types.Bundle msg (Html msg) Global.Model Global.Msg appMsg (Html appMsg)
+    type alias Layout params model msg appMsg =
+        Spa.Types.Layout Route params model msg (Html msg) Global.Model Global.Msg appMsg (Html appMsg)
 
 
 ## using your alias
 
-**`.elm-spa/Generated/Pages.elm`**
+**`src/Utils/Spa.elm`**
 
-    import Utils.Spa as Spa
-
-    bundle : Model -> Spa.Bundle Msg msg
-    bundle model_ =
-        case model_ of
-            -- ...
+    layout :
+        Layout params model msg appMsg
+        -> Page params model msg layoutModel layoutMsg appMsg
+    layout =
+        Spa.Page.layout Element.map
 
 -}
 type alias Layout route pageParams pageModel pageMsg ui_pageMsg globalModel globalMsg msg ui_msg =
     Page.Layout route pageParams pageModel pageMsg ui_pageMsg globalModel globalMsg msg ui_msg
 
 
-{-| TODO: PageContext docs
+{-| Describes how to transition between layouts and pages.
+
+    transitions : Transitions (Html msg)
+    transitions =
+        { layout = Transition.none -- page loads instantly
+        , page = Transition.fadeHtml 300
+        , pages = []
+        }
+
+-}
+type alias Transitions ui_msg =
+    { layout : Transition ui_msg
+    , page : Transition ui_msg
+    , pages :
+        List
+            { path : Path
+            , transition : Transition ui_msg
+            }
+    }
+
+
+{-| This is what your `src/Pages/*.elm` files can access!
+
+
+## creating your alias
+
+**`src/Utils/Spa.elm`**
+
+    type alias PageContext =
+        Spa.Types.PageContext Route Global.Model
+
+
+## using your alias
+
+**`src/Pages/Top.elm`**
+
+    import Utils.Spa as Spa
+
+    page =
+        Page.static
+            { title = always "Homepage"
+            , view = view -- leaving off always here!
+            }
+
+    view : PageContext -> Html Msg
+    view context =
+        case context.global.user of
+            SignedIn user ->
+                viewUser user
+
+            SignedOut ->
+                text "Who dis?"
+
 -}
 type alias PageContext route globalModel =
-    Page.PageContext route globalModel
+    { global : globalModel
+    , route : route
+    , queryParameters : Dict String String
+    }
 
 
-{-| TODO: LayoutContext docs
+{-| This is what your `src/Layouts/*.elm` files can access!
+
+
+## creating your alias
+
+**`src/Utils/Spa.elm`**
+
+    type alias LayoutContext msg =
+        Spa.Types.LayoutContext Route msg (Element msg) Global.Model Global.Msg
+
+
+## using your alias
+
+**`src/Layout.elm`**
+
+    import Utils.Spa as Spa
+
+    view : Spa.LayoutContext msg -> Html msg
+    view { page, fromGlobalMsg, global } =
+        div [ class "app" ]
+            [ Html.map fromGlobalMsg (viewNavbar global)
+            , page
+            , viewFooter
+            ]
+
+    viewNavbar : Global.Model -> Html Global.Msg
+    viewNavbar =
+        -- ...
+
+    viewFooter : Html msg
+    viewFooter =
+        -- ...
+
 -}
 type alias LayoutContext route msg ui_msg globalModel globalMsg =
-    Page.LayoutContext route msg ui_msg globalModel globalMsg
+    { page : ui_msg
+    , route : route
+    , global : globalModel
+    , fromGlobalMsg : globalMsg -> msg
+    }
 
 
 {-|
@@ -298,28 +403,27 @@ type alias LayoutContext route msg ui_msg globalModel globalMsg =
     import Spa.Types
     import Element exposing (Element)
 
-    type alias Bundle msg appMsg =
-        Spa.Types.Bundle msg (Element msg) Global.Model Global.Msg appMsg (Element appMsg)
+    type alias Upgrade params model msg layoutModel layoutMsg appMsg =
+        Spa.Types.Upgrade Route params model msg (Element msg) layoutModel layoutMsg (Element layoutMsg) Global.Model Global.Msg appMsg (Element appMsg)
 
     -- if using elm/html
 
     import Spa.Types
     import Html exposing (Html)
 
-    type alias Bundle msg appMsg =
-        Spa.Types.Bundle msg (Html msg) Global.Model Global.Msg appMsg (Html appMsg)
+    type alias Upgrade params model msg layoutModel layoutMsg appMsg =
+        Spa.Types.Upgrade Route params model msg (Html msg) layoutModel layoutMsg (Html layoutMsg) Global.Model Global.Msg appMsg (Html appMsg)
 
 
 ## using your alias
 
-**`.elm-spa/Generated/Pages.elm`**
+**`src/Utils/Spa.elm`**
 
-    import Utils.Spa as Spa
-
-    bundle : Model -> Spa.Bundle Msg msg
-    bundle model_ =
-        case model_ of
-            -- ...
+    recipe :
+        Upgrade params model msg layoutModel layoutMsg appMsg
+        -> Recipe params model msg layoutModel layoutMsg appMsg
+    recipe =
+        Spa.Page.recipe Element.map
 
 -}
 type alias Upgrade route pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg =

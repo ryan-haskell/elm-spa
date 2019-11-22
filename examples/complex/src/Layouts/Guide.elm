@@ -1,6 +1,6 @@
 module Layouts.Guide exposing (view)
 
-import Components.Styles as Styles
+import Utils.Styles as Styles
 import Element exposing (..)
 import Utils.Spa as Spa
 

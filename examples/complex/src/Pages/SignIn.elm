@@ -2,7 +2,7 @@ module Pages.SignIn exposing (Model, Msg, page)
 
 import Spa.Page
 import Components.Button
-import Components.Styles as Styles
+import Utils.Styles as Styles
 import Element exposing (..)
 import Element.Border as Border
 import Element.Font as Font

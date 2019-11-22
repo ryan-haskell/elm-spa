@@ -10,11 +10,11 @@ module Utils.Spa exposing
     , recipe
     )
 
-import Spa.Page
-import Spa.Types
 import Element exposing (Element)
 import Generated.Routes as Routes exposing (Route)
 import Global
+import Spa.Page
+import Spa.Types
 
 
 type alias Page params model msg layoutModel layoutMsg appMsg =
@@ -37,14 +37,6 @@ type alias Bundle msg appMsg =
     Spa.Types.Bundle Route msg (Element msg) Global.Model Global.Msg appMsg (Element appMsg)
 
 
-type alias Layout params model msg appMsg =
-    Spa.Types.Layout Route params model msg (Element msg) Global.Model Global.Msg appMsg (Element appMsg)
-
-
-type alias Upgrade params model msg layoutModel layoutMsg appMsg =
-    Spa.Types.Upgrade Route params model msg (Element msg) layoutModel layoutMsg (Element layoutMsg) Global.Model Global.Msg appMsg (Element appMsg)
-
-
 type alias LayoutContext msg =
     Spa.Types.LayoutContext Route msg (Element msg) Global.Model Global.Msg
 
@@ -53,11 +45,19 @@ type alias PageContext =
     Spa.Types.PageContext Route Global.Model
 
 
+type alias Layout params model msg appMsg =
+    Spa.Types.Layout Route params model msg (Element msg) Global.Model Global.Msg appMsg (Element appMsg)
+
+
 layout :
     Layout params model msg appMsg
     -> Page params model msg layoutModel layoutMsg appMsg
 layout =
     Spa.Page.layout Element.map
+
+
+type alias Upgrade params model msg layoutModel layoutMsg appMsg =
+    Spa.Types.Upgrade Route params model msg (Element msg) layoutModel layoutMsg (Element layoutMsg) Global.Model Global.Msg appMsg (Element appMsg)
 
 
 recipe :

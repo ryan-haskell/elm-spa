@@ -3,7 +3,7 @@ module Pages.Top exposing (Model, Msg, page)
 import Spa.Page
 import Components.Hero
 import Components.Section
-import Components.Styles as Styles
+import Utils.Styles as Styles
 import Element exposing (..)
 import Generated.Params as Params
 import Html.Attributes as Attr

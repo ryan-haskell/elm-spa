@@ -1,7 +1,7 @@
 module Layout exposing (view)
 
 import Components.Button
-import Components.Styles as Styles
+import Utils.Styles as Styles
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
@@ -48,7 +48,7 @@ viewNavbar user_ =
                 , Font.color Styles.colors.coral
                 , Styles.transition
                     { property = "opacity"
-                    , speed = 150
+                    , duration = 150
                     }
                 , mouseOver [ alpha 0.6 ]
                 ]

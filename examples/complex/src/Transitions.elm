@@ -1,29 +1,17 @@
 module Transitions exposing (transitions)
 
-import Components.Styles as Styles
+import Utils.Styles as Styles
 import Element exposing (..)
-import Generated.Docs.Pages
-import Layout
-import Layouts.Docs
-import Layouts.Guide
-import Spa.Path exposing (Path)
+import Generated.Docs.Pages as Docs
 import Spa.Transition as Transition exposing (Transition)
 
 
-transitions :
-    { layout : Transition (Element msg)
-    , page : Transition (Element msg)
-    , pages :
-        List
-            { path : Path
-            , transition : Transition (Element msg)
-            }
-    }
+transitions : Transition.Transitions (Element msg)
 transitions =
     { layout = Transition.fadeUi 300
     , page = Transition.fadeUi 300
     , pages =
-        [ { path = Generated.Docs.Pages.path
+        [ { path = Docs.path
           , transition = batmanNewspaper 600
           }
         ]
@@ -35,9 +23,9 @@ transitions =
 
 
 batmanNewspaper : Int -> Transition (Element msg)
-batmanNewspaper speed =
+batmanNewspaper duration =
     Transition.custom
-        { speed = speed
+        { duration = duration
         , invisible =
             \page ->
                 el
@@ -47,7 +35,7 @@ batmanNewspaper speed =
                     , scale 0
                     , Styles.transition
                         { property = "all"
-                        , speed = speed
+                        , duration = duration
                         }
                     ]
                     page
@@ -58,7 +46,7 @@ batmanNewspaper speed =
                     , width fill
                     , Styles.transition
                         { property = "all"
-                        , speed = speed
+                        , duration = duration
                         }
                     ]
                     page

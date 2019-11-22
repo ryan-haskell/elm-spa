@@ -1,6 +1,6 @@
 module Components.Section exposing (view)
 
-import Components.Styles as Styles
+import Utils.Styles as Styles
 import Element exposing (..)
 import Html.Attributes as Attr
 import Markdown

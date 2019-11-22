@@ -1,6 +1,6 @@
 module Components.Button exposing (view)
 
-import Components.Styles as Styles
+import Utils.Styles as Styles
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border

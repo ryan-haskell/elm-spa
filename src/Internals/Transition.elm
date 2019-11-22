@@ -1,6 +1,6 @@
 module Internals.Transition exposing
     ( Transition
-    , speed, view
+    , duration, view
     , optOut, none, fadeHtml, fadeUi
     , Visibility
     , visible, invisible
@@ -10,7 +10,7 @@ module Internals.Transition exposing
 {-|
 
 @docs Transition
-@docs speed, view, chooseFrom
+@docs duration, view, chooseFrom
 @docs optOut, none, fadeHtml, fadeUi
 
 @docs Visibility
@@ -46,7 +46,7 @@ type Transition ui_msg
 
 
 type alias Options ui_msg =
-    { speed : Int
+    { duration : Int
     , invisible : View ui_msg
     , visible : View ui_msg
     }
@@ -57,8 +57,8 @@ type alias View ui_msg =
     -> ui_msg
 
 
-speed : Transition ui_msg -> Int
-speed transition =
+duration : Transition ui_msg -> Int
+duration transition =
     case transition of
         OptOut ->
             0
@@ -67,7 +67,7 @@ speed transition =
             0
 
         Transition t ->
-            t.speed
+            t.duration
 
 
 view :
@@ -107,7 +107,7 @@ none =
 
 
 fadeHtml : Int -> Transition (Html msg)
-fadeHtml speed_ =
+fadeHtml duration_ =
     let
         withOpacity : Int -> View (Html msg)
         withOpacity opacity page =
@@ -116,21 +116,21 @@ fadeHtml speed_ =
                 , Attr.style "transition" <|
                     String.concat
                         [ "opacity "
-                        , String.fromInt speed_
+                        , String.fromInt duration_
                         , "ms ease-in-out"
                         ]
                 ]
                 [ page ]
     in
     Transition <|
-        { speed = speed_
+        { duration = duration_
         , invisible = withOpacity 0
         , visible = withOpacity 1
         }
 
 
 fadeUi : Int -> Transition (Element msg)
-fadeUi speed_ =
+fadeUi duration_ =
     let
         withOpacity : Float -> View (Element msg)
         withOpacity opacity page =
@@ -142,21 +142,21 @@ fadeUi speed_ =
                     Attr.style "transition" <|
                         String.concat
                             [ "opacity "
-                            , String.fromInt speed_
+                            , String.fromInt duration_
                             , "ms ease-in-out"
                             ]
                 ]
                 page
     in
     Transition <|
-        { speed = speed_
+        { duration = duration_
         , invisible = withOpacity 0
         , visible = withOpacity 1
         }
 
 
 custom :
-    { speed : Int
+    { duration : Int
     , invisible : View ui_msg
     , visible : View ui_msg
     }

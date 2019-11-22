@@ -8,26 +8,34 @@ module Spa.Page exposing
     , keep
     )
 
-{-| Each page can be as simple or complex as you need:
-
-1.  [Static](#static) - a page without state
-
-2.  [Sandbox](#sandbox) - a page without side-effects
-
-3.  [Element](#element) - a page _with_ side-effects
-
-4.  [Component](#component) - a page that can change the global state
+{-|
 
 
-## what's that `always` for?
+## Pick the simplest page for the job!
 
-You may notice the examples below use `always`. This is to **opt-out** each
-function from reading the global model.
+1.  [`static`](#static) - a page without state
 
-If you need access to `Global.Model` in your `title`, `init`, `update`, `view`, or
-`subscriptions` functions, just remove the always.
+2.  [`sandbox`](#sandbox) - a page without side-effects
 
-**It is recommended to include this to keep your pages as simple as possible!**
+3.  [`element`](#element) - a page _with_ side-effects
+
+4.  [`component`](#component) - a page that can change the global state
+
+
+### **heads up:** `always` incoming!
+
+You may notice the examples below use the function `always`.
+
+    Page.static
+        { title = always "Hello"
+        , view = always view
+        }
+
+This is to **opt-out** each function from accessing data like [`PageContext`](./Spa-Types#PageContext)
+
+If you decide you need access to the `Route`, query parameters, or `Global.Model`:
+Remove the `always` from `title`, `init`, `update`, `view`, or
+`subscriptions` functions.
 
 
 # static
@@ -50,13 +58,12 @@ If you need access to `Global.Model` in your `title`, `init`, `update`, `view`, 
 @docs component, send
 
 
-# composing pages together
+# manually composing pages?
 
 The rest of this module contains types and functions that
-can be generated with the [cli companion tool](https://github.com/ryannhg/elm-spa/tree/master/cli)
+are automatically generated with the [CLI companion tool](https://github.com/ryannhg/elm-spa/tree/master/cli)!
 
-If you're typing this stuff manually, you might need to know what
-these are for!
+If you'd rather type this stuff manually, these docs are for you!
 
 
 ## layout
@@ -69,12 +76,23 @@ these are for!
 @docs recipe
 
 
-## what's a "bundle"?
+## wait... what's a "bundle"?
 
-We can "bundle" the `view` and `subscriptions` functions together,
-because they both only need the current `model`.
+We can "bundle" the `title`,`view`, and `subscriptions` functions together,
+because they only need access to the current `model`.
 
-So _instead_ of typing out these:
+So _instead_ of typing out all this:
+
+    title bigModel =
+        case bigModel of
+            FooModel model ->
+                foo.title model
+
+            BarModel model ->
+                bar.title model
+
+            BazModel model ->
+                baz.title model
 
     view bigModel =
         case bigModel of
@@ -98,7 +116,7 @@ So _instead_ of typing out these:
             BazModel model ->
                 baz.subscriptions model
 
-You only need **one** case expression: (woohoo, less boilerplate!)
+You only create **one** case expression: (woohoo, less typing!)
 
     bundle bigModel =
         case bigModel of
@@ -133,9 +151,9 @@ type alias Page route pageParams pageModel pageMsg ui_pageMsg layoutModel layout
 
 
 {-| Implementing the `init`, `update` and `bundle` functions is much easier
-when you turn a `Page` type into `Recipe`.
+when you turn a `Page` type into a `Recipe`.
 
-A `Recipe` contains a record waiting for page specific data.
+A `Recipe` is just an Elm record waiting for its page specific data.
 
   - `init`: just needs a `route`
 
@@ -172,8 +190,8 @@ recipe =
     Internals.Page.upgrade
 
 
-{-| In the event that our `case` expression in `update` receives a `msg` that doesn't
-match up with it's `model`, we use `keep` to leave the page as-is.
+{-| If the `update` function receives a `msg` that doesn't
+match up its `model`, we use `keep` to leave the page as-is.
 
     update : Msg -> Model -> Spa.Update Model Msg
     update bigMsg bigModel =
@@ -427,8 +445,8 @@ element page =
             , init = always init
             , update = always update
             , subscriptions = always subscriptions
-            -- no always, so `view` gets `Global.Model`
-            , view = view
+            , view = view -- no always used here, so view
+                          -- has access to `PageContext`
             }
 
     title : String
@@ -447,11 +465,14 @@ element page =
     subscriptions model =
         -- ...
 
-    view : Global.Model -> Model -> Html Msg
-    view global model =
+    view : Spa.PageContext -> Model -> Html Msg
+    view { global } model =
         case global.user of
-            SignedIn _ -> viewSignOutForm
-            SignedOut -> viewSignInForm
+            SignedIn user ->
+                viewSignOutForm user model
+
+            SignedOut ->
+                viewSignInForm model
 
 -}
 component :
@@ -492,7 +513,7 @@ component page =
         )
 
 
-{-| Useful for sending `Global.Msg` from a component.
+{-| A utility for sending `Global.Msg` commands from your `Page.component`
 
     init : Params.SignIn -> ( Model, Cmd Msg, Cmd Global.Msg )
     init params =

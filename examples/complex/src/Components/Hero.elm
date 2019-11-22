@@ -1,6 +1,6 @@
 module Components.Hero exposing (Action(..), view)
 
-import Components.Styles as Styles
+import Utils.Styles as Styles
 import Element exposing (..)
 import Element.Input as Input
 

@@ -1,4 +1,4 @@
-module Components.Styles exposing
+module Utils.Styles exposing
     ( button
     , colors
     , fonts
@@ -39,7 +39,7 @@ link =
     , Font.color colors.coral
     , transition
         { property = "opacity"
-        , speed = 150
+        , duration = 150
         }
     , mouseOver
         [ alpha 0.6
@@ -59,7 +59,7 @@ button =
     , pointer
     , transition
         { property = "all"
-        , speed = 150
+        , duration = 150
         }
     , mouseOver
         [ Font.color colors.white
@@ -88,14 +88,14 @@ h3 =
 
 transition :
     { property : String
-    , speed : Int
+    , duration : Int
     }
     -> Attribute msg
-transition { property, speed } =
+transition { property, duration } =
     Element.htmlAttribute
         (Attr.style
             "transition"
-            (property ++ " " ++ String.fromInt speed ++ "ms ease-in-out")
+            (property ++ " " ++ String.fromInt duration ++ "ms ease-in-out")
         )
 
 
