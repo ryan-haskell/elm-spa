@@ -14,7 +14,7 @@ module Spa.Types exposing
 
 ## types so spooky, they got their own module!
 
-This module is all about exposing the types that `ryannhg/elm-app` uses
+This module is all about exposing the types that `ryannhg/elm-spa` uses
 under the hood.
 
 You might notice that there are a **lot of generic types**.
