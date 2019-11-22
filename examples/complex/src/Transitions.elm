@@ -1,12 +1,13 @@
 module Transitions exposing (transitions)
 
-import Utils.Styles as Styles
 import Element exposing (..)
 import Generated.Docs.Pages as Docs
 import Spa.Transition as Transition exposing (Transition)
+import Spa.Types
+import Utils.Styles as Styles
 
 
-transitions : Transition.Transitions (Element msg)
+transitions : Spa.Types.Transitions (Element msg)
 transitions =
     { layout = Transition.fadeElmUi 300
     , page = Transition.fadeElmUi 300
