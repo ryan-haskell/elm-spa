@@ -1,0 +1,6 @@
+{
+  "checks" : {
+      "SingleFieldRecord": false,
+      "ImportAll": false
+  }
+}
