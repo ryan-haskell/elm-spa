@@ -1,7 +1,7 @@
 module Main exposing (main)
 
 import Generated.Pages as Pages
-import Generated.Routes as Routes
+import Generated.Routes as Routes exposing (routes)
 import Global
 import Spa
 import Transitions
@@ -15,7 +15,7 @@ main =
         , routing =
             { routes = Routes.parsers
             , toPath = Routes.toPath
-            , notFound = Routes.routes.notFound
+            , notFound = routes.notFound
             }
         , global =
             { init = Global.init

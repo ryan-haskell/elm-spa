@@ -9,6 +9,26 @@ const File = (_ => {
       fs.mkdir(filepath, { recursive: true }, (err) => err ? reject(err) : resolve(filepath))
     )
 
+  const read = (filepath) =>
+    new Promise((resolve, reject) =>
+      fs.readFile(filepath, (err, data) =>
+        err ? reject(err) : resolve(data.toString('utf8')) 
+      )
+    )
+
+  const cp = (src, dest) => {
+    const exists = fs.existsSync(src)
+    const stats = exists && fs.statSync(src)
+    if (stats && stats.isDirectory()) {
+      fs.mkdirSync(dest)
+      fs.readdirSync(src).forEach(child =>
+        cp(path.join(src, child), path.join(dest, child))
+      )
+    } else {
+      fs.copyFileSync(src, dest)
+    }
+  }
+
   const create = (filepath, contents) => {
     // this will surely break windows, im tired and sorry i wrote this line.
     const folderOf = (path) => path.split('/').slice(0, -1).join('/')
@@ -46,7 +66,7 @@ const File = (_ => {
 
     const toPath = (filepath) => (name) =>
       isFile(name)
-        ? Promise.resolve([[ name.split('.')[0] ]])
+        ? Promise.resolve(name.split('.')[1] == 'elm' ? [[ name.split('.')[0] ]] : [])
         : paths(path.join(filepath, name))
             .then(files => files.map(file => [ name ].concat(file)))
 
@@ -56,8 +76,10 @@ const File = (_ => {
   }
 
   return {
+    read,
     paths,
     mkdir,
+    cp,
     create
   }
 })()

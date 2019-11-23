@@ -8,10 +8,39 @@ const main = ([ command, ...args ] = []) =>
     ? commands[command](args)
     : commands.help(args)
 
+// elm-spa init
+const init = (args) => {
+  const parseInitArgs = (args) => {
+    const flagPrefix = '--'
+    const isFlag = arg => arg.indexOf(flagPrefix) == 0
+
+    const flags =
+      args.filter(isFlag)
+        .reduce((obj, arg) => {
+          const [ key, value ] = arg.split('=')
+          obj[key.substring(flagPrefix.length)] = value
+          return obj
+        }, {})
+
+    const [ relative = '.' ] = args.filter(arg => !isFlag(arg))
+
+    return { ui: flags.ui || 'Element', relative }
+  }
+
+  return Promise.resolve(parseInitArgs(args))
+    .then(({ ui, relative }) =>
+      ui === 'Element'
+        ? File.cp(path.join(__dirname, '..', 'initial-projects', 'elm-ui'), path.join(cwd, relative))
+        : File.cp(path.join(__dirname, '..', 'initial-projects', 'html'), path.join(cwd, relative))
+    )
+    .then(console.info)
+    .catch(console.error)
+}
+
 // elm-spa add
 const add = args =>
   Elm.friendlyAddMessages(args)
-    .then((args = []) => {
+    .then(_ => {
       const [ pageType, moduleName, relative = '.' ] = args
       const dir = path.join(cwd, relative)
 
@@ -87,6 +116,7 @@ commands:
 `)
 
 const commands = {
+  init,
   add,
   build,
   help
