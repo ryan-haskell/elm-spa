@@ -9,18 +9,27 @@ const main = ([ command, ...args ] = []) =>
     : commands.help(args)
 
 // elm-spa add
-const add = ([ pageType, moduleName, relative = '.' ]) => {
-  const dir = path.join(cwd, relative)
+const add = args =>
+  Elm.friendlyAddMessages(args)
+    .then((args = []) => {
+      const [ pageType, moduleName, relative = '.' ] = args
+      const dir = path.join(cwd, relative)
 
-  return Elm.checkForElmJson(dir)
-    .then(({ 'elm-spa': config }) =>
-      Elm.run('add', { relative })({ pageType, moduleName, ui: config.ui  })
-        .then(Elm.formatOutput)
-    )
-    .then(str => `\n${str}\n`)
+      return Elm.checkForElmJson(dir)
+        .then(({ 'elm-spa': config }) =>
+          File.paths(path.join(dir, 'src', 'Layouts'))
+            .then(layoutPaths => Elm.run('add', { relative })({
+              pageType,
+              moduleName,
+              layoutPaths,
+              ui: config.ui
+            }))
+            .then(Elm.formatOutput)
+        )
+        .then(str => `\n${str}\n`)
+    })
     .then(console.info)
     .catch(console.error)
-  }
 
 // elm-spa build
 const build = ([ relative = '.' ]) => {

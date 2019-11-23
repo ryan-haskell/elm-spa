@@ -10,7 +10,7 @@ module File exposing
     )
 
 import Json.Encode as Json
-import Set exposing (Set)
+import Set
 
 
 type alias Config =
@@ -92,6 +92,7 @@ type alias {{last}} =
         |> String.trim
 
 
+dynamicCount : List String -> Int
 dynamicCount path =
     path
         |> List.filter ((==) "Dynamic")
@@ -180,6 +181,7 @@ routeFolderImports folderNames =
         |> asImports
 
 
+routeTypes : Details -> String
 routeTypes details =
     """
 type Route
@@ -641,7 +643,7 @@ pagesToInit item =
                 |> String.replace "{{name}}" (last path)
                 |> String.replace "{{uncapitalized}}" (uncapitalize (last path))
 
-        DynamicFile path ->
+        DynamicFile _ ->
             "Route.Dynamic _ params ->\n    recipes.dynamic.init params"
 
         StaticFolder path ->
@@ -649,7 +651,7 @@ pagesToInit item =
                 |> String.replace "{{name}}" (last path)
                 |> String.replace "{{uncapitalized}}" (uncapitalize (last path))
 
-        DynamicFolder path ->
+        DynamicFolder _ ->
             "Route.Dynamic_Folder _ route ->\n    recipes.dynamic_folder.init route"
 
 
@@ -669,7 +671,7 @@ pagesToUpdate item =
                 |> String.replace "{{name}}" (last path)
                 |> String.replace "{{uncapitalized}}" (uncapitalize (last path))
 
-        DynamicFile path ->
+        DynamicFile _ ->
             "( DynamicMsg msg, DynamicModel model ) ->\n    recipes.dynamic.update msg model"
 
         StaticFolder path ->
@@ -677,7 +679,7 @@ pagesToUpdate item =
                 |> String.replace "{{name}}" (last path)
                 |> String.replace "{{uncapitalized}}" (uncapitalize (last path))
 
-        DynamicFolder path ->
+        DynamicFolder _ ->
             "( Dynamic_Folder_Msg msg, Dynamic_Folder_Model model ) ->\n    recipes.dynamic_folder.update msg model"
 
 
@@ -697,7 +699,7 @@ pagesToBundle item =
                 |> String.replace "{{name}}" (last path)
                 |> String.replace "{{uncapitalized}}" (uncapitalize (last path))
 
-        DynamicFile path ->
+        DynamicFile _ ->
             "DynamicModel model ->\n    recipes.dynamic.bundle model"
 
         StaticFolder path ->
@@ -705,7 +707,7 @@ pagesToBundle item =
                 |> String.replace "{{name}}" (last path)
                 |> String.replace "{{uncapitalized}}" (uncapitalize (last path))
 
-        DynamicFolder path ->
+        DynamicFolder _ ->
             "Dynamic_Folder_Model model ->\n    recipes.dynamic_folder.bundle model"
 
 
@@ -867,7 +869,7 @@ routesRecordFunction path =
                             [] ->
                                 list
 
-                            a :: [] ->
+                            _ :: [] ->
                                 list
 
                             a :: b :: rest ->
@@ -1073,11 +1075,6 @@ moduleNameFor ending name =
     [ "Generated", name, ending ]
         |> List.filter (String.isEmpty >> not)
         |> String.join "."
-
-
-nonEmptyString : String -> Bool
-nonEmptyString =
-    not << String.isEmpty
 
 
 sluggify : String -> String

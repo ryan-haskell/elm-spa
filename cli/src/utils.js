@@ -73,7 +73,7 @@ const Elm = (_ => {
         files
           .map(item => ({
             ...item,
-            filepath: path.join(cwd, relative, 'elm-stuff', '.elm-spa', 'Generated', ...item.filepath) + '.elm'
+            filepath: path.join(cwd, relative, ...item.filepath) + '.elm'
           }))
           .map(item => File.create(item.filepath, item.contents))
       )
@@ -106,11 +106,66 @@ const Elm = (_ => {
     (a < b) ? -1 : (a > b) ? 1 : 0
 
   const formatOutput = files => [
-    bold('elm-spa') + ` created ${bold(files.length)} file${files === 1 ? '' : 's'}:`,
+    bold('elm-spa') + ` created ${bold(files.length)} file${files.length === 1 ? '' : 's'}:`,
     files.sort(alphabetically).map(file => '  ' + file).join('\n'),
   ].join('\n\n')
+
+  const friendlyAddMessages = (args = []) => {
+    const [ page, moduleName, relative = '.' ] = args
+  
+    const expectedFiles = [
+      path.join(cwd, relative, 'elm.json'),
+      path.join(cwd, relative, 'src', 'Layouts')
+    ]
+  
+    if (expectedFiles.some(file => !fs.existsSync(file))) {
+      return Promise.reject(`\n  I don't see an elm-spa project here...\n\n  Please run this command in the directory with your ${bold('elm.json')}\n`)
+    }
+  
+    const isValidPage = {
+      'static': true,
+      'sandbox': true,
+      'element': true,
+      'component': true
+    }
+  
+    const isValidModuleName = (name = '') => {
+      const isAlphaOnly = word => word.match(/[A-Z|a-z]+/)[0] === word
+      const isCapitalized = word => word[0].toUpperCase() === word[0]
+      return name &&
+        name.length &&
+        name.split('.').every(word => isAlphaOnly(word) && isCapitalized(word))
+    }
+  
+    const messages = {
+      invalidPage: ({ page, name }) => `
+  ${bold(page)} is not a valid page.
+
+  Try one of these?
+  ${bold(Object.keys(isValidPage).map(page => `elm-spa add ${page} ${name}`).join('\n  '))}
+      `,
+      invalidModuleName: ({ page, name }) => `
+  ${bold(name)} doesn't look like an Elm module.
+
+  Here are some examples of what I'm expecting:
+  ${bold(`elm-spa add ${page} Example`)}
+  ${bold(`elm-spa add ${page} Settings.User`)}
+      `
+    }
+  
+    if (isValidPage[page] !== true) {
+      return Promise.reject(messages.invalidPage({
+        page,
+        name: isValidModuleName(moduleName) ? moduleName : 'Example'
+      }))
+    } else if (isValidModuleName(moduleName) === false) {
+      return Promise.reject(messages.invalidModuleName({ page, name: moduleName }))
+    } else {
+      return Promise.resolve(args)
+    }
+  }
  
-  return { run, checkForElmJson, formatOutput }
+  return { run, checkForElmJson, formatOutput, friendlyAddMessages }
 })()
 
 const bold = str => '\033[1m' + str + '\033[0m'

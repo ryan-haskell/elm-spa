@@ -1,11 +1,13 @@
 module Main exposing (main)
 
+import Add
 import Dict exposing (Dict)
 import File exposing (File)
 import Json.Decode as D exposing (Decoder)
 import Json.Encode as Json
 import Ports
 import Set exposing (Set)
+import Templates.Layout
 
 
 type alias Flags =
@@ -26,21 +28,23 @@ type alias BuildConfig =
 
 type alias AddConfig =
     { ui : String
-    , pageType : PageType
-    , moduleName : List String
+    , pageType : Add.PageType
+    , modulePath : List String
+    , layoutPaths : List Filepath
     }
-
-
-type PageType
-    = Static
-    | Sandbox
-    | Element
-    | Component
 
 
 argsDecoder : String -> Decoder Args
 argsDecoder command =
     case command of
+        "add" ->
+            D.map AddArgs <|
+                D.map4 AddConfig
+                    (D.field "ui" D.string)
+                    (D.field "pageType" Add.pageTypeDecoder)
+                    (D.field "moduleName" Add.modulePathDecoder)
+                    (D.field "layoutPaths" (D.list (D.list D.string)))
+
         "build" ->
             D.map BuildArgs <|
                 D.map BuildConfig
@@ -101,16 +105,51 @@ build { paths } =
                 , File.pages
                 ]
         ]
+        |> List.map (\file -> { file | filepath = List.append [ "elm-stuff", ".elm-spa", "Generated" ] file.filepath })
         |> Ports.createFiles
 
 
 add : AddConfig -> Cmd msg
 add config =
-    Cmd.none
+    Ports.createFiles <|
+        List.concat
+            [ layoutsToCreate
+                { path = config.modulePath
+                , existingLayouts = config.layoutPaths
+                }
+                |> List.map
+                    (\path ->
+                        { filepath = List.append [ "src", "Layouts" ] path
+                        , contents = Templates.Layout.contents { ui = config.ui, modulePath = path }
+                        }
+                    )
+            , [ { filepath = List.append [ "src", "Pages" ] config.modulePath
+                , contents =
+                    Add.generate
+                        config.pageType
+                        { modulePath = config.modulePath
+                        , ui = config.ui
+                        }
+                }
+              ]
+            ]
 
 
 
 -- UTILS
+
+
+layoutsToCreate : { path : Filepath, existingLayouts : List Filepath } -> List Filepath
+layoutsToCreate { path, existingLayouts } =
+    let
+        subLists : List a -> List (List a)
+        subLists list =
+            list
+                |> List.repeat (List.length list - 1)
+                |> List.indexedMap (\i -> List.take (1 + i))
+    in
+    subLists path
+        |> List.filter (\list -> not (List.member list existingLayouts))
 
 
 generate : List (a -> b) -> List a -> List b
