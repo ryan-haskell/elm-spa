@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "learn more at https://elm-spa.dev",
   "scripts": {
-    "start": "npm run dev",
+    "start": "npm install && npm run dev",
     "dev": "npm run elm:spa:build && npm run elm:spa:watch & npm run elm:live",
     "build": "npm run elm:spa:build && npm run elm:compile",
     "elm:compile": "elm make src/Main.elm --output=public/dist/elm.compiled.js --optimize",

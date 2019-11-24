@@ -27,13 +27,22 @@ const init = (args) => {
     return { ui: flags.ui || 'Element', relative }
   }
 
-  return Promise.resolve(parseInitArgs(args))
-    .then(({ ui, relative }) =>
-      ui === 'Element'
-        ? File.cp(path.join(__dirname, '..', 'initial-projects', 'elm-ui'), path.join(cwd, relative))
-        : File.cp(path.join(__dirname, '..', 'initial-projects', 'html'), path.join(cwd, relative))
-    )
-    .then(console.info)
+  const { ui, relative } = parseInitArgs(args)
+
+  return Promise.resolve(
+    (ui === 'Element')
+      ? File.cp(path.join(__dirname, '..', 'initial-projects', 'elm-ui'), path.join(cwd, relative))
+      : File.cp(path.join(__dirname, '..', 'initial-projects', 'html'), path.join(cwd, relative))
+  )
+    .then(_ => console.info(`
+${bold('elm-spa')} created a new project in:
+
+  ${path.join(cwd, relative)}
+
+  run these commands to get started:
+  ${bold('cd ' + path.join(cwd, relative))}
+  ${bold('npm start')}
+`))
     .catch(console.error)
 }
 
@@ -84,7 +93,7 @@ commands:
   ${bold('init')} [options] <path>      create a new project at <path>
 
   options:
-     ${bold('--ui=')}<module>           the module your \`view\` uses (default: Html)
+     ${bold('--ui=')}<module>           the module your \`view\` uses (default: Element)
 
                              examples:
                              ${bold('elm-spa init your-project')}
