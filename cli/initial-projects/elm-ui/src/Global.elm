@@ -38,7 +38,10 @@ init _ _ =
 
 update : Commands msg -> Msg -> Model -> ( Model, Cmd Msg, Cmd msg )
 update _ _ model =
-    model
+    ( model
+    , Cmd.none
+    , Cmd.none
+    )
 
 
 subscriptions : Model -> Sub Msg
