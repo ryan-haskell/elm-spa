@@ -43,7 +43,12 @@ html, body {
 
 .markdown iframe {
   width: 100%;
-  margin: 2em -1em;
+  height: calc(61.25vw - 2rem);
+  max-width: 512px;
+  max-height: 288px;
+  margin-top: 2em;
   background: #eee;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  border: solid 1px #ccc;
+  border-radius: 4px;
 }
