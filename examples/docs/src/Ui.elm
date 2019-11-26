@@ -1,5 +1,6 @@
 module Ui exposing
     ( colors
+    , container
     , markdown
     , sections
     , styles
@@ -98,3 +99,11 @@ transition options =
         |> String.join ", "
         |> Attr.style "transition"
         |> Element.htmlAttribute
+
+
+container : Element msg -> Element msg
+container =
+    el
+        [ centerX
+        , width (fill |> maximum 540)
+        ]

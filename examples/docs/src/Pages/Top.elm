@@ -33,7 +33,7 @@ view =
     Ui.sections
         [ Hero.view
             { title = "elm-spa"
-            , subtitle = "a framework for building single page apps"
+            , subtitle = "reliable web apps made easy"
             , links = [ { label = "get started", url = "/guide" } ]
             }
         , Ui.markdown """

@@ -6,6 +6,7 @@ import Element.Font as Font
 import Generated.Params as Params
 import Generated.Routes as Routes exposing (routes)
 import Spa.Page
+import Ui
 import Utils.Spa exposing (Page)
 
 

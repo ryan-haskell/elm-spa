@@ -23,23 +23,29 @@ view : Options -> Element msg
 view options =
     column
         [ paddingEach
-            { top = 128
+            { top = 120
             , left = 0
             , right = 0
-            , bottom = 32
+            , bottom = 64
             }
         , centerX
         , spacing 24
         ]
-        [ column [ spacing 14, centerX ]
+        [ column [ spacing 16, centerX ]
             [ el
-                [ Font.size 56
+                [ Font.size 64
                 , Font.bold
                 , centerX
                 , Region.heading 1
                 ]
                 (text options.title)
-            , el [ centerX, alpha 0.5, Region.heading 2 ] (text options.subtitle)
+            , el
+                [ Font.size 24
+                , centerX
+                , alpha 0.5
+                , Region.heading 2
+                ]
+                (text options.subtitle)
             ]
         , wrappedRow [ spacing 12, centerX ] <|
             List.map
