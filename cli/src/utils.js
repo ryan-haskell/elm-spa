@@ -30,8 +30,7 @@ const File = (_ => {
   }
 
   const create = (filepath, contents) => {
-    // this will surely break windows, im tired and sorry i wrote this line.
-    const folderOf = (path) => path.split('/').slice(0, -1).join('/')
+    const folderOf = (path_) => path_.split(path.sep).slice(0, -1).join(path.sep)
 
     const write = (filepath, contents) =>
       new Promise((resolve, reject) =>
