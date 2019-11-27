@@ -12,17 +12,31 @@ html, body {
 
 .markdown > *:first-child {
   margin-top: 0;
+  padding-top: 0;
 }
 
 .markdown h3 {
-  margin-top: 1.5rem;
+  margin-top: 1rem;
+  padding-top: 2rem;
   line-height: 1.1;
   font-size: 2rem;
 }
 
 .markdown h4 {
+  margin-top: 0.25rem;
+  margin-bottom: -0.5rem;
+  padding-top: 1rem;
   line-height: 1.2;
   font-size: 1.375rem;
+}
+
+.markdown h5 {
+  opacity: 0.6;
+  margin-top: 0.25rem;
+  padding-top: 1rem;
+  margin-bottom: -0.5rem;
+  line-height: 1.3;
+  font-size: 1.125rem;
 }
 
 .markdown p, ul, ol {
@@ -30,17 +44,40 @@ html, body {
   font-size: 1.25rem;
 }
 
+.markdown p > code {
+  font-family: 'Source Code Pro', monospace;
+  padding: 0.025em 0.25em;
+  border: solid 1px #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+  white-space: nowrap;
+}
+
+.markdown h5 > code {
+  font-family: 'Source Code Pro', monospace;
+  padding: 0.025em 0.25em;
+}
+
 .markdown pre {
-  border: solid 1px #ddd;
+  border: solid 1px #eee;
   border-radius: 4px;
   padding: 1rem;
   margin: 0 calc(4px - 1rem);
   margin-top: 1rem;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  overflow: auto;
 }
 
 .markdown a {
   color: rgb(200, 75, 85);
+}
+
+.markdown ol ol {
+  list-style: lower-alpha;
+}
+
+.markdown ol ol ol {
+  list-style: lower-roman;
 }
 
 .markdown iframe {

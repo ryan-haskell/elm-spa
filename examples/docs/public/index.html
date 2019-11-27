@@ -18,6 +18,15 @@
       window.hljs.initHighlightingOnLoad()
       window.addEventListener('load', _ => {
         window.ports.init(Elm.Main.init())
+
+        // Smooth scroll to hash
+        setTimeout(_ => {
+          if (window.location.hash) {
+            document.querySelector(window.location.hash) &&
+              document.querySelector(window.location.hash)
+                .scrollIntoView({ behavior: "smooth" })
+          }
+        }, 1000)
       })
     </script>
   </body>

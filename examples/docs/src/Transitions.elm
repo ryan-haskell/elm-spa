@@ -2,6 +2,7 @@ module Transitions exposing (transitions)
 
 import Element exposing (..)
 import Generated.Guide.Pages as Guide
+import Spa.Path exposing (static)
 import Spa.Transition as Transition
 import Ui
 import Utils.Spa as Spa
@@ -13,7 +14,10 @@ transitions =
     , page = Transition.fadeElmUi 300
     , pages =
         [ { path = Guide.path
-          , transition = slideFromNav 200
+          , transition = slideFromNav 300
+          }
+        , { path = [ static "docs" ]
+          , transition = Transition.none
           }
         ]
     }
@@ -27,9 +31,10 @@ slideFromNav duration =
             el
                 [ alpha 0
                 , width fill
+                , moveUp 32
                 , height fill
                 , Ui.transition
-                    { duration = 200
+                    { duration = duration
                     , props = [ "opacity", "transform" ]
                     }
                 ]
@@ -39,7 +44,7 @@ slideFromNav duration =
                 , width fill
                 , height fill
                 , Ui.transition
-                    { duration = 200
+                    { duration = duration
                     , props = [ "opacity", "transform" ]
                     }
                 ]
