@@ -81,4 +81,4 @@ frontmatterDecoder : Decoder Frontmatter
 frontmatterDecoder =
     Json.map2 Frontmatter
         (Json.field "title" Json.string)
-        (Json.field "description" (Json.nullable Json.string))
+        (Json.maybe (Json.field "description" Json.string))

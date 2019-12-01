@@ -1,11 +1,12 @@
 module Ui exposing
     ( colors
-    , container
     , markdown
     , markdownArticle
     , sections
     , styles
     , transition
+    , viewNextArticle
+    , viewSidebar
     , webDataMarkdownArticle
     )
 
@@ -96,7 +97,7 @@ markdownArticle :
     }
     -> Element msg
 markdownArticle options =
-    column [ height fill ]
+    column [ width fill, height fill ]
         [ column [ paddingXY 0 64, spacing 8 ] <|
             List.concat
                 [ [ el [ Font.size 48, Font.semiBold ] (text options.title) ]
@@ -157,9 +158,129 @@ transition options =
         |> Element.htmlAttribute
 
 
-container : Element msg -> Element msg
-container =
-    el
-        [ centerX
-        , width (fill |> maximum 540)
+
+-- DOCS SIDEBAR
+
+
+type alias SidebarOptions route =
+    { current : route
+    , links : List (SideItem route)
+    , toPath : route -> String
+    }
+
+
+type SideItem route
+    = Heading String
+    | Link ( String, route )
+
+
+type Match route
+    = NoMatchFound
+    | FoundMatch
+    | HereItIs ( String, route )
+
+
+nextArticle : route -> List (SideItem route) -> Maybe ( String, route )
+nextArticle activeRoute items =
+    items
+        |> List.filterMap
+            (\item ->
+                case item of
+                    Heading _ ->
+                        Nothing
+
+                    Link tuple ->
+                        Just tuple
+            )
+        |> List.foldl
+            (\item match ->
+                case match of
+                    NoMatchFound ->
+                        if Tuple.second item == activeRoute then
+                            FoundMatch
+
+                        else
+                            NoMatchFound
+
+                    FoundMatch ->
+                        HereItIs item
+
+                    HereItIs i ->
+                        HereItIs i
+            )
+            NoMatchFound
+        |> (\match ->
+                case match of
+                    NoMatchFound ->
+                        Nothing
+
+                    FoundMatch ->
+                        Nothing
+
+                    HereItIs item ->
+                        Just item
+           )
+
+
+viewNextArticle :
+    { current : route
+    , links : List (SideItem route)
+    , toPath : route -> String
+    }
+    -> Element msg
+viewNextArticle options =
+    (\link -> paragraph [ Font.size 20 ] [ el [ Font.semiBold ] <| text "next up: ", link ]) <|
+        case nextArticle options.current options.links of
+            Just ( label, r ) ->
+                link (Font.color colors.coral :: styles.link.enabled)
+                    { label = text label
+                    , url = options.toPath r
+                    }
+
+            Nothing ->
+                link (Font.color colors.coral :: styles.link.enabled)
+                    { label = text "the guide"
+                    , url = "/guide"
+                    }
+
+
+viewSidebar :
+    SidebarOptions route
+    -> Element msg
+viewSidebar options =
+    column
+        [ alignTop
+        , spacing 16
+        , width (px 180)
+        , paddingEach { top = 84, left = 0, right = 0, bottom = 0 }
         ]
+        [ el [ Font.size 24, Font.semiBold ] (text "docs")
+        , column [ spacing 8 ] (List.map (viewSideLink options) options.links)
+        ]
+
+
+viewSideLink : SidebarOptions route -> SideItem route -> Element msg
+viewSideLink options item =
+    case item of
+        Heading label ->
+            el
+                [ alpha 0.5
+                , Font.size 18
+                , Font.semiBold
+                , paddingEach { top = 8, left = 0, right = 0, bottom = 0 }
+                ]
+                (text label)
+
+        Link ( label, route ) ->
+            let
+                linkStyles =
+                    if route == options.current then
+                        styles.link.disabled
+
+                    else
+                        styles.link.enabled
+            in
+            link (Font.color colors.coral :: linkStyles)
+                { label = text label
+                , url = options.toPath route
+                }

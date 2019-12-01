@@ -33,6 +33,8 @@ view =
         { title = "docs"
         , subtitle = Just "it's not done until the docs are great!"
         , content = """
+<iframe></iframe>
+
 ### oh hi there!
 
 each section of the docs focus on a single command, concept, or idea in elm-spa.

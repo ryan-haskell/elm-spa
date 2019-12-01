@@ -2,7 +2,6 @@ module Transitions exposing (transitions)
 
 import Element exposing (..)
 import Generated.Docs.Pages as Docs
-import Generated.Guide.Pages as Guide
 import Spa.Path exposing (static)
 import Spa.Transition as Transition
 import Ui
@@ -14,11 +13,8 @@ transitions =
     { layout = Transition.fadeElmUi 500
     , page = Transition.fadeElmUi 300
     , pages =
-        [ { path = Guide.path
+        [ { path = Docs.path
           , transition = Transition.fadeElmUi 300
-          }
-        , { path = Docs.path
-          , transition = Transition.none
           }
         ]
     }

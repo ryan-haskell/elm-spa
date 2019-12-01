@@ -1,12 +1,14 @@
 module Pages.Docs.Dynamic.Dynamic exposing (Model, Msg, page)
 
+import Components.Sidebar as Sidebar
 import Element exposing (..)
 import Generated.Docs.Dynamic.Params as Params
+import Generated.Routes exposing (Route)
 import Http
 import Spa.Page
 import Ui
 import Utils.Markdown as Markdown exposing (Markdown)
-import Utils.Spa exposing (Page)
+import Utils.Spa exposing (Page, PageContext)
 import Utils.WebData as WebData exposing (WebData)
 
 
@@ -14,7 +16,7 @@ page : Page Params.Dynamic Model Msg model msg appMsg
 page =
     Spa.Page.element
         { title = \{ model } -> String.join " | " [ viewTitle model, "docs", "elm-spa" ]
-        , init = always init
+        , init = init
         , update = always update
         , subscriptions = always subscriptions
         , view = always view
@@ -29,14 +31,16 @@ type alias Model =
     { section : String
     , slug : String
     , markdown : WebData (Markdown Markdown.Frontmatter)
+    , route : Route
     }
 
 
-init : Params.Dynamic -> ( Model, Cmd Msg )
-init { param1, param2 } =
+init : PageContext -> Params.Dynamic -> ( Model, Cmd Msg )
+init context { param1, param2 } =
     ( { section = param1
       , slug = param2
       , markdown = WebData.Loading
+      , route = context.route
       }
     , Http.get
         { url = "/" ++ String.join "/" [ "content", "docs", param1, param2 ++ ".md" ]
@@ -77,10 +81,21 @@ subscriptions model =
 
 view : Model -> Element Msg
 view model =
-    Ui.webDataMarkdownArticle
-        { fallbackTitle = viewTitle model
-        , markdown = model.markdown
-        }
+    column [ width fill, spacing 32 ]
+        [ Ui.webDataMarkdownArticle
+            { fallbackTitle = viewTitle model
+            , markdown = model.markdown
+            }
+        , case model.markdown of
+            WebData.Success _ ->
+                Sidebar.viewNextArticle model.route
+
+            WebData.Failure _ ->
+                Sidebar.viewNextArticle model.route
+
+            _ ->
+                text ""
+        ]
 
 
 viewTitle : Model -> String

@@ -56,11 +56,11 @@ npx elm-spa add component Example
 ```
 
 
-### is that it?
+### one more thing!
 
-pretty much! but there's another cool perk when you use the `elm-spa add` command:
+there's one last perk when you use the `elm-spa add` command:
 
-it will automatically create layouts for you too!
+it will automatically create layout files for you too!
 
 ```bash
 npx elm-spa add element Foo.Bar
