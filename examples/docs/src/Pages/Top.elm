@@ -33,10 +33,15 @@ view =
     Ui.sections
         [ Hero.view
             { title = "elm-spa"
-            , subtitle = "reliable web apps made easy"
+            , subtitle = "single page apps made easy"
             , links = [ { label = "get started", url = "/guide" } ]
             }
-        , Ui.markdown """
+        , el
+            [ width (fill |> maximum 480)
+            , centerX
+            ]
+          <|
+            Ui.markdown """
 ### does elm _need_ a framework?
 
 __nope, not really–__ it's kinda got one built in! so building something like React, VueJS, or Angular wouldn't really make sense.

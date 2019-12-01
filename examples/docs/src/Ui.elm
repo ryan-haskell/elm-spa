@@ -2,9 +2,11 @@ module Ui exposing
     ( colors
     , container
     , markdown
+    , markdownArticle
     , sections
     , styles
     , transition
+    , webDataMarkdownArticle
     )
 
 import Element exposing (..)
@@ -13,6 +15,8 @@ import Element.Border as Border
 import Element.Font as Font
 import Html.Attributes as Attr
 import Markdown
+import Utils.Markdown as Markdown exposing (Markdown(..))
+import Utils.WebData as WebData exposing (WebData(..))
 
 
 colors : { coral : Color, white : Color }
@@ -83,6 +87,58 @@ markdown =
         >> Element.html
         >> List.singleton
         >> paragraph []
+
+
+markdownArticle :
+    { title : String
+    , subtitle : Maybe String
+    , content : String
+    }
+    -> Element msg
+markdownArticle options =
+    column [ height fill ]
+        [ column [ paddingXY 0 64, spacing 8 ] <|
+            List.concat
+                [ [ el [ Font.size 48, Font.semiBold ] (text options.title) ]
+                , options.subtitle
+                    |> Maybe.map (text >> List.singleton >> paragraph [ alpha 0.5, Font.size 20 ])
+                    |> Maybe.map List.singleton
+                    |> Maybe.withDefault []
+                ]
+        , markdown options.content
+        ]
+
+
+webDataMarkdownArticle :
+    { fallbackTitle : String
+    , markdown : WebData (Markdown { title : String, description : Maybe String })
+    }
+    -> Element msg
+webDataMarkdownArticle options =
+    case options.markdown of
+        Loading ->
+            el [ height fill ] (text "")
+
+        Success (Markdown.WithFrontmatter { frontmatter, content }) ->
+            markdownArticle
+                { title = frontmatter.title
+                , subtitle = frontmatter.description
+                , content = content
+                }
+
+        Success (Markdown.WithoutFrontmatter content) ->
+            markdownArticle
+                { title = options.fallbackTitle
+                , subtitle = Nothing
+                , content = content
+                }
+
+        Failure _ ->
+            markdownArticle
+                { title = "huh."
+                , subtitle = Just "i couldn't find that article."
+                , content = ""
+                }
 
 
 transition : { props : List String, duration : Int } -> Attribute msg

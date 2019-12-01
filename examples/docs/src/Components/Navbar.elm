@@ -13,10 +13,10 @@ view currentRoute =
         , centerX
         , width fill
         ]
-        [ row [ Font.color colors.coral, spacing 16 ]
+        [ row [ Font.color colors.coral, spacing 20 ]
             [ el [ Font.semiBold, Font.size 20 ]
                 (viewLink currentRoute ( "elm-spa", routes.top ))
-            , viewLink currentRoute ( "docs", routes.docs )
+            , viewLink currentRoute ( "docs", routes.docs_top )
             , viewLink currentRoute ( "guide", routes.guide )
             ]
         , el [ alignRight ] <|

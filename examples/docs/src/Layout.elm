@@ -12,7 +12,7 @@ view : Spa.LayoutContext msg -> Element msg
 view { page, route } =
     column
         [ height fill
-        , width (fill |> maximum 540)
+        , width (fill |> maximum 780)
         , centerX
         , Font.size 16
         , Font.family

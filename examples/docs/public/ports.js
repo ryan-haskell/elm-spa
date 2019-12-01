@@ -1,17 +1,17 @@
-// On load, listen to Elm!
-window.addEventListener('load', _ => {
-  window.ports = {
-    init: (app) =>
+const Ports = {
+  // Called by index.html
+  init: (app) => {
+    if (app.ports && app.ports.outgoing) {
       app.ports.outgoing.subscribe(({ action, data }) =>
-        actions[action]
-          ? actions[action](data)
+        Ports.actions[action]
+          ? Ports.actions[action](data)
           : console.warn(`I didn't recognize action "${action}".`)
       )
+    }
+  },
+  // Maps an action name to its handler
+  actions: {
+    'LOG': (message) =>
+      console.info(`From Elm:`, message)
   }
-})
-
-// maps actions to functions!
-const actions = {
-  'LOG': (message) =>
-    console.log(`From Elm:`, message)
 }

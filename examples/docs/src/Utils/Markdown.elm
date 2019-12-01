@@ -1,10 +1,12 @@
 module Utils.Markdown exposing
-    ( Markdown(..)
+    ( Frontmatter
+    , Markdown(..)
+    , frontmatterDecoder
     , parse
     , parser
     )
 
-import Json.Decode as Json
+import Json.Decode as Json exposing (Decoder)
 import Json.Encode
 import Parser exposing ((|.), (|=), Parser)
 
@@ -47,6 +49,17 @@ type alias RawMarkdown =
 
 parser : Parser RawMarkdown
 parser =
+    let
+        frontmatterParser : Parser String
+        frontmatterParser =
+            Parser.getChompedString <|
+                Parser.chompUntil "---"
+
+        contentParser : Parser String
+        contentParser =
+            Parser.getChompedString <|
+                Parser.chompWhile (always True)
+    in
     Parser.succeed RawMarkdown
         |. Parser.symbol "---"
         |= frontmatterParser
@@ -54,13 +67,18 @@ parser =
         |= contentParser
 
 
-frontmatterParser : Parser String
-frontmatterParser =
-    Parser.getChompedString <|
-        Parser.chompUntil "---"
+
+-- FRONTMATTER
 
 
-contentParser : Parser String
-contentParser =
-    Parser.getChompedString <|
-        Parser.chompWhile (always True)
+type alias Frontmatter =
+    { title : String
+    , description : Maybe String
+    }
+
+
+frontmatterDecoder : Decoder Frontmatter
+frontmatterDecoder =
+    Json.map2 Frontmatter
+        (Json.field "title" Json.string)
+        (Json.field "description" (Json.nullable Json.string))

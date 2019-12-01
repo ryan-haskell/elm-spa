@@ -2,6 +2,14 @@
 { "title": "setup" }
 ---
 
+### what's in this section?
+
+- Installing NodeJS
+- Installing VS Code
+- Installing Elm
+
+<iframe></iframe>
+
 Make sure you have the latest version of [NodeJS](https://nodejs.org/) installed.
 
 ```

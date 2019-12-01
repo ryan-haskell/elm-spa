@@ -7,7 +7,7 @@ module Global exposing
     , update
     )
 
-import Generated.Routes as Routes exposing (Route)
+import Generated.Routes exposing (Route)
 import Ports
 
 
@@ -23,20 +23,20 @@ type Msg
     = Msg
 
 
-type alias Commands msg =
+type alias GlobalContext msg =
     { navigate : Route -> Cmd msg
     }
 
 
-init : Commands msg -> Flags -> ( Model, Cmd Msg, Cmd msg )
+init : GlobalContext msg -> Flags -> ( Model, Cmd Msg, Cmd msg )
 init _ _ =
     ( {}
     , Cmd.none
-    , Ports.log "Hello!"
+    , Ports.log "Global.elm is using ports!"
     )
 
 
-update : Commands msg -> Msg -> Model -> ( Model, Cmd Msg, Cmd msg )
+update : GlobalContext msg -> Msg -> Model -> ( Model, Cmd Msg, Cmd msg )
 update _ _ model =
     ( model
     , Cmd.none
