@@ -34,7 +34,7 @@ view =
         [ Hero.view
             { title = "elm-spa"
             , subtitle = "single page apps made easy"
-            , links = [ { label = "get started", url = "/guide" } ]
+            , links = [ { label = "learn more", url = "/docs" } ]
             }
         , el
             [ width (fill |> maximum 480)

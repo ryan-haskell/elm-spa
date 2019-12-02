@@ -82,10 +82,7 @@ subscriptions model =
 view : Model -> Element Msg
 view model =
     column [ width fill, spacing 32 ]
-        [ Ui.webDataMarkdownArticle
-            { fallbackTitle = viewTitle model
-            , markdown = model.markdown
-            }
+        [ Ui.webDataMarkdownArticle model.markdown
         , case model.markdown of
             WebData.Success _ ->
                 Sidebar.viewNextArticle model.route

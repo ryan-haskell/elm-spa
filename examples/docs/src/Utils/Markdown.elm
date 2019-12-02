@@ -1,6 +1,6 @@
 module Utils.Markdown exposing
     ( Frontmatter
-    , Markdown(..)
+    , Markdown
     , frontmatterDecoder
     , parse
     , parser
@@ -11,15 +11,13 @@ import Json.Encode
 import Parser exposing ((|.), (|=), Parser)
 
 
-type Markdown frontmatter
-    = WithFrontmatter
-        { frontmatter : frontmatter
-        , content : String
-        }
-    | WithoutFrontmatter String
+type alias Markdown frontmatter =
+    { frontmatter : frontmatter
+    , content : String
+    }
 
 
-parse : Json.Decoder a -> String -> Markdown a
+parse : Json.Decoder a -> String -> Result Json.Error (Markdown a)
 parse decoder value =
     value
         |> Parser.run parser
@@ -30,15 +28,11 @@ parse decoder value =
                     |> Json.decodeString decoder
                     |> Result.map
                         (\frontmatter ->
-                            WithFrontmatter
-                                { frontmatter = frontmatter
-                                , content = raw.content
-                                }
+                            { frontmatter = frontmatter
+                            , content = raw.content
+                            }
                         )
-                    |> Result.withDefault (WithoutFrontmatter raw.content)
-                    |> Ok
             )
-        |> Result.withDefault (WithoutFrontmatter value)
 
 
 type alias RawMarkdown =

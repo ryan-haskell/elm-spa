@@ -111,3 +111,12 @@ html, body {
   border: solid 1px #ccc;
   border-radius: 4px;
 }
+
+.markdown thead {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.markdown td {
+  padding-right: 1em;
+}

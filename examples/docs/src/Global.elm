@@ -1,5 +1,6 @@
 module Global exposing
-    ( Flags
+    ( Device(..)
+    , Flags
     , Model
     , Msg(..)
     , init
@@ -7,8 +8,11 @@ module Global exposing
     , update
     )
 
+import Browser.Dom as Dom
+import Browser.Events as Events
 import Generated.Routes exposing (Route)
 import Ports
+import Task
 
 
 type alias Flags =
@@ -16,11 +20,18 @@ type alias Flags =
 
 
 type alias Model =
-    {}
+    { device : Device
+    }
+
+
+type Device
+    = Mobile
+    | Desktop
 
 
 type Msg
-    = Msg
+    = ScreenResized Int Int
+    | GotViewport Dom.Viewport
 
 
 type alias GlobalContext msg =
@@ -30,20 +41,38 @@ type alias GlobalContext msg =
 
 init : GlobalContext msg -> Flags -> ( Model, Cmd Msg, Cmd msg )
 init _ _ =
-    ( {}
-    , Cmd.none
+    ( { device = Desktop
+      }
+    , Task.perform GotViewport Dom.getViewport
     , Ports.log "Global.elm is using ports!"
     )
 
 
 update : GlobalContext msg -> Msg -> Model -> ( Model, Cmd Msg, Cmd msg )
-update _ _ model =
-    ( model
-    , Cmd.none
-    , Cmd.none
-    )
+update _ msg model =
+    case msg of
+        ScreenResized width _ ->
+            ( { model | device = deviceFrom width }
+            , Cmd.none
+            , Cmd.none
+            )
+
+        GotViewport { viewport } ->
+            ( { model | device = deviceFrom (floor viewport.width) }
+            , Cmd.none
+            , Cmd.none
+            )
+
+
+deviceFrom : Int -> Device
+deviceFrom width =
+    if width > 715 then
+        Desktop
+
+    else
+        Mobile
 
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Sub.none
+    Events.onResize ScreenResized

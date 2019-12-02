@@ -37,8 +37,8 @@ view =
 
 ### oh hi there!
 
-each section of the docs focus on a single command, concept, or idea in elm-spa.
+Each section of the docs focus on a single command, concept, or idea in elm-spa.
 
-if you're new to elm-spa, [the guide](/guide) has a complete video tutorial on how to build this site from scratch!
+If you're new to elm-spa, [the guide](/guide) has a complete video tutorial on how to build this site from scratch!
         """
         }

@@ -16,7 +16,7 @@ import Element.Border as Border
 import Element.Font as Font
 import Html.Attributes as Attr
 import Markdown
-import Utils.Markdown as Markdown exposing (Markdown(..))
+import Utils.Markdown as Markdown exposing (Markdown)
 import Utils.WebData as WebData exposing (WebData(..))
 
 
@@ -80,11 +80,15 @@ sections =
 markdown : String -> Element msg
 markdown =
     let
-        options =
+        defaults =
             Markdown.defaultOptions
-                |> (\o -> { o | sanitize = False })
     in
-    Markdown.toHtmlWith options [ Attr.class "markdown" ]
+    Markdown.toHtmlWith
+        { defaults
+            | sanitize = False
+            , githubFlavored = Just { tables = True, breaks = False }
+        }
+        [ Attr.class "markdown" ]
         >> Element.html
         >> List.singleton
         >> paragraph []
@@ -111,26 +115,17 @@ markdownArticle options =
 
 
 webDataMarkdownArticle :
-    { fallbackTitle : String
-    , markdown : WebData (Markdown { title : String, description : Maybe String })
-    }
+    WebData (Markdown { title : String, description : Maybe String })
     -> Element msg
-webDataMarkdownArticle options =
-    case options.markdown of
+webDataMarkdownArticle markdown_ =
+    case markdown_ of
         Loading ->
-            el [ height fill ] (text "")
+            text ""
 
-        Success (Markdown.WithFrontmatter { frontmatter, content }) ->
+        Success { frontmatter, content } ->
             markdownArticle
                 { title = frontmatter.title
                 , subtitle = frontmatter.description
-                , content = content
-                }
-
-        Success (Markdown.WithoutFrontmatter content) ->
-            markdownArticle
-                { title = options.fallbackTitle
-                , subtitle = Nothing
                 , content = content
                 }
 

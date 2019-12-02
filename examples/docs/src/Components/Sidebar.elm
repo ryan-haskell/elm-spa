@@ -13,12 +13,14 @@ type SideItem
 
 links : List SideItem
 links =
-    [ Link ( "docs", routes.docs_top )
+    [ Link ( "overview", routes.docs_top )
     , Heading "the cli"
+    , Link ( "overview", routes.docs_dynamic "elm-spa" )
     , Link ( "elm-spa init", routes.docs_dynamic_dynamic "elm-spa" "init" )
     , Link ( "elm-spa add", routes.docs_dynamic_dynamic "elm-spa" "add" )
     , Link ( "elm-spa build", routes.docs_dynamic_dynamic "elm-spa" "build" )
     , Heading "pages"
+    , Link ( "overview", routes.docs_dynamic "pages" )
     , Link ( "static", routes.docs_dynamic_dynamic "pages" "static" )
     , Link ( "sandbox", routes.docs_dynamic_dynamic "pages" "sandbox" )
     , Link ( "element", routes.docs_dynamic_dynamic "pages" "element" )

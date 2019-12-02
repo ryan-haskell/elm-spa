@@ -29,7 +29,7 @@ expectMarkdown :
     -> Http.Expect msg
 expectMarkdown msg =
     Http.expectString
-        (Result.map (Markdown.parse Markdown.frontmatterDecoder)
+        (Result.andThen (Markdown.parse Markdown.frontmatterDecoder >> Result.mapError (\_ -> Http.BadBody ""))
             >> fromResult
             >> msg
         )
