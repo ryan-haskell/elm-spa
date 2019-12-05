@@ -14,7 +14,7 @@ type SideItem
 links : List SideItem
 links =
     [ Link ( "overview", routes.docs_top )
-    , Heading "the cli"
+    , Heading "elm-spa"
     , Link ( "overview", routes.docs_dynamic "elm-spa" )
     , Link ( "elm-spa init", routes.docs_dynamic_dynamic "elm-spa" "init" )
     , Link ( "elm-spa add", routes.docs_dynamic_dynamic "elm-spa" "add" )
@@ -25,6 +25,9 @@ links =
     , Link ( "sandbox", routes.docs_dynamic_dynamic "pages" "sandbox" )
     , Link ( "element", routes.docs_dynamic_dynamic "pages" "element" )
     , Link ( "component", routes.docs_dynamic_dynamic "pages" "component" )
+    , Heading "layouts"
+    , Link ( "overview", routes.docs_dynamic "layouts" )
+    , Link ( "transitions", routes.docs_dynamic_dynamic "layouts" "transitions" )
     ]
 
 

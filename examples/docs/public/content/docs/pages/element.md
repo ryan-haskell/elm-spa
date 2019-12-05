@@ -34,4 +34,4 @@ For that first example, our `init` function receives `Params` that look like thi
 }
 ```
 
-(You can read more about this in the [routing section](/docs/routing/naming))
+(You can read more about this in the [pages overview](/docs/pages))

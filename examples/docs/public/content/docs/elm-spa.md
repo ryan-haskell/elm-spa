@@ -1,5 +1,5 @@
 ---
-{ "title": "elm-spa cli"
+{ "title": "elm-spa"
 , "description": "a command line tool."
 }
 ---

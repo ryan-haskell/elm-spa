@@ -9,11 +9,11 @@ import Ui exposing (colors, styles)
 view : Route -> Element msg
 view currentRoute =
     row
-        [ spacing 24
+        [ spacing 16
         , centerX
         , width fill
         ]
-        [ row [ Font.color colors.coral, spacing 20 ]
+        [ row [ Font.color colors.coral, spacing 16 ]
             [ el [ Font.semiBold, Font.size 20 ]
                 (viewLink currentRoute ( "elm-spa", routes.top ))
             , viewLink currentRoute ( "docs", routes.docs_top )
