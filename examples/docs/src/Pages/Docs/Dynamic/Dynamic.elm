@@ -15,7 +15,7 @@ import Utils.WebData as WebData exposing (WebData)
 page : Page Params.Dynamic Model Msg model msg appMsg
 page =
     Spa.Page.element
-        { title = \{ model } -> String.join " | " [ viewTitle model, "docs", "elm-spa" ]
+        { title = \{ model } -> String.join " | " [ model.slug, model.section, "docs", "elm-spa" ]
         , init = init
         , update = always update
         , subscriptions = always subscriptions
