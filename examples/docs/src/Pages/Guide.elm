@@ -43,8 +43,7 @@ view =
 __This entire site!__ And in this guide we'll build it together, from scratch.
 (Step-by-step, with short videos)
 
-<iframe title="elm-spa: welcome to the guide!" src="https://www.youtube.com/embed/OMDMawvANNs" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-
+<iframe></iframe>
 
 Until that's ready– checkout the [docs](/docs)!
         """
