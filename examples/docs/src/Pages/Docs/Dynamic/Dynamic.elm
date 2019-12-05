@@ -81,7 +81,18 @@ subscriptions model =
 
 view : Model -> Element Msg
 view model =
-    column [ width fill, spacing 32 ]
+    column
+        [ width fill
+        , spacing 32
+        , alpha
+            (if model.markdown == WebData.Loading then
+                0
+
+             else
+                1
+            )
+        , Ui.transition { props = [ "opacity" ], duration = 300 }
+        ]
         [ Ui.webDataMarkdownArticle model.markdown
         , case model.markdown of
             WebData.Success _ ->
