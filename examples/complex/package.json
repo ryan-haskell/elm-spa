@@ -10,7 +10,7 @@
     "elm:compile": "elm make src/Main.elm --output=dist/elm.compiled.js --optimize",
     "elm:live": "elm-live src/Main.elm --start-page=index.html --open --pushstate --port=1234 -- --output=dist/elm.compiled.js --debug",
     "elm:spa:build": "elm-spa build .",
-    "elm:spa:watch": "SHELL=/bin/bash chokidar 'src/Pages' -c 'npm run elm:spa:build'"
+    "elm:spa:watch": "chokidar 'src/Pages' -c 'npm run elm:spa:build'"
   },
   "dependencies": {
     "chokidar-cli": "2.1.0",
