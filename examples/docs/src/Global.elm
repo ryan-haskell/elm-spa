@@ -32,6 +32,7 @@ type Device
 type Msg
     = ScreenResized Int Int
     | GotViewport Dom.Viewport
+    | AfterNavigate { old : Route, new : Route }
 
 
 type alias GlobalContext msg =
@@ -44,13 +45,19 @@ init _ _ =
     ( { device = Desktop
       }
     , Task.perform GotViewport Dom.getViewport
-    , Ports.log "Global.elm is using ports!"
+    , Cmd.none
     )
 
 
 update : GlobalContext msg -> Msg -> Model -> ( Model, Cmd Msg, Cmd msg )
 update _ msg model =
     case msg of
+        AfterNavigate _ ->
+            ( model
+            , Cmd.none
+            , Ports.scrollToTop
+            )
+
         ScreenResized width _ ->
             ( { model | device = deviceFrom width }
             , Cmd.none

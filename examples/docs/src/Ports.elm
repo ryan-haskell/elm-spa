@@ -1,4 +1,4 @@
-port module Ports exposing (log)
+port module Ports exposing (scrollToTop)
 
 import Json.Encode as Json
 
@@ -6,9 +6,9 @@ import Json.Encode as Json
 port outgoing : { action : String, data : Json.Value } -> Cmd msg
 
 
-log : String -> Cmd msg
-log message =
+scrollToTop : Cmd msg
+scrollToTop =
     outgoing
-        { action = "LOG"
-        , data = Json.string message
+        { action = "SCROLL_TO_TOP"
+        , data = Json.null
         }

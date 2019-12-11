@@ -16,7 +16,7 @@ main =
             { routes = Routes.parsers
             , toPath = Routes.toPath
             , notFound = routes.notFound
-            , afterNavigate = Nothing
+            , afterNavigate = Just Global.AfterNavigate
             }
         , global =
             { init = Global.init

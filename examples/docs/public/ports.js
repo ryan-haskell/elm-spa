@@ -11,7 +11,7 @@ const Ports = {
   },
   // Maps an action name to its handler
   actions: {
-    'LOG': (message) =>
-      console.info(`From Elm:`, message)
+    'SCROLL_TO_TOP': _ =>
+      window.scroll({ top: 0, left: 0, behavior: 'smooth' })
   }
 }
