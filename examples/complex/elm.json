@@ -14,8 +14,7 @@
       "elm/json": "1.1.3",
       "elm/url": "1.0.0",
       "elm-explorations/markdown": "1.0.0",
-      "mdgriffith/elm-ui": "1.1.5",
-      "ryannhg/elm-spa": "1.0.0"
+      "mdgriffith/elm-ui": "1.1.5"
     },
     "indirect": {
       "elm/time": "1.0.0",

@@ -16,7 +16,7 @@
             "elm/url": "1.0.0",
             "elm-explorations/markdown": "1.0.0",
             "mdgriffith/elm-ui": "1.1.5",
-            "ryannhg/elm-spa": "2.0.0"
+            "ryannhg/elm-spa": "3.0.0"
         },
         "indirect": {
             "elm/bytes": "1.0.8",
