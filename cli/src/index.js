@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const package = require('../package.json')
 const path = require('path')
 const cwd = process.cwd()
 const { File, Elm, bold } = require('./utils.js')
@@ -128,7 +129,8 @@ const commands = {
   init,
   add,
   build,
-  help
+  help,
+  '-v': _ => console.info(`elm-spa version ${package.version}`)
 }
 
 main(process.argv.slice(2))
