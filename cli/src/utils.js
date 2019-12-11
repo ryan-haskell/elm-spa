@@ -3,10 +3,11 @@ const fs = require('fs')
 const cwd = process.cwd()
 
 const File = (_ => {
-
   const mkdir = (filepath) =>
     new Promise((resolve, reject) =>
-      fs.mkdir(filepath, { recursive: true }, (err) => err ? reject(err) : resolve(filepath))
+      fs.mkdir(filepath, { recursive: true },
+        (err) => err ? reject(err) : resolve(filepath)
+      )
     )
 
   const read = (filepath) =>
@@ -30,7 +31,8 @@ const File = (_ => {
   }
 
   const create = (filepath, contents) => {
-    const folderOf = (path_) => path_.split(path.sep).slice(0, -1).join(path.sep)
+    const folderOf = (path_) =>
+      path_.split(path.sep).slice(0, -1).join(path.sep)
 
     const write = (filepath, contents) =>
       new Promise((resolve, reject) =>
@@ -65,7 +67,11 @@ const File = (_ => {
 
     const toPath = (filepath) => (name) =>
       isFile(name)
-        ? Promise.resolve(name.split('.')[1] == 'elm' ? [[ name.split('.')[0] ]] : [])
+        ? Promise.resolve(
+            name.split('.')[1] == 'elm'
+              ? [[ name.split('.')[0] ]]
+              : []
+          )
         : paths(path.join(filepath, name))
             .then(files => files.map(file => [ name ].concat(file)))
 
@@ -106,20 +112,22 @@ const Elm = (_ => {
 
       app.ports.outgoing.subscribe(({ message, data }) =>
         handlers[message]
-          ? Promise.resolve(handlers[message](args, data)).then(resolve).catch(reject)
-          : reject(`Didn't recognize message "${message}"– Yell at @ryannhg on the internet!\n`)
+          ? Promise.resolve(handlers[message](args, data))
+              .then(resolve)
+              .catch(reject)
+          : reject(`Didn't recognize message "${message}"– yell at @ryannhg on the internet!\n`)
       )
     })
 
-  const checkForElmJson = (paths) =>
+  const checkForElmSpaJson = (paths) =>
     new Promise((resolve, reject) =>
-      fs.readFile(path.join(paths, 'elm.json'), (_, contents) =>
+      fs.readFile(path.join(paths, 'elm-spa.json'), (_, contents) =>
         contents
           ? Promise.resolve(contents.toString())
               .then(JSON.parse)
               .then(resolve)
-              .catch(_ => `Couldn't understand the ${bold('elm.json')} file at:\n${paths}`)
-          : reject(`Couldn't find an ${bold('elm.json')} file at:\n${paths}`)
+              .catch(_ => `Couldn't understand the ${bold('elm-spa.json')} file at:\n${paths}`)
+          : reject(`Couldn't find an ${bold('elm-spa.json')} file at:\n${paths}`)
       )
     )
 
@@ -135,12 +143,12 @@ const Elm = (_ => {
     const [ page, moduleName, relative = '.' ] = args
   
     const expectedFiles = [
-      path.join(cwd, relative, 'elm.json'),
+      path.join(cwd, relative, 'elm-spa.json'),
       path.join(cwd, relative, 'src', 'Layouts')
     ]
   
     if (expectedFiles.some(file => !fs.existsSync(file))) {
-      return Promise.reject(`\n  I don't see an elm-spa project here...\n\n  Please run this command in the directory with your ${bold('elm.json')}\n`)
+      return Promise.reject(`\n  I don't see an elm-spa project here...\n\n  Please run this command in the directory with your ${bold('elm-spa.json')}\n`)
     }
   
     const isValidPage = {
@@ -186,7 +194,7 @@ const Elm = (_ => {
     }
   }
  
-  return { run, checkForElmJson, formatOutput, friendlyAddMessages }
+  return { run, checkForElmSpaJson, formatOutput, friendlyAddMessages }
 })()
 
 const bold = str => '\033[1m' + str + '\033[0m'

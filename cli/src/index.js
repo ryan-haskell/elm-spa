@@ -53,8 +53,8 @@ const add = args =>
       const [ pageType, moduleName, relative = '.' ] = args
       const dir = path.join(cwd, relative)
 
-      return Elm.checkForElmJson(dir)
-        .then(({ 'elm-spa': config }) =>
+      return Elm.checkForElmSpaJson(dir)
+        .then(config =>
           File.paths(path.join(dir, 'src', 'Layouts'))
             .then(layoutPaths => Elm.run('add', { relative })({
               pageType,
@@ -73,7 +73,7 @@ const add = args =>
 const build = ([ relative = '.' ]) => {
   const dir = path.join(cwd, relative)
 
-  return Elm.checkForElmJson(dir)
+  return Elm.checkForElmSpaJson(dir)
     .then(json =>
       File.paths(path.join(dir, 'src', 'Pages'))
         .then(Elm.run('build', { relative }, json['elm-spa']))
