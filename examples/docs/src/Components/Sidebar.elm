@@ -28,6 +28,10 @@ links =
     , Heading "layouts"
     , Link ( "overview", routes.docs_dynamic "layouts" )
     , Link ( "transitions", routes.docs_dynamic_dynamic "layouts" "transitions" )
+    , Heading "other things"
+    , Link ( "components", routes.docs_dynamic "components" )
+    , Link ( "deploying", routes.docs_dynamic "deploying" )
+    , Link ( "faqs", routes.docs_dynamic "faqs" )
     ]
 
 
@@ -101,7 +105,7 @@ view activeRoute =
     column
         [ alignTop
         , spacing 16
-        , width (px 180)
+        , width (px 200)
         , paddingEach { top = 84, left = 0, right = 0, bottom = 0 }
         ]
         [ el [ Font.size 24, Font.semiBold ] (text "docs")

@@ -33,7 +33,7 @@ page =
 view : Element Msg
 view =
     Hero.view
-        { title = "page not found?"
+        { title = "that's a 404"
         , subtitle = "it's not you, it's me."
         , links =
             [ { label = "but this link works!"

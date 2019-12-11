@@ -37,7 +37,7 @@ view =
             , links = [ { label = "learn more", url = "/docs" } ]
             }
         , el
-            [ width (fill |> maximum 480)
+            [ width (fill |> maximum 512)
             , centerX
             ]
           <|

@@ -1,11 +1,9 @@
 module Components.Hero exposing (Options, view)
 
 import Element exposing (..)
-import Element.Background as Background
-import Element.Border as Border
 import Element.Font as Font
 import Element.Region as Region
-import Ui exposing (colors, styles)
+import Ui exposing (styles)
 
 
 type alias Options =
