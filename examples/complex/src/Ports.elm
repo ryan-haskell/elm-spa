@@ -1,4 +1,4 @@
-port module Ports exposing (scrollTo)
+port module Ports exposing (alert, scrollTo)
 
 import Json.Encode as Json
 
@@ -11,4 +11,12 @@ scrollTo id =
     outgoing
         { action = "SCROLL_TO"
         , data = Json.string id
+        }
+
+
+alert : String -> Cmd msg
+alert message =
+    outgoing
+        { action = "ALERT"
+        , data = Json.string message
         }

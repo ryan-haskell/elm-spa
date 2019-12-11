@@ -32,9 +32,10 @@ as the entrypoint to your app.
                 { routes = Routes.parsers
                 , toPath = Routes.toPath
                 , notFound = routes.notFound
+                , afterNavigate = Nothing
                 }
             , transitions = Transitions.transitions
-            , ui = Spa.usingElmUi   
+            , ui = Spa.usingElmUi
             }
 
 @docs create, Program
@@ -150,6 +151,7 @@ create :
         { routes : List (Parser (route -> route) route)
         , toPath : route -> String
         , notFound : route
+        , afterNavigate : Maybe ({ old : route, new : route } -> globalMsg)
         }
     , transitions :
         { layout : Transition ui_msg
@@ -194,6 +196,7 @@ create config =
                     { fromUrl = fromUrl config.routing
                     , toPath = config.routing.toPath
                     , routes = config.routing.routes
+                    , afterNavigate = config.routing.afterNavigate
                     , transitions = pageTransitions config.transitions
                     }
                 , init = page.init
@@ -331,6 +334,7 @@ update :
         { fromUrl : Url -> route
         , toPath : route -> String
         , routes : Routes route a
+        , afterNavigate : Maybe ({ old : route, new : route } -> globalMsg)
         , transitions :
             List
                 { path : Path
@@ -426,6 +430,17 @@ update config msg model =
                 [ Utils.delay
                     duration
                     (FadeInPage url)
+                , case config.routing.afterNavigate of
+                    Just toMsg ->
+                        (Utils.send >> Cmd.map Global)
+                            (toMsg
+                                { old = config.routing.fromUrl model.url
+                                , new = config.routing.fromUrl url
+                                }
+                            )
+
+                    Nothing ->
+                        Cmd.none
                 ]
             )
 

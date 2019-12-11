@@ -12,6 +12,8 @@ window.addEventListener('load', _ => {
 
 // maps actions to functions!
 const actions = {
+  'ALERT': message =>
+      window.alert(message),
   'SCROLL_TO': id =>
     document.getElementById(id) &&
       window.scrollTo({

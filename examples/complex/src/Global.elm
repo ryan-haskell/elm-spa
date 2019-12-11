@@ -8,6 +8,7 @@ module Global exposing
     )
 
 import Generated.Routes as Routes exposing (Route, routes)
+import Ports
 
 
 type alias Flags =
@@ -22,6 +23,10 @@ type alias Model =
 type Msg
     = SignIn String
     | SignOut
+    | AfterNavigate
+        { old : Route
+        , new : Route
+        }
 
 
 type alias Commands msg =
@@ -40,6 +45,16 @@ init _ _ =
 update : Commands msg -> Msg -> Model -> ( Model, Cmd Msg, Cmd msg )
 update commands msg model =
     case msg of
+        AfterNavigate routes ->
+            ( model
+            , Cmd.none
+            , if routes.new == Routes.routes.guide then
+                Ports.alert "Global: You're on the guide!"
+
+              else
+                Cmd.none
+            )
+
         SignIn user ->
             ( { model | user = Just user }
             , Cmd.none
