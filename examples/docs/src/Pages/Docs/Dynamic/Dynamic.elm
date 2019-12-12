@@ -96,10 +96,10 @@ view model =
         [ Ui.webDataMarkdownArticle model.markdown
         , case model.markdown of
             WebData.Success _ ->
-                Sidebar.viewNextArticle model.route
+                Sidebar.viewNextDocsArticle model.route
 
             WebData.Failure _ ->
-                Sidebar.viewNextArticle model.route
+                Sidebar.viewNextDocsArticle model.route
 
             _ ->
                 text ""

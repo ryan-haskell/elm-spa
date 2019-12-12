@@ -1,8 +1,8 @@
-module Pages.Docs.Dynamic exposing (Model, Msg, page)
+module Pages.Guide.Dynamic exposing (Model, Msg, page)
 
 import Components.Sidebar as Sidebar
 import Element exposing (..)
-import Generated.Docs.Params as Params
+import Generated.Guide.Params as Params
 import Generated.Routes exposing (Route)
 import Http
 import Spa.Page
@@ -15,7 +15,7 @@ import Utils.WebData as WebData exposing (WebData(..))
 page : Page Params.Dynamic Model Msg model msg appMsg
 page =
     Spa.Page.element
-        { title = \{ model } -> String.join " | " [ model.slug, "docs", "elm-spa" ]
+        { title = \{ model } -> String.join " | " [ model.slug, "guide", "elm-spa" ]
         , init = init
         , update = always update
         , subscriptions = always subscriptions
@@ -41,7 +41,7 @@ init { route } { param1 } =
       , route = route
       }
     , Http.get
-        { url = "/" ++ String.join "/" [ "content", "docs", param1 ++ ".md" ]
+        { url = "/" ++ String.join "/" [ "content", "guide", param1 ++ ".md" ]
         , expect = WebData.expectMarkdown Loaded
         }
     )
@@ -94,10 +94,10 @@ view model =
         [ Ui.webDataMarkdownArticle model.markdown
         , case model.markdown of
             WebData.Success _ ->
-                Sidebar.viewNextDocsArticle model.route
+                Sidebar.viewNextGuideArticle model.route
 
             WebData.Failure _ ->
-                Sidebar.viewNextDocsArticle model.route
+                Sidebar.viewNextGuideArticle model.route
 
             _ ->
                 text ""

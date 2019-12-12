@@ -1,5 +1,5 @@
 # your elm-spa
-> learn more at [https://elm-spa.dev](https://elm-spa.dev)
+> single page apps made easy. learn more at [https://elm-spa.dev](https://elm-spa.dev)
 
 ### local development
 

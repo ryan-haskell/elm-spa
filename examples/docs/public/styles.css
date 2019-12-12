@@ -102,7 +102,7 @@ html, body {
 
 .markdown iframe {
   width: 100%;
-  height: calc(61.25vw - 2rem);
+  height: calc(56.25vw - 2rem);
   max-width: 560px;
   max-height: 315px;
   margin-top: 2em;

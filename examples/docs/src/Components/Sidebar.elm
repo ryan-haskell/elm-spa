@@ -1,4 +1,9 @@
-module Components.Sidebar exposing (view, viewNextArticle)
+module Components.Sidebar exposing
+    ( viewDocLinks
+    , viewGuideLinks
+    , viewNextDocsArticle
+    , viewNextGuideArticle
+    )
 
 import Element exposing (..)
 import Element.Font as Font
@@ -11,8 +16,16 @@ type SideItem
     | Link ( String, Route )
 
 
-links : List SideItem
-links =
+guideLinks : List SideItem
+guideLinks =
+    [ Link ( "intro", routes.guide )
+    , Link ( "installation", routes.guide_dynamic "installation" )
+    , Link ( "getting started", routes.guide_dynamic "getting-started" )
+    ]
+
+
+docsLinks : List SideItem
+docsLinks =
     [ Link ( "overview", routes.docs_top )
     , Heading "elm-spa"
     , Link ( "overview", routes.docs_dynamic "elm-spa" )
@@ -83,10 +96,38 @@ nextArticle activeRoute items =
            )
 
 
-viewNextArticle : Route -> Element msg
-viewNextArticle route =
+viewNextDocsArticle =
+    viewNextArticle
+        { items = docsLinks
+        , nextUp =
+            { label = text "the guide"
+            , url = "/guide"
+            }
+        }
+
+
+viewNextGuideArticle =
+    viewNextArticle
+        { items = guideLinks
+        , nextUp =
+            { label = text "the docs"
+            , url = "/docs"
+            }
+        }
+
+
+viewNextArticle :
+    { nextUp :
+        { label : Element msg
+        , url : String
+        }
+    , items : List SideItem
+    }
+    -> Route
+    -> Element msg
+viewNextArticle options route =
     (\link -> paragraph [ Font.size 20 ] [ el [ Font.semiBold ] <| text "next up: ", link ]) <|
-        case nextArticle route links of
+        case nextArticle route options.items of
             Just ( label, r ) ->
                 link (Font.color colors.coral :: styles.link.enabled)
                     { label = text label
@@ -95,21 +136,35 @@ viewNextArticle route =
 
             Nothing ->
                 link (Font.color colors.coral :: styles.link.enabled)
-                    { label = text "the guide"
-                    , url = "/guide"
-                    }
+                    options.nextUp
 
 
-view : Route -> Element msg
-view activeRoute =
+viewDocLinks : Route -> Element msg
+viewDocLinks =
+    view
+        { items = docsLinks
+        , heading = "docs"
+        }
+
+
+viewGuideLinks : Route -> Element msg
+viewGuideLinks =
+    view
+        { items = guideLinks
+        , heading = "guide"
+        }
+
+
+view : { heading : String, items : List SideItem } -> Route -> Element msg
+view { heading, items } activeRoute =
     column
         [ alignTop
         , spacing 16
         , width (px 200)
         , paddingEach { top = 84, left = 0, right = 0, bottom = 0 }
         ]
-        [ el [ Font.size 24, Font.semiBold ] (text "docs")
-        , column [ spacing 8 ] (List.map (viewSideLink activeRoute) links)
+        [ el [ Font.size 24, Font.semiBold ] (text heading)
+        , column [ spacing 8 ] (List.map (viewSideLink activeRoute) items)
         ]
 
 

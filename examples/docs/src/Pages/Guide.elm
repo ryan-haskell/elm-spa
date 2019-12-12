@@ -33,7 +33,7 @@ view =
     Ui.sections
         [ Hero.view
             { title = "guide"
-            , subtitle = "(coming soon)"
+            , subtitle = "(videos coming soon)"
             , links = []
             }
         , el [ centerX, width (fill |> maximum 512) ] <|
@@ -45,5 +45,8 @@ __This entire site!__ And in this guide we'll build it together, from scratch.
 
 <iframe></iframe>
         """
-        , link ([ centerX ] ++ Ui.styles.button) { label = text "let's gooo", url = "/docs" }
+        , link ([ centerX ] ++ Ui.styles.button)
+            { label = text "let's gooo"
+            , url = "/guide/getting-started"
+            }
         ]

@@ -1,4 +1,4 @@
-module Layouts.Docs exposing (view)
+module Layouts.Guide exposing (view)
 
 import Components.Sidebar as Sidebar
 import Element exposing (..)
@@ -12,11 +12,11 @@ view { page, route, global } =
         Global.Mobile ->
             column [ width fill ]
                 [ page
-                , Sidebar.viewDocLinks route
+                , Sidebar.viewGuideLinks route
                 ]
 
         Global.Desktop ->
             row [ width fill ]
-                [ Sidebar.viewDocLinks route
+                [ Sidebar.viewGuideLinks route
                 , el [ width fill, alignTop ] page
                 ]
