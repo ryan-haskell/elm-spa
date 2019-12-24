@@ -30,6 +30,29 @@ const File = (_ => {
     }
   }
 
+  const deleteFolderRecursive = (filepath) => {
+    if (fs.existsSync(filepath)) {
+      fs.readdirSync(filepath).forEach(file => {
+        const current = path.join(filepath, file)
+        if (fs.lstatSync(current).isDirectory()) {
+          deleteFolderRecursive(current)
+        } else {
+          fs.unlinkSync(current)
+        }
+      })
+      fs.rmdirSync(filepath)
+    }
+  }
+
+  const rmdir = (folder) => new Promise((resolve, reject) => {
+    try {
+      deleteFolderRecursive(folder)
+      resolve()
+    } catch (err) {
+      reject(err)
+    }
+  })
+
   const create = (filepath, contents) => {
     const folderOf = (path_) =>
       path_.split(path.sep).slice(0, -1).join(path.sep)
@@ -84,6 +107,7 @@ const File = (_ => {
     read,
     paths,
     mkdir,
+    rmdir,
     cp,
     create
   }
@@ -96,14 +120,17 @@ const Elm = (_ => {
     error: (_, message) =>
       Promise.reject(message),
     createFiles: ({ relative }, files) =>
-      Promise.all(
-        files
-          .map(item => ({
-            ...item,
-            filepath: path.join(cwd, relative, ...item.filepath) + '.elm'
-          }))
-          .map(item => File.create(item.filepath, item.contents))
-      )
+      File.rmdir(path.join(cwd, relative, 'elm-stuff', '.elm-spa', 'Generated'))
+        .then(_ =>
+          Promise.all(
+            files
+              .map(item => ({
+                ...item,
+                filepath: path.join(cwd, relative, ...item.filepath) + '.elm'
+              }))
+              .map(item => File.create(item.filepath, item.contents))
+          )
+        )
   }
 
   const run = (command, args) => (data) =>
