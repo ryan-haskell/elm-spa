@@ -730,8 +730,12 @@ pagesToBundle item =
 -- ROUTES
 
 
-routes : List Filepath -> String
-routes filepaths =
+routes :
+    { paths : List Filepath
+    , pathsWithFiles : List Filepath
+    }
+    -> String
+routes { paths, pathsWithFiles } =
     """
 module Generated.Routes exposing
     ( Route
@@ -774,16 +778,16 @@ parsers : List (Parser (Route -> a) a)
 parsers =
 {{routesParserLines}}
     """
-        |> String.replace "{{routesFolderImports}}" (routesFolderImports filepaths)
-        |> String.replace "{{routesTypeAliases}}" (routesTypeAliases filepaths)
-        |> String.replace "{{routesRecords}}" (routesRecords filepaths)
-        |> String.replace "{{routesParserLines}}" (routesParserLines filepaths)
+        |> String.replace "{{routesFolderImports}}" (routesFolderImports paths)
+        |> String.replace "{{routesTypeAliases}}" (routesTypeAliases pathsWithFiles)
+        |> String.replace "{{routesRecords}}" (routesRecords pathsWithFiles)
+        |> String.replace "{{routesParserLines}}" (routesParserLines pathsWithFiles)
         |> String.trim
 
 
 routesFolderImports : List Filepath -> String
-routesFolderImports files =
-    files
+routesFolderImports paths =
+    paths
         |> List.map dropLast
         |> Set.fromList
         |> Set.toList

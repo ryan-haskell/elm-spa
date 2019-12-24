@@ -95,7 +95,13 @@ handle flags =
 build : BuildConfig -> Cmd msg
 build { paths } =
     List.concat
-        [ [ File [ "Routes" ] (File.routes paths) ]
+        [ [ File [ "Routes" ]
+                (File.routes
+                    { paths = paths ++ [ [ "Authors", "Dynamic" ], [ "Authors", "Dynamic", "Posts" ] ]
+                    , pathsWithFiles = paths
+                    }
+                )
+          ]
         , paths
             |> List.foldl groupByFolder Dict.empty
             |> Debug.log "grouped"
