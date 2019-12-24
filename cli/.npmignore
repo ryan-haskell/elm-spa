@@ -1,3 +1,4 @@
 elm-stuff
 src/elm
 /elm.json
+!.gitignore
