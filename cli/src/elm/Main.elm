@@ -98,12 +98,27 @@ build { paths } =
         [ [ File [ "Routes" ] (File.routes paths) ]
         , paths
             |> List.foldl groupByFolder Dict.empty
+            |> Debug.log "grouped"
             |> toDetails
-            |> generate
-                [ File.params
-                , File.route
-                , File.pages
-                ]
+            |> (\items ->
+                    let
+                        itemsWithFiles : List File.Details
+                        itemsWithFiles =
+                            List.filter
+                                (.files >> List.isEmpty >> not)
+                                items
+
+                        shouldImportParams : String -> Bool
+                        shouldImportParams filepath =
+                            List.member filepath
+                                (List.map .moduleName itemsWithFiles)
+                    in
+                    List.concat
+                        [ List.map File.params itemsWithFiles
+                        , List.map (File.route { shouldImportParams = shouldImportParams }) items
+                        , List.map (File.pages { shouldImportParams = shouldImportParams }) items
+                        ]
+               )
         ]
         |> List.map (\file -> { file | filepath = List.append [ "elm-stuff", ".elm-spa", "Generated" ] file.filepath })
         |> Ports.createFiles
@@ -152,10 +167,10 @@ layoutsToCreate { path, existingLayouts } =
         |> List.filter (\list -> not (List.member list existingLayouts))
 
 
-generate : List (a -> b) -> List a -> List b
+generate : List (a -> Maybe b) -> List a -> List b
 generate fns value =
     List.map
-        (\fn -> List.map fn value)
+        (\fn -> List.filterMap fn value)
         fns
         |> List.concat
 
@@ -219,7 +234,27 @@ toDetails :
     Dict String Items
     -> List File.Details
 toDetails dict =
-    Dict.toList dict
+    [ ( ""
+      , { files = Set.fromList [ [ "NotFound" ], [ "Top" ] ]
+        , folders = Set.fromList [ [ "Authors" ] ]
+        }
+      )
+    , ( "Authors"
+      , { files = Set.fromList []
+        , folders = Set.fromList [ [ "Authors", "Dynamic" ] ]
+        }
+      )
+    , ( "Authors.Dynamic"
+      , { files = Set.fromList []
+        , folders = Set.fromList [ [ "Authors", "Dynamic", "Posts" ] ]
+        }
+      )
+    , ( "Authors.Dynamic.Posts"
+      , { files = Set.fromList [ [ "Authors", "Dynamic", "Posts", "Dynamic" ] ]
+        , folders = Set.fromList []
+        }
+      )
+    ]
         |> List.map
             (\( moduleName, { files, folders } ) ->
                 { moduleName = moduleName

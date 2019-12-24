@@ -117,15 +117,20 @@ paramsRecord path =
 -- ROUTE
 
 
-route : Details -> File
-route details =
-    { filepath = filepathFor details.moduleName "Route"
-    , contents = routeContents details
+type alias Context =
+    { shouldImportParams : String -> Bool
     }
 
 
-routeContents : Details -> String
-routeContents details =
+route : Context -> Details -> File
+route context details =
+    { filepath = filepathFor details.moduleName "Route"
+    , contents = routeContents context details
+    }
+
+
+routeContents : Context -> Details -> String
+routeContents context details =
     """
 module {{routeModuleName}} exposing
     ( Route(..)
@@ -143,7 +148,7 @@ module {{routeModuleName}} exposing
         |> String.replace "{{routeModuleName}}"
             (routeModuleName details.moduleName)
         |> String.replace "{{routeImports}}"
-            (routeImports details)
+            (routeImports context details)
         |> String.replace "{{routeTypes}}"
             (routeTypes details)
         |> String.replace "{{routeToPath}}"
@@ -161,17 +166,27 @@ routeModuleNameFromFilepath =
     String.join "." >> routeModuleName
 
 
-routeImports : Details -> String
-routeImports details =
+routeImports : Context -> Details -> String
+routeImports context details =
     """
-import {{paramModuleName}} as Params
+{{paramImport}}
 {{routeFolderImports}}
     """
-        |> String.replace "{{paramModuleName}}"
-            (paramsModuleName details.moduleName)
+        |> String.replace "{{paramImport}}"
+            (paramImport context details)
         |> String.replace "{{routeFolderImports}}"
             (routeFolderImports details.folders)
         |> String.trim
+
+
+paramImport : Context -> Details -> String
+paramImport context details =
+    if context.shouldImportParams details.moduleName then
+        paramsModuleName details.moduleName
+            |> (\str -> "import " ++ str ++ " as Params")
+
+    else
+        ""
 
 
 routeFolderImports : List Filepath -> String
@@ -325,15 +340,15 @@ toItems { folders, files } =
 -- PAGES
 
 
-pages : Details -> File
-pages details =
+pages : Context -> Details -> File
+pages context details =
     { filepath = filepathFor details.moduleName "Pages"
-    , contents = pagesContents details
+    , contents = pagesContents context details
     }
 
 
-pagesContents : Details -> String
-pagesContents details =
+pagesContents : Context -> Details -> String
+pagesContents context details =
     """
 module {{pagesModuleName}} exposing
     ( Model
@@ -346,7 +361,7 @@ import Spa.Page
 import Spa.Path exposing (Path, static, dynamic)
 import {{layoutModuleName}} as Layout
 import Utils.Spa as Spa
-import {{paramsModuleName}} as Params
+{{paramImport}}
 import {{routeModuleName}} as Route exposing (Route)
 {{pagesPageImports}}
 {{pagesFolderRouteImports}}
@@ -421,7 +436,7 @@ bundle bigModel =
     """
         |> String.replace "{{pagesModuleName}}" (pagesModuleName details.moduleName)
         |> String.replace "{{layoutModuleName}}" (pagesLayoutModuleName details.moduleName)
-        |> String.replace "{{paramsModuleName}}" (paramsModuleName details.moduleName)
+        |> String.replace "{{paramImport}}" (paramImport context details)
         |> String.replace "{{routeModuleName}}" (routeModuleName details.moduleName)
         |> String.replace "{{pagesPageImports}}" (pagesPageImports details.files)
         |> String.replace "{{pagesFolderRouteImports}}" (pagesFolderImports "Route" details.folders)

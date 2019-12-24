@@ -4,6 +4,8 @@ const path = require('path')
 const cwd = process.cwd()
 const { File, Elm, bold } = require('./utils.js')
 
+const debug = (a) => console.log(a) || a
+
 const main = ([ command, ...args ] = []) =>
   commands[command]
     ? commands[command](args)
@@ -77,6 +79,7 @@ const build = ([ relative = '.' ]) => {
   return Elm.checkForElmSpaJson(dir)
     .then(json =>
       File.paths(path.join(dir, 'src', 'Pages'))
+        .then(debug)
         .then(Elm.run('build', { relative }, json['elm-spa']))
         .then(Elm.formatOutput)
     )
@@ -85,27 +88,31 @@ const build = ([ relative = '.' ]) => {
     .catch(console.error)
   }
 
+const version =
+  `${bold('elm-spa')} ${package.version}`
+
 // elm-spa help
 const help = () => console.info(`
+${version}
+
 usage: ${bold('elm-spa')} <command> [...]
 
 commands:
 
-  ${bold('init')} [options] <path>      create a new project at <path>
+  ${bold('init')} [options] <path>     create a new project at <path>
 
   options:
-     ${bold('--ui=')}<module>           the module your \`view\` uses (default: Element)
+     ${bold('--ui=')}<module>          the ui module your \`view\` uses
+                            (default: Element)
 
-                             examples:
-                             ${bold('elm-spa init your-project')}
-                             ${bold('elm-spa init --ui=Element your-project')}
+                            examples:
+                            ${bold('elm-spa init your-project')}
+                            ${bold('elm-spa init --ui=Html your-project')}
 
-                            
-  ${bold('build')} <path>               generate pages and routes
+  ${bold('build')} <path>              generate pages and routes
 
-                             examples:
-                             ${bold('elm-spa build .')}
-
+                            examples:
+                            ${bold('elm-spa build .')}
 
   ${bold('add')} static <module>       create a new static page
       sandbox <module>      create a new sandbox page
@@ -116,13 +123,11 @@ commands:
                             ${bold('elm-spa add static AboutUs')}
                             ${bold('elm-spa add element Settings.Index')}
 
-
   ${bold('help')}                      print this help screen
 
                             examples:
                             ${bold('elm-spa help')}
                             ${bold('elm-spa wat')}
-                            ${bold('elm-spa huh?')}
 `)
 
 const commands = {
@@ -130,7 +135,7 @@ const commands = {
   add,
   build,
   help,
-  '-v': _ => console.info(`elm-spa version ${package.version}`)
+  '-v': _ => console.info(version)
 }
 
 main(process.argv.slice(2))
