@@ -1,6 +1,6 @@
 {
   "name": "elm-spa",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "description": "the cli companion tool for ryannhg/elm-spa",
   "main": "src/index.js",
   "bin": "src/index.js",

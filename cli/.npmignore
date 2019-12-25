@@ -1,4 +1,5 @@
 elm-stuff
 src/elm
+tests
 /elm.json
 !.gitignore
