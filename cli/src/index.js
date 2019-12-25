@@ -4,8 +4,6 @@ const path = require('path')
 const cwd = process.cwd()
 const { File, Elm, bold } = require('./utils.js')
 
-const debug = (a) => console.log(a) || a
-
 const main = ([ command, ...args ] = []) =>
   commands[command]
     ? commands[command](args)
@@ -79,7 +77,6 @@ const build = ([ relative = '.' ]) => {
   return Elm.checkForElmSpaJson(dir)
     .then(json =>
       File.paths(path.join(dir, 'src', 'Pages'))
-        .then(debug)
         .then(Elm.run('build', { relative }, json['elm-spa']))
         .then(Elm.formatOutput)
     )

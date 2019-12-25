@@ -8,6 +8,7 @@ import Json.Encode as Json
 import Ports
 import Set exposing (Set)
 import Templates.Layout
+import Utils
 
 
 type alias Flags =
@@ -97,14 +98,14 @@ build { paths } =
     List.concat
         [ [ File [ "Routes" ]
                 (File.routes
-                    { paths = paths ++ [ [ "Authors", "Dynamic" ], [ "Authors", "Dynamic", "Posts" ] ]
+                    { paths = Utils.allSubsets paths
                     , pathsWithFiles = paths
                     }
                 )
           ]
         , paths
             |> List.foldl groupByFolder Dict.empty
-            |> Debug.log "grouped"
+            |> Utils.addInMissingFolders
             |> toDetails
             |> (\items ->
                     let
@@ -173,14 +174,6 @@ layoutsToCreate { path, existingLayouts } =
         |> List.filter (\list -> not (List.member list existingLayouts))
 
 
-generate : List (a -> Maybe b) -> List a -> List b
-generate fns value =
-    List.map
-        (\fn -> List.filterMap fn value)
-        fns
-        |> List.concat
-
-
 dropLast : List a -> List a
 dropLast =
     List.reverse
@@ -240,27 +233,7 @@ toDetails :
     Dict String Items
     -> List File.Details
 toDetails dict =
-    [ ( ""
-      , { files = Set.fromList [ [ "NotFound" ], [ "Top" ] ]
-        , folders = Set.fromList [ [ "Authors" ] ]
-        }
-      )
-    , ( "Authors"
-      , { files = Set.fromList []
-        , folders = Set.fromList [ [ "Authors", "Dynamic" ] ]
-        }
-      )
-    , ( "Authors.Dynamic"
-      , { files = Set.fromList []
-        , folders = Set.fromList [ [ "Authors", "Dynamic", "Posts" ] ]
-        }
-      )
-    , ( "Authors.Dynamic.Posts"
-      , { files = Set.fromList [ [ "Authors", "Dynamic", "Posts", "Dynamic" ] ]
-        , folders = Set.fromList []
-        }
-      )
-    ]
+    Dict.toList dict
         |> List.map
             (\( moduleName, { files, folders } ) ->
                 { moduleName = moduleName
