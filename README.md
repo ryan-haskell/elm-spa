@@ -1,18 +1,17 @@
 # elm-spa
-> a way to build single page apps with Elm!
+> single page apps made easy
 
+### what is elm-spa?
 
-## it's not done until the docs are great!
+__elm-spa__ is a framework for building web apps in Elm. It's not a "framework" like React or VueJS, it's more of a framework like NextJS, Rails, or .NET MVC.
 
-So nicer documentation and examples are on the way!
+It provides simple tooling and a convention for creating single page apps, so you can focus on the cool thing you want to build!
 
-Until then, you can join the conversation on [discourse](https://discourse.elm-lang.org/t/elm-spa-a-tool-for-building-single-page-apps/4597/27), or start a conversation in a Github issue.
+__Learn more at [elm-spa.dev](https://elm-spa.dev)__
 
-(_Please, no PRs for now. They're tricky to merge with the constant design changes!_)
+### looking for the website's code?
 
+the website project is available over here:
+https://github.com/ryannhg/elm-spa-dev
 
-## local development
-
-```
-npm start
-```
+(that's the one we build together at [elm-spa.dev/guide](https://elm-spa.dev/guide))
