@@ -42,7 +42,7 @@ view =
             ]
           <|
             Ui.markdown """
-### does elm _need_ a framework?
+### does Elm _need_ a framework?
 
 __nope, not really–__ it's kinda got one built in! so building something like React, VueJS, or Angular wouldn't really make sense.
 

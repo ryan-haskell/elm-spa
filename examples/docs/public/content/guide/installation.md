@@ -28,7 +28,7 @@ You can confirm that node is installed by running this command
 npm -v
 ```
 
-(that should spit out a number like `6.11.3`, though it doesn't need to that exact number)
+(that should spit out a number like `6.11.3`, though it doesn't need to be that exact number)
 
 ### installing all the elm things
 

@@ -8,10 +8,10 @@
 
 ### starting simple
 
-Not every component in Elm needs to have it's own `Model`, `Msg`, `init`, 
+Not every component in Elm needs to have its own `Model`, `Msg`, `init`,
 `update`, `view` defined. In fact, a lot of things can just be a function!
 
-Let's look at an examples of using creating a reusable button in Elm:
+Let's look at an example of creating a reusable button in Elm:
 
 ```elm
 module Pages.Top exposing ( Model, Msg, page )
@@ -156,7 +156,7 @@ view =
     ]
 ```
 
-That makes our page a lot shorter, and using `Ui.viewButton` let's readers know 
+That makes our page a lot shorter, and using `Ui.viewButton` lets readers know
 where that function is coming from!
 
 We can now reuse it on `src/Pages/Share.elm` easily!
@@ -183,7 +183,7 @@ In Elm, we _usually_ make a module around data structures. The creator of the la
 Evan Czaplicki, has a [really great talk](https://www.youtube.com/watch?v=XpDsk374LDE)
 about that idea here.
 
-For this site, I made the navbar into it's own file (at `src/Components/Navbar.elm`),
+For this site, I made the navbar into its own file (at `src/Components/Navbar.elm`),
 but I could have just as easily made a function in `src/Ui.elm` that exposed `viewNavbar`.
 
 Directly mapping ideas from JS frameworks like React may lead you down a frustrating path.
@@ -203,7 +203,7 @@ module Components.Example exposing
 -- code
 ```
 
-You'll end up creating a verbosity problem for components (the same one 
+You'll end up creating a verbosity problem for components (the same one
 that __elm-spa__ was designed to fix for pages!)
 
 ```elm

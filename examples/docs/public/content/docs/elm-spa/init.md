@@ -20,7 +20,7 @@ Here, you can replace `your-project` with whatever you like!
 ### choose your ui
 
 By default, running `elm-spa init` will use [elm-ui](https://package.elm-lang.org/packages/mdgriffith/elm-ui/latest/),
-a package that let's us build web UIs _without HTML or CSS_.
+a package that lets us build web UIs _without HTML or CSS_.
 
 It's pretty neat.
 
