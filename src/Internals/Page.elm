@@ -1,73 +1,110 @@
 module Internals.Page exposing
     ( Bundle
     , Init
+    , Layout
+    , LayoutContext
     , Page(..)
+    , PageContext
     , Recipe
     , Update
+    , Upgrade
     , upgrade
     )
 
-{-| Page docs
--}
+import Dict exposing (Dict)
+import Internals.Path exposing (Path)
+import Internals.Transition as Transition exposing (Transition)
 
 
-type Page pageRoute pageModel pageMsg uiPageMsg layoutModel layoutMsg uiLayoutMsg globalModel globalMsg msg uiMsg
-    = Page (Page_ pageRoute pageModel pageMsg uiPageMsg layoutModel layoutMsg uiLayoutMsg globalModel globalMsg msg uiMsg)
+type alias PageContext route globalModel =
+    { global : globalModel
+    , route : route
+    , queryParameters : Dict String String
+    }
 
 
-type alias Page_ pageRoute pageModel pageMsg uiPageMsg layoutModel layoutMsg uiLayoutMsg globalModel globalMsg msg uiMsg =
+type Page route pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
+    = Page (Page_ route pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg)
+
+
+type alias Page_ route pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg =
     { toModel : pageModel -> layoutModel
     , toMsg : pageMsg -> layoutMsg
-    , map : (pageMsg -> layoutMsg) -> uiPageMsg -> uiLayoutMsg
+    , map : (pageMsg -> layoutMsg) -> ui_pageMsg -> ui_layoutMsg
     }
-    -> Recipe pageRoute pageModel pageMsg layoutModel layoutMsg uiLayoutMsg globalModel globalMsg msg uiMsg
+    -> Recipe route pageParams pageModel pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
 
 
-{-| Recipe docs
--}
-type alias Recipe pageRoute pageModel pageMsg layoutModel layoutMsg uiLayoutMsg globalModel globalMsg msg uiMsg =
-    { init : pageRoute -> Init layoutModel layoutMsg globalModel globalMsg
-    , update : pageMsg -> pageModel -> Update layoutModel layoutMsg globalModel globalMsg
-    , bundle : pageModel -> Bundle layoutMsg uiLayoutMsg globalModel globalMsg msg uiMsg
+type alias Recipe route pageParams pageModel pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg =
+    { init : pageParams -> Init route layoutModel layoutMsg globalModel globalMsg
+    , update : pageMsg -> pageModel -> Update route layoutModel layoutMsg globalModel globalMsg
+    , bundle : pageModel -> Bundle route layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
+    }
+
+
+type alias Upgrade route pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg =
+    { page : Page route pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
+    , toModel : pageModel -> layoutModel
+    , toMsg : pageMsg -> layoutMsg
     }
 
 
 upgrade :
-    Page pageRoute pageModel pageMsg uiPageMsg layoutModel layoutMsg uiLayoutMsg globalModel globalMsg msg uiMsg
-    ->
-        { toModel : pageModel -> layoutModel
-        , toMsg : pageMsg -> layoutMsg
-        , map : (pageMsg -> layoutMsg) -> uiPageMsg -> uiLayoutMsg
+    ((pageMsg -> layoutMsg) -> ui_pageMsg -> ui_layoutMsg)
+    -> Upgrade route pageParams pageModel pageMsg ui_pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
+    -> Recipe route pageParams pageModel pageMsg layoutModel layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg
+upgrade map config =
+    let
+        (Page page) =
+            config.page
+    in
+    page
+        { toModel = config.toModel
+        , toMsg = config.toMsg
+        , map = map
         }
-    -> Recipe pageRoute pageModel pageMsg layoutModel layoutMsg uiLayoutMsg globalModel globalMsg msg uiMsg
-upgrade (Page fn) data =
-    fn data
 
 
-{-| Init docs
--}
-type alias Init layoutModel layoutMsg globalModel globalMsg =
-    { global : globalModel }
+type alias Init route layoutModel layoutMsg globalModel globalMsg =
+    PageContext route globalModel
     -> ( layoutModel, Cmd layoutMsg, Cmd globalMsg )
 
 
-{-| Update docs
--}
-type alias Update layoutModel layoutMsg globalModel globalMsg =
-    { global : globalModel }
+type alias Update route layoutModel layoutMsg globalModel globalMsg =
+    PageContext route globalModel
     -> ( layoutModel, Cmd layoutMsg, Cmd globalMsg )
 
 
-{-| Bundle docs
--}
-type alias Bundle layoutMsg uiLayoutMsg globalModel globalMsg msg uiMsg =
-    { global : globalModel
-    , fromGlobalMsg : globalMsg -> msg
+type alias Bundle route layoutMsg ui_layoutMsg globalModel globalMsg msg ui_msg =
+    { fromGlobalMsg : globalMsg -> msg
     , fromPageMsg : layoutMsg -> msg
-    , map : (layoutMsg -> msg) -> uiLayoutMsg -> uiMsg
+    , map : (layoutMsg -> msg) -> ui_layoutMsg -> ui_msg
+    , visibility : Transition.Visibility
+    , path : Path
+    , transitions :
+        List
+            { path : Path
+            , transition : Transition ui_msg
+            }
     }
+    -> PageContext route globalModel
     ->
         { title : String
-        , view : uiMsg
+        , view : ui_msg
         , subscriptions : Sub msg
         }
+
+
+type alias LayoutContext route msg ui_msg globalModel globalMsg =
+    { page : ui_msg
+    , route : route
+    , global : globalModel
+    , fromGlobalMsg : globalMsg -> msg
+    }
+
+
+type alias Layout route pageParams pageModel pageMsg ui_pageMsg globalModel globalMsg msg ui_msg =
+    { path : Path
+    , view : LayoutContext route msg ui_msg globalModel globalMsg -> ui_msg
+    , recipe : Recipe route pageParams pageModel pageMsg pageModel pageMsg ui_pageMsg globalModel globalMsg msg ui_msg
+    }

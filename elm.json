@@ -1,20 +1,23 @@
 {
-  "type": "package",
-  "name": "ryannhg/elm-spa",
-  "summary": "a way to create single page apps with Elm",
-  "license": "BSD-3-Clause",
-  "version": "1.0.0",
-  "exposed-modules": [
-      "Application",
-      "Application.Page",
-      "Application.Route"
-  ],
-  "elm-version": "0.19.0 <= v < 0.20.0",
-  "dependencies": {
-      "elm/browser": "1.0.0 <= v < 2.0.0",
-      "elm/core": "1.0.0 <= v < 2.0.0",
-      "elm/html": "1.0.0 <= v < 2.0.0",
-      "elm/url": "1.0.0 <= v < 2.0.0"
-  },
-  "test-dependencies": {}
+    "type": "package",
+    "name": "ryannhg/elm-spa",
+    "summary": "a way to build single page apps with Elm",
+    "license": "BSD-3-Clause",
+    "version": "3.0.1",
+    "exposed-modules": [
+        "Spa",
+        "Spa.Page",
+        "Spa.Types",
+        "Spa.Transition",
+        "Spa.Path"
+    ],
+    "elm-version": "0.19.0 <= v < 0.20.0",
+    "dependencies": {
+        "elm/browser": "1.0.0 <= v < 2.0.0",
+        "elm/core": "1.0.0 <= v < 2.0.0",
+        "elm/html": "1.0.0 <= v < 2.0.0",
+        "elm/url": "1.0.0 <= v < 2.0.0",
+        "mdgriffith/elm-ui": "1.1.5 <= v < 2.0.0"
+    },
+    "test-dependencies": {}
 }
