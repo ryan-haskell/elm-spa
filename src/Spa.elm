@@ -479,7 +479,7 @@ update config msg model =
 navigate : (route -> String) -> Url -> route -> Cmd (Msg globalMsg layoutMsg)
 navigate toPath url route =
     Utils.send <|
-        ClickedLink (Browser.Internal { url | path = toPath route })
+        ClickedLink (Browser.Internal { url | path = toPath route, query = Nothing })
 
 
 
