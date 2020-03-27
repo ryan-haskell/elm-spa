@@ -113,6 +113,9 @@ const help = {
 
 }
 
+const toUnixFilepath = (filepath) =>
+  filepath.split(path.sep).join('/')
+
 // Available commands
 const commands = {
 
@@ -150,7 +153,7 @@ const commands = {
           .then(names => names.filter(name => name.endsWith('.elm')))
           .then(names => names.map(name => name.substring(folders.pages(dir).length)))
           .then(filepaths => new Promise(
-            Elm.Main.init({ flags: { ...flags, command: 'build', filepaths } }).ports.buildPort.subscribe
+            Elm.Main.init({ flags: { ...flags, command: 'build', filepaths: filepaths.map(toUnixFilepath) } }).ports.buildPort.subscribe
           ))
           .then(files => {
             ensureDirectory(folders.generated(dir))
