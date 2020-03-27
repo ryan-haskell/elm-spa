@@ -1,8 +1,7 @@
 {
     "type": "application",
     "source-directories": [
-        "src",
-        "../../../src"
+        "src"
     ],
     "elm-version": "0.19.1",
     "dependencies": {
@@ -10,7 +9,8 @@
             "elm/browser": "1.0.2",
             "elm/core": "1.0.5",
             "elm/html": "1.0.0",
-            "elm/url": "1.0.0"
+            "elm/url": "1.0.0",
+            "ryannhg/elm-spa": "4.0.0"
         },
         "indirect": {
             "elm/json": "1.1.3",
