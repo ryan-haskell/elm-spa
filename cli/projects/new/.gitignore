@@ -2,3 +2,5 @@
 dist
 elm-stuff
 node_modules
+
+src/Generated

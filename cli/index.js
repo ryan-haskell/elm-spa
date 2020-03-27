@@ -119,7 +119,11 @@ const commands = {
   'init': ([ folder ]) =>
     folder && folder !== 'help'
       ? Promise.resolve()
-          .then(_ => cp(path.join(__dirname, 'projects', 'new'), path.join(process.cwd(), folder)))
+          .then(_ => {
+            const dest = path.join(process.cwd(), folder)
+            cp(path.join(__dirname, 'projects', 'new'), dest)
+            try { fs.renameSync(path.join(dest, '.npmignore'), path.join(dest, '.gitignore')) } catch (_) {}
+          })
           .then(_ => `\ncreated a new project in ${path.join(process.cwd(), folder)}\n`)
           .catch(_ => `\nUnable to initialize a project at ${path.join(process.cwd(), folder)}\n`)
       : Promise.resolve(help.init),

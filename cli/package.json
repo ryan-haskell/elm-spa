@@ -9,7 +9,6 @@
   },
   "scripts": {
     "build": "elm make src/Main.elm --optimize --output dist/elm.worker.js",
-    "publish": "npm run build && npm publish",
     "test": "elm-test",
     "test:watch": "elm-test --watch",
     "dev": "chokidar src -c \"(npm run build || true)\""
