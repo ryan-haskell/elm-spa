@@ -1,9 +1,9 @@
 {
     "type": "package",
     "name": "ryannhg/elm-spa",
-    "summary": "a way to build single page apps with Elm",
+    "summary": "single page apps made easy",
     "license": "BSD-3-Clause",
-    "version": "3.0.1",
+    "version": "3.0.2",
     "exposed-modules": [
         "Spa",
         "Spa.Page",
