@@ -1,6 +1,0 @@
-# sends all routes to /index.html
-# (so you can handle 404s there!)
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
