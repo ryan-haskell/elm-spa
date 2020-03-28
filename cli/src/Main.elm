@@ -1,5 +1,6 @@
 module Main exposing (main)
 
+import Path
 import Platform
 import Ports
 
@@ -20,7 +21,7 @@ main =
                 ( ()
                 , case command of
                     "build" ->
-                        Ports.build filepaths
+                        Ports.build (filepaths |> List.map Path.fromFilepath |> List.sortWith Path.routingOrder)
 
                     "add" ->
                         Ports.add { pageType = pageType, name = name }

@@ -6,7 +6,7 @@ import Add.Sandbox
 import Add.Static
 import Generators.Pages as Pages
 import Generators.Route as Route
-import Path
+import Path exposing (Path)
 
 
 port addPort : { filepath : String, content : String } -> Cmd msg
@@ -56,17 +56,13 @@ add { name, pageType } =
             uhhh ()
 
 
-build : List String -> Cmd msg
-build filepaths =
-    filepaths
-        |> List.map Path.fromFilepath
-        |> (\paths ->
-                [ { filepath = "Generated/Route.elm"
-                  , content = Route.generate paths
-                  }
-                , { filepath = "Generated/Pages.elm"
-                  , content = Pages.generate paths
-                  }
-                ]
-           )
-        |> buildPort
+build : List Path -> Cmd msg
+build paths =
+    buildPort
+        [ { filepath = "Generated/Route.elm"
+          , content = Route.generate paths
+          }
+        , { filepath = "Generated/Pages.elm"
+          , content = Pages.generate paths
+          }
+        ]

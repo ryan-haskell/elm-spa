@@ -4,6 +4,7 @@ module Path exposing
     , fromModuleName
     , hasParams
     , optionalParams
+    , routingOrder
     , toFilepath
     , toFlags
     , toList
@@ -235,6 +236,44 @@ toParamList (Internals list) =
 hasParams : Path -> Bool
 hasParams path =
     dynamicCount path > 0
+
+
+routingOrder : Path -> Path -> Order
+routingOrder (Internals list1) (Internals list2) =
+    let
+        endsIn : String -> List String -> Bool
+        endsIn str list =
+            list
+                |> List.reverse
+                |> List.head
+                |> (==) (Just str)
+
+        endsInTop =
+            endsIn "Top"
+
+        endsInDynamic =
+            endsIn "Dynamic"
+    in
+    if List.length list1 < List.length list2 then
+        LT
+
+    else if List.length list1 > List.length list2 then
+        GT
+
+    else if endsInTop list1 && not (endsInTop list2) then
+        LT
+
+    else if not (endsInTop list1) && endsInTop list2 then
+        GT
+
+    else if not (endsInDynamic list1) && endsInDynamic list2 then
+        LT
+
+    else if endsInDynamic list1 && not (endsInDynamic list2) then
+        GT
+
+    else
+        EQ
 
 
 

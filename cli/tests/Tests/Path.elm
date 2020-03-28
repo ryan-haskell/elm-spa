@@ -8,7 +8,39 @@ import Test exposing (..)
 suite : Test
 suite =
     describe "Path"
-        [ describe "fromFilepath"
+        [ describe "routingOrder"
+            [ test "prioritizes dynamic last" <|
+                \_ ->
+                    Path.routingOrder
+                        (Path.fromFilepath "Example/Top.elm")
+                        (Path.fromFilepath "Example/Dynamic.elm")
+                        |> Expect.equal LT
+            , test "prioritizes files over folders with top" <|
+                \_ ->
+                    Path.routingOrder
+                        (Path.fromFilepath "Example/Top.elm")
+                        (Path.fromFilepath "Example.elm")
+                        |> Expect.equal GT
+            , test "works with List.sortWith as expected" <|
+                \_ ->
+                    [ Path.fromFilepath "Top.elm"
+                    , Path.fromFilepath "About.elm"
+                    , Path.fromFilepath "Authors/Dynamic/Posts/Dynamic.elm"
+                    , Path.fromFilepath "Posts/Dynamic.elm"
+                    , Path.fromFilepath "Posts.elm"
+                    , Path.fromFilepath "Posts/Top.elm"
+                    ]
+                        |> List.sortWith Path.routingOrder
+                        |> Expect.equalLists
+                            [ Path.fromFilepath "Top.elm"
+                            , Path.fromFilepath "About.elm"
+                            , Path.fromFilepath "Posts.elm"
+                            , Path.fromFilepath "Posts/Top.elm"
+                            , Path.fromFilepath "Posts/Dynamic.elm"
+                            , Path.fromFilepath "Authors/Dynamic/Posts/Dynamic.elm"
+                            ]
+            ]
+        , describe "fromFilepath"
             [ test "ignores first slash" <|
                 \_ ->
                     "/Top.elm"
