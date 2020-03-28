@@ -67,7 +67,7 @@ const help = {
   
     ${bold('elm-spa init')} – create a new project
     ${bold('elm-spa add')} – add a new page
-    ${bold('elm-spa build')} – generate files
+    ${bold('elm-spa build')} – generate routes and pages automatically
     
     ${bold('elm-spa <command> help')} – get detailed help for a command
     ${bold('elm-spa -v')} – print version number
@@ -100,10 +100,11 @@ const help = {
   build: `
   ${bold('elm-spa build')} [dir]
 
-    Generate "Generated.Route" and "Generated.Pages" for
-    this project, based on the files in src/Pages/*
+    Create "Generated.Route" and "Generated.Pages" modules for
+    this project, based on the files in "src/Pages"
 
-    Optionally, you can specify a different directory.
+    Here are more details on how that works:
+    https://www.npmjs.com/package/elm-spa#naming-conventions
 
     ${bold('examples:')}
     elm-spa build
