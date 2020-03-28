@@ -96,17 +96,17 @@ type Model
                     \_ ->
                         paths.single
                             |> Pages.pagesUpgradedValues
-                            |> Expect.equal "    { top = Pages.Top.page |> Spa.upgrade Top_Model Top_Msg }"
+                            |> Expect.equal "    { top = Pages.Top.page |> Page.upgrade Top_Model Top_Msg }"
                 , test "works with multiple paths" <|
                     \_ ->
                         paths.multiple
                             |> Pages.pagesUpgradedValues
-                            |> Expect.equal """    { top = Pages.Top.page |> Spa.upgrade Top_Model Top_Msg
-    , about = Pages.About.page |> Spa.upgrade About_Model About_Msg
-    , notFound = Pages.NotFound.page |> Spa.upgrade NotFound_Model NotFound_Msg
-    , posts_top = Pages.Posts.Top.page |> Spa.upgrade Posts_Top_Model Posts_Top_Msg
-    , posts_dynamic = Pages.Posts.Dynamic.page |> Spa.upgrade Posts_Dynamic_Model Posts_Dynamic_Msg
-    , authors_dynamic_posts_dynamic = Pages.Authors.Dynamic.Posts.Dynamic.page |> Spa.upgrade Authors_Dynamic_Posts_Dynamic_Model Authors_Dynamic_Posts_Dynamic_Msg
+                            |> Expect.equal """    { top = Pages.Top.page |> Page.upgrade Top_Model Top_Msg
+    , about = Pages.About.page |> Page.upgrade About_Model About_Msg
+    , notFound = Pages.NotFound.page |> Page.upgrade NotFound_Model NotFound_Msg
+    , posts_top = Pages.Posts.Top.page |> Page.upgrade Posts_Top_Model Posts_Top_Msg
+    , posts_dynamic = Pages.Posts.Dynamic.page |> Page.upgrade Posts_Dynamic_Model Posts_Dynamic_Msg
+    , authors_dynamic_posts_dynamic = Pages.Authors.Dynamic.Posts.Dynamic.page |> Page.upgrade Authors_Dynamic_Posts_Dynamic_Model Authors_Dynamic_Posts_Dynamic_Msg
     }"""
                 ]
             , describe "pagesInit"
@@ -196,7 +196,7 @@ update bigMsg bigModel =
                         paths.single
                             |> Pages.pagesBundle
                             |> Expect.equal (String.trim """
-bundle : Model -> Global.Model -> Spa.Bundle Msg
+bundle : Model -> Global.Model -> Bundle Msg
 bundle bigModel =
     case bigModel of
         Top_Model model ->
@@ -207,7 +207,7 @@ bundle bigModel =
                         paths.multiple
                             |> Pages.pagesBundle
                             |> Expect.equal (String.trim """
-bundle : Model -> Global.Model -> Spa.Bundle Msg
+bundle : Model -> Global.Model -> Bundle Msg
 bundle bigModel =
     case bigModel of
         Top_Model model ->

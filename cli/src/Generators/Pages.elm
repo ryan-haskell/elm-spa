@@ -25,10 +25,9 @@ module Generated.Pages exposing
     , view
     )
 
-import Browser exposing (Document)
 import Generated.Route as Route exposing (Route)
 import Global
-import Spa
+import Page exposing (Bundle, Document)
 {{pagesImports}}
 
 
@@ -49,7 +48,7 @@ import Spa
 type alias UpgradedPage flags model msg =
     { init : flags -> Global.Model -> ( Model, Cmd Msg, Cmd Global.Msg )
     , update : msg -> model -> Global.Model -> ( Model, Cmd Msg, Cmd Global.Msg )
-    , bundle : model -> Global.Model -> Spa.Bundle Msg
+    , bundle : model -> Global.Model -> Bundle Msg
     }
 
 
@@ -171,7 +170,7 @@ pagesUpgradedValues paths =
                 ( Path.toVariableName path
                 , "Pages."
                     ++ Path.toModulePath path
-                    ++ ".page |> Spa.upgrade "
+                    ++ ".page |> Page.upgrade "
                     ++ Path.toTypeName path
                     ++ "_Model "
                     ++ Path.toTypeName path
@@ -258,7 +257,7 @@ pagesBundle : List Path -> String
 pagesBundle paths =
     Utils.function
         { name = "bundle"
-        , annotation = [ "Model", "Global.Model", "Spa.Bundle Msg" ]
+        , annotation = [ "Model", "Global.Model", "Bundle Msg" ]
         , inputs = [ "bigModel" ]
         , body =
             Utils.caseExpression

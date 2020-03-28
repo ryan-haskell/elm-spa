@@ -8,10 +8,9 @@ create path =
     """
 module Pages.{{name}} exposing (Flags, Model, Msg, page)
 
-import Browser exposing (Document)
 import Global
 import Html
-import Spa
+import Page exposing (Document, Page)
 
 
 type alias Flags =
@@ -26,9 +25,9 @@ type Msg
     = NoOp
 
 
-page : Spa.Page Flags Model Msg Global.Model Global.Msg
+page : Page Flags Model Msg
 page =
-    Spa.component
+    Page.component
         { init = init
         , update = update
         , subscriptions = subscriptions
