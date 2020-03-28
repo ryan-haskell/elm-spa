@@ -5,23 +5,22 @@ module Pages.Profile exposing
     , page
     )
 
-import Browser exposing (Document)
 import Browser.Navigation as Nav
 import Data.User as User exposing (User)
 import Global
 import Html exposing (..)
 import Html.Attributes exposing (alt, class, src)
 import Html.Events as Events
-import Spa exposing (Page)
+import Page exposing (Document, Page)
 
 
 
 -- PAGE
 
 
-page : Spa.Page Flags Model Msg Global.Model Global.Msg
+page : Page Flags Model Msg
 page =
-    Spa.component
+    Page.component
         { init = always init
         , update = always update
         , subscriptions = always subscriptions

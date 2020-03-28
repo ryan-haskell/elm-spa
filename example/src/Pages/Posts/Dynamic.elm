@@ -5,10 +5,9 @@ module Pages.Posts.Dynamic exposing
     , page
     )
 
-import Browser exposing (Document)
 import Html exposing (..)
 import Html.Attributes as Attr exposing (class)
-import Spa exposing (Page)
+import Page exposing (Document, Page)
 
 
 type alias Flags =
@@ -25,9 +24,9 @@ type alias Msg =
     Never
 
 
-page : Page Flags Model Msg globalModel globalMsg
+page : Page Flags Model Msg
 page =
-    Spa.element
+    Page.element
         { init = \flags -> ( Model flags.param1, Cmd.none )
         , update = \_ model -> ( model, Cmd.none )
         , subscriptions = \_ -> Sub.none

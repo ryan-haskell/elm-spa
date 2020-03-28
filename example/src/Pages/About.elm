@@ -5,21 +5,20 @@ module Pages.About exposing
     , page
     )
 
-import Browser exposing (Document)
 import Data.Tab as Tab exposing (Tab)
 import Html exposing (..)
 import Html.Attributes as Attr exposing (class)
 import Html.Events as Events
-import Spa exposing (Page)
+import Page exposing (Document, Page)
 
 
 
 -- PAGE
 
 
-page : Spa.Page Flags Model Msg globalModel globalMsg
+page : Page Flags Model Msg
 page =
-    Spa.sandbox
+    Page.sandbox
         { init = init
         , update = update
         , view = view

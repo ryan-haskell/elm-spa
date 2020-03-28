@@ -5,10 +5,9 @@ module Pages.Posts.Top exposing
     , page
     )
 
-import Browser exposing (Document)
 import Html exposing (..)
 import Html.Attributes as Attr exposing (class, href)
-import Spa exposing (Page)
+import Page exposing (Document, Page)
 
 
 type alias Flags =
@@ -23,14 +22,14 @@ type alias Msg =
     Never
 
 
-page : Page Flags Model Msg globalModel globalMsg
+page : Page Flags Model Msg
 page =
-    Spa.static
+    Page.static
         { view = view
         }
 
 
-view : Document msg
+view : Document Msg
 view =
     { title = "Posts"
     , body =
