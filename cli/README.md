@@ -1,4 +1,6 @@
-# elm-spa
+# elm-spa 
+
+[![Build Status](https://travis-ci.org/ryannhg/elm-spa.svg?branch=master)](https://travis-ci.org/ryannhg/elm-spa)
 
 ## single page apps made easy
 
