@@ -32,7 +32,7 @@ page =
         , update = update
         , view = view
         }
-    ```
+```
 
 ```elm
 module Pages.Posts exposing (page)
