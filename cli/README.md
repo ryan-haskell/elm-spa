@@ -4,7 +4,7 @@
 
 ## single page apps made easy
 
-this is the cli tool for [the ryannhg/elm-spa package](https://package.elm-lang.org/packages/ryannhg/elm-spa/latest/Spa). 
+this is the cli tool for [the ryannhg/elm-spa package](https://package.elm-lang.org/packages/ryannhg/elm-spa/latest). 
 
 It comes with a few commands to help you build single page applications in Elm!
 
@@ -140,5 +140,5 @@ These `Flags` are automatically passed in to the `init` function of any `element
 
 ## the elm package
 
-Need more details? Feel free to check out the [official elm package documentation](https://package.elm-lang.org/packages/ryannhg/elm-spa/latest/Spa)!
+Need more details? Feel free to check out the [official elm package documentation](https://package.elm-lang.org/packages/ryannhg/elm-spa/latest)!
 
