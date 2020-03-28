@@ -14,48 +14,52 @@ Make your page as simple as you need:
 module Pages.Home exposing (page)
 
 -- can render a static page
+page : Page Flags Model Msg
 page =
-    Spa.static
-      { view = view
-      }
+    Page.static
+        { view = view
+        }
 ```
 
 ```elm
 module Pages.About exposing (page)
 
 -- can keep track of page state
+page : Page Flags Model Msg
 page =
-    Spa.sandbox
-      { init = init
-      , update = update
-      , view = view
-      }
-```
+    Page.sandbox
+        { init = init
+        , update = update
+        , view = view
+        }
+    ```
 
 ```elm
 module Pages.Posts exposing (page)
 
 -- can perform side effects
+page : Page Flags Model Msg
 page =
-    Spa.element
-      { init = init
-      , update = update
-      , subscriptions = subscriptions
-      , view = view
-      }
+    Page.element
+        { init = init
+        , update = update
+        , subscriptions = subscriptions
+        , view = view
+        }
 ```
 
 ```elm
 module Pages.SignIn exposing (page)
 
 -- can read and update global state
+page : Page Flags Model Msg
 page =
-    Spa.component
-      { init = init
-      , update = update
-      , subscriptions = subscriptions
-      , view = view
-      }
+    Page.component
+        { init = init
+        , update = update
+        , subscriptions = subscriptions
+        , view = view
+        }
 ```
 
 ### putting your pages together is super easy!
@@ -114,7 +118,7 @@ elm-spa init new-project
 ### install the elm package
 
 If you'd rather define routes and pages by hand,
-you can add [the elm package](https://package.elm-lang.org/packages/ryannhg/elm-spa/latest/Spa) to your project:
+you can add [the elm package](https://package.elm-lang.org/packages/ryannhg/elm-spa/latest) to your project:
 
 ```
 elm install ryannhg/elm-spa
