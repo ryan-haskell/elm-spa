@@ -209,6 +209,7 @@ You can check out <https://elm-spa.dev> or join #elm-spa-users on the official E
 
 import Browser exposing (Document)
 import Html
+import Spa.Advanced as Advanced
 
 
 
@@ -242,12 +243,8 @@ static :
     { view : Document msg
     }
     -> Page flags () msg globalModel globalMsg
-static options =
-    { init = \_ _ -> ( (), Cmd.none, Cmd.none )
-    , update = \_ _ model -> ( model, Cmd.none, Cmd.none )
-    , view = \_ _ -> options.view
-    , subscriptions = \_ _ -> Sub.none
-    }
+static =
+    Advanced.static
 
 
 {-|
@@ -269,12 +266,8 @@ sandbox :
     , view : model -> Document msg
     }
     -> Page flags model msg globalModel globalMsg
-sandbox options =
-    { init = \_ _ -> ( options.init, Cmd.none, Cmd.none )
-    , update = \_ msg model -> ( options.update msg model, Cmd.none, Cmd.none )
-    , view = always options.view
-    , subscriptions = \_ _ -> Sub.none
-    }
+sandbox =
+    Advanced.sandbox
 
 
 {-|
@@ -296,12 +289,8 @@ element :
     , subscriptions : model -> Sub msg
     }
     -> Page flags model msg globalModel globalMsg
-element page =
-    { init = \_ flags -> page.init flags |> (\( model, cmd ) -> ( model, cmd, Cmd.none ))
-    , update = \_ msg model -> page.update msg model |> (\( model_, cmd ) -> ( model_, cmd, Cmd.none ))
-    , subscriptions = always page.subscriptions
-    , view = always page.view
-    }
+element =
+    Advanced.element
 
 
 {-|
@@ -327,7 +316,7 @@ component :
     }
     -> Page flags model msg globalModel globalMsg
 component =
-    identity
+    Advanced.component
 
 
 {-| For each page we export from our `Pages.*` modules, we should call the `upgrade` function with the corresponding `Model` and `Msg` variants, like this:
@@ -349,19 +338,13 @@ upgrade :
         , update : pageMsg -> pageModel -> globalModel -> ( model, Cmd msg, Cmd globalMsg )
         , bundle : pageModel -> globalModel -> Bundle msg
         }
-upgrade toModel toMsg page =
-    { init =
-        \flags global ->
-            page.init global flags |> (\( model, cmd, globalCmd ) -> ( toModel model, Cmd.map toMsg cmd, globalCmd ))
-    , update =
-        \msg model global ->
-            page.update global msg model |> (\( model_, cmd, globalCmd ) -> ( toModel model_, Cmd.map toMsg cmd, globalCmd ))
-    , bundle =
-        \model global ->
-            { view = page.view global model |> (\doc -> { title = doc.title, body = List.map (Html.map toMsg) doc.body })
-            , subscriptions = page.subscriptions global model |> Sub.map toMsg
+upgrade =
+    Advanced.upgrade
+        (\toMsg doc ->
+            { title = doc.title
+            , body = List.map (Html.map toMsg) doc.body
             }
-    }
+        )
 
 
 {-|

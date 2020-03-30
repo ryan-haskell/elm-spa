@@ -8,11 +8,13 @@ When you create an app with the [elm/browser](https://package.elm-lang.org/packa
 
 __elm-spa__ uses that design at the page-level, so you can quickly add new pages to your Elm application!
 
-Make your page as simple as you need:
+✅ Automatically generate routes and pages
+
+✅ Read and update global state across pages
+
+## static pages
 
 ```elm
-module Pages.Home exposing (page)
-
 -- can render a static page
 page : Page Flags Model Msg
 page =
@@ -21,9 +23,9 @@ page =
         }
 ```
 
-```elm
-module Pages.About exposing (page)
+## sandbox pages
 
+```elm
 -- can keep track of page state
 page : Page Flags Model Msg
 page =
@@ -34,9 +36,9 @@ page =
         }
 ```
 
-```elm
-module Pages.Posts exposing (page)
+## element pages
 
+```elm
 -- can perform side effects
 page : Page Flags Model Msg
 page =
@@ -48,9 +50,9 @@ page =
         }
 ```
 
-```elm
-module Pages.SignIn exposing (page)
+## component pages
 
+```elm
 -- can read and update global state
 page : Page Flags Model Msg
 page =
@@ -62,7 +64,14 @@ page =
         }
 ```
 
-### putting your pages together is super easy!
+## easily put together pages!
+
+The reason we return the same `Page` type is to make it super
+easy to write top-level `init`, `update`, `view`, and `susbcriptions` functions.
+
+(And if you're using the [official cli tool](https://npmjs.org/elm-spa), this code will be automatically generated for you)
+
+### `init`
 
 ```elm
 init : Route -> Global.Model -> ( Model, Cmd Msg, Cmd Global.Msg )
@@ -73,6 +82,8 @@ init route =
         Route.Posts slug -> pages.posts.init slug
         Route.SignIn -> pages.signIn.init ()
 ```
+
+### `update`
 
 ```elm
 update : Msg -> Model -> Global.Model -> ( Model, Cmd Msg, Cmd Global.Msg )
@@ -93,6 +104,8 @@ update bigMsg bigModel =
         _ ->
             always ( bigModel, Cmd.none, Cmd.none )
 ```
+
+### `view` + `subscriptions`
 
 ```elm
 -- handle view and subscriptions in one case expression!
@@ -127,10 +140,22 @@ elm install ryannhg/elm-spa
 ### rather see an example?
 
 This repo comes with an example project that you can
-play around with. add in some pages and see how it works!
+play around with. Add in some pages and see how it works!
+
+#### html example
 
 ```
 git clone https://github.com/ryannhg/elm-spa
-cd example
+cd elm-spa/examples/html
 npm start
 ```
+
+#### elm-ui example
+
+```
+git clone https://github.com/ryannhg/elm-spa
+cd elm-spa/examples/elm-ui
+npm start
+```
+
+The __elm-spa__ will be running at http://localhost:8000
