@@ -501,3 +501,238 @@ toHref route =
 ```
 
 This function allows all our URLs to be handled in one place in the application.
+
+
+## src/Pages.elm
+
+Now we are ready to take a look at how `ryannhg/elm-spa` allows us to compose together our pages.
+
+Let's define the top-level `Pages` module that handles initializing, updating, viewing, and receiving subscriptions from the current page.
+
+```elm
+import Pages exposing
+    ( Model
+    , Msg
+    , init
+    , update
+    , view
+    , subscriptions
+    )
+
+import Global
+import Document exposing (Document)
+import Page exposing (Page)
+import Pages.Top as Top
+import Pages.AboutUs as AboutUs
+import Pages.Posts as Posts
+import Pages.Post as Post
+import Pages.NotFound as NotFound
+import Route
+import Url exposing (Url)
+```
+
+### model, msg, and upgraded pages
+
+The user can only be on one page at a time, so we use a custom type to represent which page we are currently viewing.
+
+```elm
+type Model
+    = Top_Model Top.Model
+    | AboutUs_Model AboutUs.Model
+    | Posts_Model Posts.Model
+    | Post_Model Post.Model
+    | NotFound_Model NotFound.Model
+```
+
+Additionally, messages could be sent from any one of the five pages.
+
+```elm
+type Msg
+    = Top_Msg Top.Msg
+    | AboutUs_Msg AboutUs.Msg
+    | Posts_Msg Posts.Msg
+    | Post_Msg Post.Msg
+    | NotFound_Msg NotFound.Msg
+```
+
+What's great about the custom types above? Each variant we created (like `Top_Model` and `Top_Msg`) are actually functions with signatures like this:
+
+```elm
+Top_Model : Top.Model -> Model
+Top_Msg : Top.Msg -> Msg
+
+AboutUs_Model : AboutUs.Model -> Model
+AboutUs_Msg : AboutUs.Msg -> Msg
+
+Posts_Model : Posts.Model -> Model
+Posts_Msg : Posts.Msg -> Msg
+
+-- ... same for Post, NotFound
+```
+
+What that means is if I call `Top_Model` with a `Top.Model`, I'll get a `Model` back. The same goes for giving `About_Msg` an `AboutUs.Msg`!
+
+All these varaiants are functions that tell each page how they can upgrade to the shared `Model` and `Msg` types we just defined.
+
+With `elm-spa`, we want to "upgrade our pages" using these variants!
+
+```elm
+type alias Upgraded pageFlags pageModel pageMsg =
+    { init :
+        pageFlags
+        -> Global.Model
+        -> ( Model, Cmd Msg, Cmd Global.Msg )
+    , update :
+        pageMsg
+        -> pageModel
+        -> Global.Model
+        -> ( Model, Cmd Msg, Cmd Global.Msg )
+    , bundle :
+        pageModel
+        -> { view : Document Msg
+           , subscriptions : Sub Msg
+           }
+    }
+```
+
+Our goal now is to create an `Upgraded` for each page in our application. An "upgraded page" has all the information we need to return the correct values, no matter which page we are using.
+
+It returns a record with three functions. Each of these functions take page-specific input and output the **same type of value**.
+
+Returning the same type is what allows us to easily create the top-level `init`, `update`, `view`, and `subscriptions` functions.
+
+Fortunately, if we provide `Page.upgrade` with those variant functions and a page, `elm-spa` handles the logic for us!
+
+```elm
+pages :
+    { top : Upgraded Top.Flags Top.Model Top.Msg
+    , aboutUs : Upgraded AboutUs.Flags AboutUs.Model AboutUs.Msg
+    , posts : Upgraded Posts.Flags Posts.Model Posts.Msg
+    , post : Upgraded Post.Flags Post.Model Post.Msg
+    , notFound : Upgraded NotFound.Flags NotFound.Model NotFound.Msg
+    }
+pages =
+    { top = Top.page |> Page.upgrade Top_Model Top_Msg
+    , aboutUs = AboutUs.page |> Page.upgrade AboutUs_Model AboutUs_Msg
+    , posts = Posts.page |> Page.upgrade Posts_Model Posts_Msg
+    , post = Post.page |> Page.upgrade Post_Model Post_Msg
+    , notFound = NotFound.page |> Page.upgrade NotFound_Model NotFound_Msg
+    }
+```
+
+It's okay if this doesn't make sense yet, let's look at how we use the upgraded `pages` values to create our top-level `Pages` functions:
+
+### init
+
+```elm
+init : Url -> Global.Model -> ( Model, Cmd Msg, Cmd Global.Msg )
+init url =
+    case Route.fromUrl url of
+        Route.Top ->
+            pages.top.init ()
+
+        Route.AboutUs ->
+            pages.aboutUs.init ()
+
+        Route.Posts ->
+            pages.posts.init ()
+
+        Route.Post id ->
+            pages.post.init id
+
+        Route.NotFound ->
+            pages.notFound.init ()
+
+```
+
+### update
+
+```elm
+update : Msg -> Model -> Global.Model -> ( Model, Cmd Msg, Cmd Global.Msg )
+update msg_ model_ =
+    case ( msg_, model_ ) of
+        ( Top_Msg msg, Top_Model model ) ->
+            pages.top.update msg model
+
+        ( AboutUs_Msg msg, AboutUs_Model model ) ->
+            pages.aboutUs.update msg model
+
+        ( Posts_Msg msg, Posts_Model model ) ->
+            pages.posts.update msg model
+
+        ( Post_Msg msg, Post_Model model ) ->
+            pages.post.update msg model
+
+        ( NotFound_Msg msg, NotFound_Model model ) ->
+            pages.notFound.update msg model
+
+        _ ->
+            -- msg doesn't match model, no update
+            ( model_, Cmd.none, Cmd.none )
+```
+
+### view + subscriptions
+
+```elm
+bundle Model -> Global.Model -> ( Model, Cmd Msg, Cmd Global.Msg )
+bundle model_ =
+    case model_ of
+        Top_Model model ->
+            pages.top.bundle model
+
+        AboutUs_Model model ->
+            pages.aboutUs.bundle model
+
+        Posts_Model model ->
+            pages.posts.bundle model
+
+        Post_Model model ->
+            pages.post.bundle model
+
+        NotFound_Model model ->
+            pages.notFound.bundle model
+
+
+view : Model -> Global.Model -> Document Msg
+view model =
+    bundle model >> .view
+
+
+subscriptions : Model -> Global.Model -> Sub Msg
+subscriptions model =
+    bundle model >> .subscriptions
+```
+
+Each function provides page-specific flags, model, or msg values and returns the same `Model` and `Msg` types that the functions expect.
+
+No need to manually upgrade these by hand.
+
+
+## src/Page.elm
+
+TODO
+
+
+## src/Page/Top.elm
+
+TODO
+
+
+## src/Page/AboutUs.elm
+
+TODO
+
+
+## src/Page/Posts.elm
+
+TODO
+
+
+## src/Page/Post.elm
+
+TODO
+
+
+## src/Page/NotFoun.elm
+
+TODO
