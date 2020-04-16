@@ -448,7 +448,7 @@ Our route module will be using a `Url.Parser` from the `elm/url` package to impl
 
 ```elm
 type Route
-    = Top
+    = Home
     | AboutUs
     | Posts
     | Post String
@@ -464,7 +464,7 @@ We can create our `Route` by parsing a `Url`.
 ```elm
 fromUrl : Url -> Route
 fromUrl url =
-    [ Parser.map Top Parser.top
+    [ Parser.map Home Parser.top
     , Parser.map AboutUs (Parser.s "about-us")
     , Parser.map Posts (Parser.s "posts")
     , Parser.map Post (Parser.s "posts" </> Parser.string)
@@ -484,7 +484,7 @@ If we want to turn our `AboutUs` route back into `/about-us`, we'll need to defi
 toHref : Route -> String
 toHref route =
     case route of
-        Top ->
+        Home ->
             "/"
 
         AboutUs ->
@@ -522,7 +522,7 @@ import Pages exposing
 import Global
 import Document exposing (Document)
 import Page exposing (Page)
-import Pages.Top as Top
+import Pages.Home as Home
 import Pages.AboutUs as AboutUs
 import Pages.Posts as Posts
 import Pages.Post as Post
@@ -537,7 +537,7 @@ The user can only be on one page at a time, so we use a custom type to represent
 
 ```elm
 type Model
-    = Top_Model Top.Model
+    = Home_Model Home.Model
     | AboutUs_Model AboutUs.Model
     | Posts_Model Posts.Model
     | Post_Model Post.Model
@@ -548,18 +548,18 @@ Additionally, messages could be sent from any one of the five pages.
 
 ```elm
 type Msg
-    = Top_Msg Top.Msg
+    = Home_Msg Home.Msg
     | AboutUs_Msg AboutUs.Msg
     | Posts_Msg Posts.Msg
     | Post_Msg Post.Msg
     | NotFound_Msg NotFound.Msg
 ```
 
-What's great about the custom types above? Each variant we created (like `Top_Model` and `Top_Msg`) are actually functions with signatures like this:
+What's great about the custom types above? Each variant we created (like `Home_Model` and `Home_Msg`) are actually functions with signatures like this:
 
 ```elm
-Top_Model : Top.Model -> Model
-Top_Msg : Top.Msg -> Msg
+Home_Model : Home.Model -> Model
+Home_Msg : Home.Msg -> Msg
 
 AboutUs_Model : AboutUs.Model -> Model
 AboutUs_Msg : AboutUs.Msg -> Msg
@@ -570,7 +570,7 @@ Posts_Msg : Posts.Msg -> Msg
 -- ... same for Post, NotFound
 ```
 
-What that means is if I call `Top_Model` with a `Top.Model`, I'll get a `Model` back. The same goes for giving `About_Msg` an `AboutUs.Msg`!
+What that means is if I call `Home_Model` with a `Home.Model`, I'll get a `Model` back. The same goes for giving `About_Msg` an `AboutUs.Msg`!
 
 All these varaiants are functions that tell each page how they can upgrade to the shared `Model` and `Msg` types we just defined.
 
@@ -605,14 +605,14 @@ Fortunately, if we provide `Page.upgrade` with those variant functions and a pag
 
 ```elm
 pages :
-    { top : Upgraded Top.Flags Top.Model Top.Msg
+    { home : Upgraded Home.Flags Home.Model Home.Msg
     , aboutUs : Upgraded AboutUs.Flags AboutUs.Model AboutUs.Msg
     , posts : Upgraded Posts.Flags Posts.Model Posts.Msg
     , post : Upgraded Post.Flags Post.Model Post.Msg
     , notFound : Upgraded NotFound.Flags NotFound.Model NotFound.Msg
     }
 pages =
-    { top = Top.page |> Page.upgrade Top_Model Top_Msg
+    { home = Home.page |> Page.upgrade Home_Model Home_Msg
     , aboutUs = AboutUs.page |> Page.upgrade AboutUs_Model AboutUs_Msg
     , posts = Posts.page |> Page.upgrade Posts_Model Posts_Msg
     , post = Post.page |> Page.upgrade Post_Model Post_Msg
@@ -628,8 +628,8 @@ It's okay if this doesn't make sense yet, let's look at how we use the upgraded 
 init : Url -> Global.Model -> ( Model, Cmd Msg, Cmd Global.Msg )
 init url =
     case Route.fromUrl url of
-        Route.Top ->
-            pages.top.init ()
+        Route.Home ->
+            pages.home.init ()
 
         Route.AboutUs ->
             pages.aboutUs.init ()
@@ -651,8 +651,8 @@ init url =
 update : Msg -> Model -> Global.Model -> ( Model, Cmd Msg, Cmd Global.Msg )
 update msg_ model_ =
     case ( msg_, model_ ) of
-        ( Top_Msg msg, Top_Model model ) ->
-            pages.top.update msg model
+        ( Home_Msg msg, Home_Model model ) ->
+            pages.home.update msg model
 
         ( AboutUs_Msg msg, AboutUs_Model model ) ->
             pages.aboutUs.update msg model
@@ -674,11 +674,11 @@ update msg_ model_ =
 ### view + subscriptions
 
 ```elm
-bundle Model -> Global.Model -> ( Model, Cmd Msg, Cmd Global.Msg )
+bundle Model -> Global.Model -> { view : Document Msg, subscriptions : Sub Msg }
 bundle model_ =
     case model_ of
-        Top_Model model ->
-            pages.top.bundle model
+        Home_Model model ->
+            pages.home.bundle model
 
         AboutUs_Model model ->
             pages.aboutUs.bundle model
@@ -708,12 +708,115 @@ Each function provides page-specific flags, model, or msg values and returns the
 No need to manually upgrade these by hand.
 
 
+## src/Document.elm
+
+```elm
+module Document exposing (Document, map)
+
+import Html exposing (Html)
+
+
+type alias Document msg =
+    { title : String
+    , body : List (Html msg)
+    }
+    
+    
+map : (msg1 -> msg2) -> Document msg1 -> Document msg2
+map fn doc =
+    { title = doc.title
+    , body = List.map (Html.map fn) doc.body
+    }
+```
+
 ## src/Page.elm
 
-TODO
+The `ryannhg/elm-spa` package works with all different types of values, so it's useful to create a file at the top of the project to make type signatures less redundant and easier to read compiler errors.
+
+Let's start with this:
+
+```elm
+module Page exposing
+    ( Page
+    , static
+    , sandbox
+    , element
+    , component
+    , upgrade
+    )
+
+import Document exposing (Document)
+import Global
+import Spa
 
 
-## src/Page/Top.elm
+type alias Page flags model msg =
+    { init : Global.Model -> flags -> ( model, Cmd msg, Cmd Global.Msg )
+    , update : Global.Msg -> msg -> model -> ( model, Cmd msg, Cmd Global.Msg )
+    , bundle :
+        { view : Global.Model -> model -> Document msg
+        , subscriptions : Global.Model -> model -> Sub msg
+        }
+    }
+
+
+static :
+    { view : Document msg
+    }
+    -> Page flags () msg
+static =
+    Spa.static
+
+
+sandbox :
+    { init : model
+    , update : msg -> model -> model
+    , view : model -> Document msg
+    }
+    -> Page flags model msg
+sandbox =
+    Spa.sandbox
+
+
+element :
+    { init : flags -> ( model, Cmd msg )
+    , update : msg -> model -> ( model, Cmd msg )
+    , view : model -> Document msg
+    , subscriptions : model -> Sub msg
+    }
+    -> Page flags model msg
+element =
+    Spa.element
+
+
+component :
+    { init : Global.Model -> flags -> ( model, Cmd msg, Cmd Global.Msg )
+    , update : Global.Model -> msg -> model -> ( model, Cmd msg, Cmd Global.Msg )
+    , view : Global.Model -> model -> Document msg
+    , subscriptions : Global.Model -> model -> Sub msg
+    }
+    -> Page flags model msg
+component =
+    Spa.component
+    
+
+upgrade
+    : (pageModel -> model)
+    -> (pageMsg -> msg)
+    -> Page flags model msg
+    -> { init : flags -> Global.Model -> ( model, Cmd msg, Cmd Global.Msg )
+       , update : msg -> model -> Global.Model -> ( model, Cmd msg, Cmd Global.Msg )
+       , bundle : model -> Global.Model ->
+           { view : Document msg
+           , subscriptions : Sub msg
+           }
+       }
+upgrade =
+    Spa.upgrade
+```
+
+
+## src/Page/Home.elm
 
 TODO
 
@@ -733,6 +836,6 @@ TODO
 TODO
 
 
-## src/Page/NotFoun.elm
+## src/Page/NotFound.elm
 
 TODO
