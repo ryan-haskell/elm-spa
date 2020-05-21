@@ -37,7 +37,7 @@ const listFiles = (dir) =>
       [])
 
 const ensureDirectory = (dir) =>
-  fs.mkdirSync(dir, { recursive: true })
+  fs.existsSync(dir) || fs.mkdirSync(dir, { recursive: true })
 
 const saveToFolder = (prefix) => ({ filepath, content }) =>
   fs.writeFileSync(path.join(prefix, filepath), content, { encoding: 'utf8' })
