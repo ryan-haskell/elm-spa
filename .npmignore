@@ -1,0 +1,10 @@
+elm-stuff
+/src
+/tests
+/elm.json
+/examples
+!.gitignore
+.github
+.netlify
+*.tgz
+/dist/elm.js

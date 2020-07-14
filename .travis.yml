@@ -1,3 +1,0 @@
-language: elm
-before_install: cd cli
-script: elm-format --validate src tests && elm-test

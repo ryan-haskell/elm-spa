@@ -1,0 +1,8 @@
+# Folders to ignore
+elm-stuff
+node_modules
+public/dist
+src/Spa/Generated
+
+# MacOS weird stuff
+.DS_Store

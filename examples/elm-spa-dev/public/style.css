@@ -1,0 +1,100 @@
+@import "https://nope.rhg.dev/dist/1.0.0/core.min.css";
+
+html, body {
+  color: #222;
+  background-color: #f8f0f4;
+  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+body { overflow-y: scroll; }
+
+table { line-height: 1.2; }
+
+.font-h5, .font-h6, .font-body, .text-body {
+  font-weight: normal;
+  font-family: inherit;
+}
+
+.font-h1, .font-h2, .font-h3, .font-h4, .text-header {
+  font-family: 'Baloo Da 2', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  line-height: 0.9;
+}
+
+.font-h1 { font-size: 6rem; }
+.font-h5 { font-size: 1.5rem; }
+
+.text--bigger { font-size: 1.2rem; }
+
+/* links, buttons, and hoverable elements */
+.link { text-decoration: underline; font-weight: bold; color: #409844; }
+
+.hoverable, .link, .button {
+  cursor: pointer;
+  transition: opacity 200ms ease-in-out;
+}
+
+.hoverable:hover:not([disabled]),
+.link:hover:not([disabled]),
+.button:hover:not([disabled]) {
+  opacity: 0.6;
+}
+
+.link.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.size--120 { min-width: 6rem; min-height: 6rem; max-width: 6rem; max-height: 6rem; }
+.width--sidebar { min-width: 12rem; max-width: 12rem; }
+
+.color--faint { color: rgba(0, 0, 0, 0.6); }
+.color--green { color: #409844; }
+
+.fadeable { transition: transform 200ms ease-in-out; }
+.no-width { width: 0; overflow: hidden; }
+.invisible { opacity: 0; visibility: hidden; }
+
+.readable { max-width: 36em; }
+
+.sticky { position: sticky; top: 0; }
+
+code.lang-terminal { position: relative; padding-left: 1.2rem }
+code.lang-terminal::before { position: absolute; top: 0.0675em; left: 0; content: "$"; margin-left: 0; opacity: 0.5; pointer-events: none; }
+
+/* markdown styles */
+.markdown h1 { font-weight: bold; font-size: 4rem; letter-spacing: -0.05em; font-family: 'Baloo Da 2', sans-serif; }
+.markdown h2 { font-weight: bold; font-size: 2.5rem; margin-top: 1rem; letter-spacing: -0.05em; }
+.markdown h3 { font-weight: bold; font-size: 2rem; margin-top: 1rem; letter-spacing: -0.05em; }
+.markdown h4 { font-weight: bold; font-size: 1.5rem; margin-top: 0.5rem; letter-spacing: -0.05em; }
+.markdown h5 { font-weight: bold; font-size: 1.25rem; }
+.markdown h6 { font-weight: bold; font-size: 1rem; }
+.markdown p, .markdown ul, .markdown ol { color: #444; line-height: 1.4; font-size: 1.25rem; letter-spacing: -0.01em; }
+.markdown blockquote { line-height: 1.4; opacity: 0.5; padding: 0.25rem 1rem; border-left: solid 0.125rem #888; }
+.markdown pre { line-height: 1.3; padding: 1rem; background: #333; color: white; border-radius: 0.125em; }
+.markdown code { font-family: 'Fira Code', monospace; font-size: 0.9em; letter-spacing: 0; }
+.markdown p code, .markdown ul code, .markdown ol code { border: solid 1px #ccc; padding: 0 0.25em; border-radius: 0.125em; white-space: nowrap; }
+.markdown a { text-decoration: underline; font-weight: bold; color: #409844; }
+.markdown a[href^=https] { text-decoration: underline; font-weight: bold; color: dodgerblue; }
+.markdown table { border-radius: 0.125em; border: solid 1px #ccc; }
+.markdown td { vertical-align: top }
+.markdown td, .markdown th { padding: 0.5rem; }
+.markdown tbody tr:nth-child(2n+1) { background: #f2e3eb; }
+.markdown hr { height: 2px; width: 12rem; max-width: 100%; background-color: #ccc; border: 0; margin-left: 0; margin-right: 0; }
+
+/* responsive font scaling */
+html { font-size: 16px; }
+@media screen and (min-width: 641px) { html { font-size: 18px; } }
+@media screen and (min-width: 1600px) { html { font-size: 20px; } }
+
+/* accessible code highlighting */
+.hljs-comment, .hljs-quote { color: #959ba7; }
+
+.home-pre {
+  background: linear-gradient(#333, #222);
+  color: white;
+  padding: 0.5em 1em;
+  border-radius: 25px;
+  box-shadow: 0 0.5em 1em rgba(0,0,0,0.25);
+}
