@@ -75,7 +75,7 @@ type alias Url params =
 
 #### params
 
-Each dynamic page has it's own params, pulled from the URL. There are examples in the "Params" column above.
+Each dynamic page has its own params, pulled from the URL. There are examples in the "Params" column above.
 
 ```elm
 type alias Params =
