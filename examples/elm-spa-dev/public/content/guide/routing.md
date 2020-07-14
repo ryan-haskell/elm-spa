@@ -114,7 +114,7 @@ The original URL in case you need any other information like the protocol, port,
 
 ## Programmatic Navigation
 
-The [elm/browser](https://package.elm-lang.org/packages/elm/browser/latest/Browser-Navigation#pushUrl) allows us to programmatically navigate to another page, if we provide a `Browser.Navigation.Key`. Fortunately, the `Url params` record above contains that `key`, and is available on all pages (and the `Shared` module)!
+The [elm/browser](https://package.elm-lang.org/packages/elm/browser/latest/Browser-Navigation#pushUrl) package allows us to programmatically navigate to another page, if we provide a `Browser.Navigation.Key`. Fortunately, the `Url params` record above contains that `key`, and is available on all pages (and the `Shared` module)!
 
 I recommend creating a common module, like `Utils.Route` that you can use in your application:
 
