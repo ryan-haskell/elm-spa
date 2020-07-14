@@ -3,7 +3,7 @@
 You can install `elm-spa` via [npm](https://nodejs.org/):
 
 ```terminal
-npm install -g elm-spa@5.0.0
+npm install -g elm-spa@latest
 ```
 
 Now, you can run `elm-spa` from the terminal!
