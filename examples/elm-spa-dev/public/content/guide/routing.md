@@ -112,6 +112,40 @@ Required for programmatic navigation with `Nav.pushUrl` and other functions from
 
 The original URL in case you need any other information like the protocol, port, etc.
 
+## Programmatic Navigation
+
+The [elm/browser](https://package.elm-lang.org/packages/elm/browser/latest/Browser-Navigation#pushUrl) allows us to programmatically navigate to another page, if we provide a `Browser.Navigation.Key`. Fortunately, the `Url params` record above contains that `key`, and is available on all pages (and the `Shared` module)!
+
+I recommend creating a common module, like `Utils.Route` that you can use in your application:
+
+```elm
+module Utils.Route exposing (navigate)
+
+import Browser.Navigation as Nav
+import Spa.Generated.Route as Route exposing (Route)
+
+
+navigate : Nav.Key -> Route -> Cmd msg
+navigate key route =
+  Nav.pushUrl key (Route.toString route)
+```
+
+From there, you can call `Utils.Route.navigate` from any `init` or `update` function with your desired route.
+
+```elm
+module Pages.Dashboard exposing (..)
+
+import Utils.Route
+
+-- ...
+
+init : Url Params -> ( Model, Cmd Msg )
+init url =
+  ( Model { ... }
+  , Utils.Route.navigate url.key Route.SignIn
+  )
+```
+
 ---
 
 Let's take a closer look at [Pages](/guide/pages)!
