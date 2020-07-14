@@ -53,7 +53,7 @@ __Supported Parameters__: Only `String` and `Int` dynamic parameters are support
 You can also nest your dynamic routes. Here's an example:
 
 
-__`Users/User_String/Posts/Post_Id.elm`__
+__`Users/User_String/Posts/Post_Int.elm`__
 
 URL | Params
 :-- | :--
@@ -75,7 +75,7 @@ type alias Url params =
 
 #### params
 
-Each dynamic page has it's own params, pulled from the URL. There are examples in the "Params" column above.
+Each dynamic page has its own params, pulled from the URL. There are examples in the "Params" column above.
 
 ```elm
 type alias Params =

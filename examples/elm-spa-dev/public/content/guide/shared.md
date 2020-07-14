@@ -1,10 +1,10 @@
 # Shared
 
-Whether your sharing layouts or information between pages, the `Shared` module is the place to be!
+Whether you're sharing layouts or information between pages, the `Shared` module is the place to be!
 
 ## Flags
 
-If you have initial data you hope to pass into your Elm application, you should provide it via `Flags`,
+If you have initial data you want to pass into your Elm application, you should provide it via `Flags`.
 
 When you create a project with `elm-spa init`, a file will be created at `public/main.js`:
 
@@ -53,8 +53,8 @@ decoder =
 init : Flags -> Url -> Key -> ( Model, Cmd Msg )
 init flags url key =
     case Json.decodeValue decoder flags of
-        Ok initialData ->   -- Initialize app
-        Err reason -> -- Handle failure
+        Ok initialData -> -- Initialize app
+        Err reason ->     -- Handle failure
 ```
 
 This way, you can create a decoder to gracefully handle the JSON being sent into your Elm application.
@@ -106,7 +106,7 @@ This is just an example of using `update` with the `user` field we added earlier
 
 ## view
 
-The `Shared.view` function is a great place to render things that should persist across page transitions. It comes with more than just a `Model`, so you can insert the `page` whereever you'd like:
+The `Shared.view` function is a great place to render things that should persist across page transitions. It comes with more than just a `Model`, so you can insert the `page` wherever you'd like:
 
 ```elm
 import Components.Navbar as Navbar
