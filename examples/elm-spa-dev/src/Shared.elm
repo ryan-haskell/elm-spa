@@ -15,6 +15,7 @@ import Html.Attributes exposing (class, classList, href, style)
 import Spa.Document exposing (Document)
 import Spa.Generated.Route as Route exposing (Route)
 import Spa.Transition
+import Url exposing (Url)
 
 
 type alias Flags =
@@ -23,12 +24,13 @@ type alias Flags =
 
 type alias Model =
     { key : Nav.Key
+    , url : Url
     }
 
 
-init : Flags -> Nav.Key -> Model
-init _ key =
-    Model key
+init : Flags -> Nav.Key -> Url -> Model
+init _ key url =
+    Model key url
 
 
 type Msg

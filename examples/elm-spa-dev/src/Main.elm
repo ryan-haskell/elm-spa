@@ -46,13 +46,13 @@ init : Flags -> Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
     let
         shared =
-            Shared.init flags key
+            Shared.init flags key url
 
         route =
             fromUrl url
 
         ( page, pageCmd ) =
-            Pages.init route shared key url
+            Pages.init route shared
     in
     ( Model url key shared page { layout = True, page = True } url
     , Cmd.batch
@@ -134,7 +134,7 @@ loadPage url model =
             fromUrl url
 
         ( page, cmd ) =
-            Pages.init route model.shared model.key url
+            Pages.init route model.shared
 
         shared =
             Pages.save page model.shared
