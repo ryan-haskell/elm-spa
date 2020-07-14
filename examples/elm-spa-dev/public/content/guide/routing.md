@@ -53,7 +53,7 @@ __Supported Parameters__: Only `String` and `Int` dynamic parameters are support
 You can also nest your dynamic routes. Here's an example:
 
 
-__`Users/User_String/Posts/Post_Id.elm`__
+__`Users/User_String/Posts/Post_Int.elm`__
 
 URL | Params
 :-- | :--
