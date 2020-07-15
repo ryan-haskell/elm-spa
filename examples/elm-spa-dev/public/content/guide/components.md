@@ -82,6 +82,8 @@ Modules should be [built around data structures](https://www.youtube.com/watch?v
 
 ### Making a Carousel Component
 
+Let's outline the high-level API for the component, we'll provide the complete implementation later!
+
 ```elm
 module Components.Carousel exposing
   ( Carousel
