@@ -56,7 +56,7 @@ File | Description
 `Pages/NotFound.elm` | The page to show if we're at an invalid route.
 `Spa/Document.elm` | The kind of thing each page's `view` returns (changing this allows support for [elm-ui](https://github.com/mdgriffith/elm-ui) or [elm-css](https://github.com/rtfeldman/elm-css))
 `Spa/Page.elm` | Defines the four page types (`static`, `sandbox`, `element`, and `application`)
-`Spa/Url.elm` | Defines a type that holds route parameters, query parameters (automatically passed into the `init` function of `element` and `application` pages)
+`Spa/Url.elm` | Defines a type that holds route parameters, query parameters (automatically passed into each page)
 `Main.elm` | The entrypoint to the app, that wires everything together.
 `Shared.elm` | The place to define layouts and shared data between pages.
 
