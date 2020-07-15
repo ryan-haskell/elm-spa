@@ -35,7 +35,7 @@ view _ =
             [ hero
             , viewSection "No assembly required." """
 Build reliable [Elm](https://elm-lang.org) applications with the wonderful tools created by the community– brought together in one place:
-- Use __elm-ui__ to create build UIs without CSS.
+- Use __elm-ui__ to create UIs without CSS.
 - Comes with __elm-live__, a hot-reloading web server.
 - Create a test suite with __elm-test__
 """
