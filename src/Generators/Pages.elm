@@ -66,23 +66,23 @@ import Spa.Url as Url
 
 
 view : Model -> Document Msg
-view =
-    bundle >> .view
+view model =
+    (bundle model).view ()
 
 
 subscriptions : Model -> Sub Msg
-subscriptions =
-    bundle >> .subscriptions
+subscriptions model =
+    (bundle model).subscriptions ()
 
 
 save : Model -> Shared.Model -> Shared.Model
-save =
-    bundle >> .save
+save model =
+    (bundle model).save ()
 
 
 load : Model -> Shared.Model -> ( Model, Cmd Msg )
-load =
-    bundle >> .load
+load model =
+    (bundle model).load ()
 
 
 
@@ -97,10 +97,10 @@ type alias Upgraded params model msg =
 
 
 type alias Bundle =
-    { view : Document Msg
-    , subscriptions : Sub Msg
-    , save : Shared.Model -> Shared.Model
-    , load : Shared.Model -> ( Model, Cmd Msg )
+    { view : () -> Document Msg
+    , subscriptions : () -> Sub Msg
+    , save : () -> Shared.Model -> Shared.Model
+    , load : () -> Shared.Model -> ( Model, Cmd Msg )
     }
 
 
@@ -114,10 +114,10 @@ upgrade toModel toMsg page =
             page.update msg model |> Tuple.mapBoth toModel (Cmd.map toMsg)
 
         bundle_ model =
-            { view = page.view model |> Document.map toMsg
-            , subscriptions = page.subscriptions model |> Sub.map toMsg
-            , save = page.save model
-            , load = load_ model
+            { view = \\_ -> page.view model |> Document.map toMsg
+            , subscriptions = \\_ -> page.subscriptions model |> Sub.map toMsg
+            , save = \\_ -> page.save model
+            , load = \\_ -> load_ model
             }
 
         load_ model shared =
