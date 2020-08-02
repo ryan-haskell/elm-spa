@@ -29,7 +29,7 @@ table { line-height: 1.2; }
 
 /* links, buttons, and hoverable elements */
 .link { text-decoration: underline; font-weight: bold; color: #409844; }
-
+.link--external { color: dodgerblue; }
 .hoverable, .link, .button {
   cursor: pointer;
   transition: opacity 200ms ease-in-out;
