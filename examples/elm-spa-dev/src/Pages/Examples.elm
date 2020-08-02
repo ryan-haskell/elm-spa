@@ -95,7 +95,7 @@ viewExample example =
                 ]
             , div [ class "row spacing-small" ]
                 [ a [ href example.demoUrl, target "_blank", class "link link--external" ] [ text "Demo" ]
-                , a [ href example.demoUrl, target "_blank", class "link link--external" ] [ text "Source" ]
+                , a [ href example.srcUrl, target "_blank", class "link link--external" ] [ text "Source" ]
                 ]
             ]
         ]
