@@ -83,7 +83,7 @@ view { params } =
 
 viewExample : Example -> Html msg
 viewExample example =
-    section [ class "row spacing-medium" ]
+    section [ class "row spacing-medium wrap" ]
         [ a [ href example.demoUrl, target "_blank", class "hoverable" ]
             [ img [ src example.image, alt example.name, style "width" "360px" ] []
             ]
