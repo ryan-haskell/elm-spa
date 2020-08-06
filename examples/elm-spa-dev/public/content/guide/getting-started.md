@@ -6,6 +6,14 @@ Getting started with __elm-spa__ is easy! Make sure you have the latest stable v
 npx elm-spa init
 ```
 
+After choosing your folder name and UI library, you can enter the new folder and run:
+
+```
+npm start
+```
+
+That's it- your new SPA will be live at `http://localhost:8000`.
+
 ## Project Structure
 
 This one-time command will create a new project in a folder called `our-elm-spa`.  Here's an overview of that folder:
