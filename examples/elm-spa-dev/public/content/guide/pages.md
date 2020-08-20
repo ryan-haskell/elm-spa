@@ -112,7 +112,7 @@ type alias Model =
   , user : Maybe User
   }
 
-init : Shared.Model -> Url.Params -> ( Model, Cmd Msg )
+init : Shared.Model -> Url Params -> ( Model, Cmd Msg )
 init shared url =
   ( { email = ""
     , password = ""
