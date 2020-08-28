@@ -39,8 +39,11 @@ init flags url key =
 
         ( page, pageCmd ) =
             Pages.init (fromUrl url) shared
+
+        savedShare =
+            Pages.save page shared
     in
-    ( Model shared page
+    ( Model savedShare page
     , Cmd.batch
         [ Cmd.map Shared sharedCmd
         , Cmd.map Pages pageCmd
