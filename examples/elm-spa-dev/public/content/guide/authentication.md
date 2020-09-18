@@ -21,7 +21,7 @@ If your app involves user authentication, you could make a `protectedSandbox` pa
 
 protectedSandbox :
   { init : User -> Url params -> model
-  , update : Msg -> model -> model
+  , update : msg -> model -> model
   , view : model -> Document msg
   }
   -> Page params (Maybe model) msg
