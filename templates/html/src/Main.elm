@@ -84,7 +84,11 @@ update msg model =
                     { original | url = url }
 
                 ( page, pageCmd ) =
-                    Pages.init (fromUrl url) shared
+                    if url.path == model.shared.url.path then
+                        Pages.load model.page shared
+
+                    else
+                        Pages.init (fromUrl url) shared
             in
             ( { model | page = page, shared = Pages.save page shared }
             , Cmd.map Pages pageCmd
