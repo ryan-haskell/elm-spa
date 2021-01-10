@@ -6,12 +6,14 @@ import Path exposing (Path)
 create : Path -> String
 create path =
     """
-module Pages.{{name}} exposing (Params, Model, Msg, page)
+module Pages.{{name}} exposing (Model, Msg, Params, page)
 
 import Shared
 import Spa.Document exposing (Document)
 import Spa.Page as Page exposing (Page)
 import Spa.Url as Url exposing (Url)
+import UI exposing (Components)
+import UI.Content exposing (Type(..))
 
 
 page : Page Params Model Msg
@@ -77,10 +79,10 @@ subscriptions model =
 -- VIEW
 
 
-view : Model -> Document Msg
-view model =
+view : Components Msg -> Model -> Document Msg
+view { t } model =
     { title = "{{name}}"
-    , body = []
+    , body = t Static "{{name}}"
     }
 """
         |> String.replace "{{name}}" (Path.toModulePath path)

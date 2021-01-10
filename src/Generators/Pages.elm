@@ -27,12 +27,15 @@ module Spa.Generated.Pages exposing
     , view
     )
 
+import Color exposing (Color)
 {{pagesImports}}
 import Shared
 import Spa.Document as Document exposing (Document)
 import Spa.Generated.Route as Route exposing (Route)
 import Spa.Page exposing (Page)
 import Spa.Url as Url
+import Theme exposing (Theme)
+import UI exposing (Components)
 
 
 -- TYPES
@@ -65,9 +68,9 @@ import Spa.Url as Url
 {{pagesBundle}}
 
 
-view : Model -> Document Msg
-view model =
-    (bundle model).view ()
+view : Theme Color -> Model -> Document Msg
+view theme model =
+    (bundle model).view theme
 
 
 subscriptions : Model -> Sub Msg
@@ -97,7 +100,7 @@ type alias Upgraded params model msg =
 
 
 type alias Bundle =
-    { view : () -> Document Msg
+    { view : Theme Color -> Document Msg
     , subscriptions : () -> Sub Msg
     , save : () -> Shared.Model -> Shared.Model
     , load : () -> Shared.Model -> ( Model, Cmd Msg )
@@ -114,10 +117,10 @@ upgrade toModel toMsg page =
             page.update msg model |> Tuple.mapBoth toModel (Cmd.map toMsg)
 
         bundle_ model =
-            { view = \\_ -> page.view model |> Document.map toMsg
-            , subscriptions = \\_ -> page.subscriptions model |> Sub.map toMsg
-            , save = \\_ -> page.save model
-            , load = \\_ -> load_ model
+            { view = \\theme -> page.view (UI.components theme) model |> Document.map toMsg
+            , subscriptions = \\() -> page.subscriptions model |> Sub.map toMsg
+            , save = \\() -> page.save model
+            , load = \\() -> load_ model
             }
 
         load_ model shared =
