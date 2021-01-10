@@ -1,7 +1,7 @@
 .DS_Store
 elm-stuff
 node_modules
-dist
+# dist
 Generated
 elm-spa-*.tgz
 # Local Netlify folder
