@@ -84,15 +84,28 @@ update msg model =
             , Cmd.none
             )
 
-        GotMarkdown (Ok markdown) ->
-            ( { model | markdown = Success markdown }
-            , Cmd.none
-            )
+        GotMarkdown response ->
+            let
+                success markdown =
+                    ( { model | markdown = Success markdown }
+                    , Cmd.none
+                    )
 
-        GotMarkdown (Err _) ->
-            ( { model | markdown = Failure "Couldn't find that section of the guide..." }
-            , Cmd.none
-            )
+                failure =
+                    ( { model | markdown = Failure "Couldn't find that section of the guide..." }
+                    , Cmd.none
+                    )
+            in
+            case response of
+                Ok markdown ->
+                    if String.startsWith "<!DOCTYPE" markdown then
+                        failure
+
+                    else
+                        success markdown
+
+                Err _ ->
+                    failure
 
 
 
