@@ -1,10 +1,8 @@
 elm-stuff
-/src
+/node_modules
 /tests
-/elm.json
-/examples
-!.gitignore
-.github
-.netlify
-*.tgz
-/dist/elm.js
+/jest.config.js
+/tsconfig.json
+/src/**
+!/src/new/**
+!/src/defaults/**

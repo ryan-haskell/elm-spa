@@ -33,7 +33,6 @@ const config = {
   defaults: [
     [ 'Main.elm' ],
     [ 'Shared.elm' ],
-    [ `Pages`, `${reserved.homepage}.elm` ],
     [ `Pages`, `${reserved.notFound}.elm` ],
     [ 'Page.elm' ],
     [ 'Request.elm' ],

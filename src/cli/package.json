@@ -9,7 +9,8 @@
     "build": "tsc",
     "build:watch": "tsc --watch",
     "test": "jest",
-    "test:watch": "jest --watchAll"
+    "test:watch": "jest --watchAll",
+    "publish:test": "npm run build && npm pack --dry-run"
   },
   "repository": {
     "type": "git",

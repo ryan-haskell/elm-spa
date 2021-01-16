@@ -129,7 +129,7 @@ const compileMainElm = (env : Environment) => async () => {
       await File.mkdir(config.folders.dist)
     }
 
-    return Process.run(`${config.binaries.elm} make ${input} --output=${output} --report=json ${flags}`)
+    return Process.run(`${config.binaries.elm} make ${input} --output=${output} --report=json ${flags}`)  
       .catch(colorElmError)
   }
 
@@ -185,9 +185,6 @@ const compileMainElm = (env : Environment) => async () => {
 
   const minify = () =>
     Process.run(`${config.binaries.terser} ${output} --compress 'pure_funcs="F2,F3,F4,F5,F6,F7,F8,F9,A2,A3,A4,A5,A6,A7,A8,A9",pure_getters,keep_fargs=false,unsafe_comps,unsafe' | ${config.binaries.terser} --mangle --output=${output}`)
-
-  const gzip = () =>
-    Process.run(`gzip --keep --force ${output}`)
 
   return (env === 'development')
     ? elmMake()
