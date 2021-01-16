@@ -9,6 +9,7 @@ import MsgTemplate from '../templates/msg'
 import ParamsTemplate from '../templates/params'
 import * as Process from '../process'
 import { bold, underline, colors, reset, check, dim } from "../terminal"
+import { isStaticPage } from "../templates/utils"
 
 export const build = (env : Environment) => () =>
   createMissingDefaultFiles()
@@ -58,7 +59,7 @@ const createMissingDefaultFiles = async () => {
 const scanForStaticPages = async (entries: PageEntry[]) : Promise<string[][]> => {
   const contents = await Promise.all(entries.map(e => File.read(e.filepath)))
   return contents
-    .map((content, i) => content.includes('exposing (page)') ? i : undefined)
+    .map((content, i) => isStaticPage(content) ? i : undefined)
     .filter(a => typeof a === 'number')
     .map((i : any) => entries[i].segments)
 }

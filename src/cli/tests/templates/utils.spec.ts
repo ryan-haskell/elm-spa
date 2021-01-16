@@ -143,4 +143,59 @@ type Route
 ]
     `.trim())
   })
+
+  test.each([
+    [ [ config.reserved.homepage ], `[]` ],
+    [ [ "AboutUs" ], `[ "about-us" ]` ],
+    [ [ "AboutUs", "Offices" ], `[ "about-us", "offices" ]` ],
+    [ [ "Posts" ], `[ "posts" ]` ],
+    [ [ "Posts", "Id_" ], `[ "posts", params.id ]` ],
+    [ [ "Users", "Name_", "Settings" ], `[ "users", params.name, "settings" ]` ],
+    [ [ "Users", "Name_", "Posts", "Id_" ], `[ "users", params.name, "posts", params.id ]` ],
+  ])(".routeVariant(%p)", (input, output) => {
+    expect(Utils.routeToHrefSegments(input)).toBe(output)
+  })
 })
+
+describe.each([['Model'], ['Msg']])
+  ('Utils.exposes%s', (name: string) => {
+    const fn = (Utils as any)[`exposes${name}`] as (val: string) => boolean
+
+    test('fails for exposing all', () =>
+      expect(fn(`module Layout exposing (..)`)).toBe(false)
+    )
+
+    test(`fails if missing keyword`, () => {
+      expect(fn(`module Layout exposing (OtherImport)`)).toBe(false)
+      expect(fn(`module Layout exposing
+                    ( OtherImport
+                    )
+      `)).toBe(false)
+    })
+
+    test(`works with single-line exposing "${name}"`, () => {
+      expect(fn(`module Layout exposing (${name})`)).toBe(true)
+      expect(fn(`module Layout exposing (OtherImport, ${name})`)).toBe(true)
+      expect(fn(`module Layout exposing (${name}, OtherImport)`)).toBe(true)
+    })
+
+    test(`works with multi-line exposing "${name}"`, () => {
+      expect(fn(`
+        module Layout exposing
+            ( ${name}
+            )
+      `)).toBe(true)
+      expect(fn(`
+        module Layout exposing
+            ( OtherImport
+            , ${name}
+            )
+      `)).toBe(true)
+      expect(fn(`
+        module Layout exposing
+            ( ${name}
+            , OtherImport
+            )
+      `)).toBe(true)
+    })
+  })

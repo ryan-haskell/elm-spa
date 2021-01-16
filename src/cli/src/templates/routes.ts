@@ -1,10 +1,10 @@
-import { routeTypeDefinition, indent, routeParserList, paramsImports, Options } from "./utils"
+import { routeTypeDefinition, indent, routeParserList, paramsImports, Options, routeToHref } from "./utils"
 
 export default (pages : string[][], _options : Options) : string => `
 module Gen.Route exposing
     ( Route(..)
     , fromUrl
-    -- , toUrl
+    , toHref
     )
 
 ${paramsImports(pages)}
@@ -25,8 +25,13 @@ routes =
 ${indent(routeParserList(pages), 1)}
 
 
--- toUrl : Route -> Url
--- toUrl route =
---     Debug.todo "Gen.Route.toUrl"
+toHref : Route -> String
+toHref route =
+    let
+        joinAsHref : List String -> String
+        joinAsHref segments =
+            "/" ++ String.join "/" segments
+    in
+${indent(routeToHref(pages), 1)}
 
 `.trimLeft()

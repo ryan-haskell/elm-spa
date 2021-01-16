@@ -12,12 +12,17 @@ const isHomepage = (path: string[]) =>
 const isNotFoundPage = (path: string[]) =>
   path.join('') === config.reserved.notFound
 
-// [ 'Users', 'Name_', 'Settings' ] => [ 'Name_' ]
+// [ 'Users', 'Name_', 'Settings' ] => [ 'Name' ]
 const dynamicRouteSegments = (path : string[]) : string[] =>
   isHomepage(path) || isNotFoundPage(path)
     ? []
-    : path.filter(segment => segment.endsWith('_'))
+    : path.filter(isDynamicSegment)
         .map(segment => segment.substr(0, segment.length - 1))
+
+const isDynamicSegment = (segment : string) : boolean =>
+  segment !== config.reserved.homepage
+  && segment !== config.reserved.notFound
+  && segment.endsWith('_')
 
 // "AboutUs" => "aboutUs"
 const fromPascalToCamelCase = (str : string) : string =>
@@ -127,6 +132,29 @@ export const routeTypeDefinition = (paths: string[][]) : string =>
 export const routeParserList = (paths: string[][]) : string =>
   multilineList(paths.map(routeParserMap))
 
+export const routeToHref = (paths: string[][]) : string =>
+  caseExpression(paths, {
+    variable: 'route',
+    condition: (path) => 
+      (dynamicRouteSegments(path).length === 0)
+        ? routeVariant(path) 
+        : `${routeVariant(path)} params`,
+    result: (path) => `joinAsHref ${routeToHrefSegments(path)}`
+  })
+
+export const routeToHrefSegments = (path: string[]) : string => {
+  const segments = path.filter(p => p !== config.reserved.homepage)
+  const hrefFragments =
+    segments.map(segment => 
+      isDynamicSegment(segment)
+        ? `params.${fromPascalToCamelCase(segment.substring(0, segment.length - 1))}`
+        : `"${fromPascalToSlugCase(segment)}"`
+    )
+  return hrefFragments.length === 0
+    ? `[]`
+    : `[ ${hrefFragments.join(', ')} ]`
+}
+
 export const paramsImports = (paths: string[][]) : string =>
   paths.map(path => `import Gen.Params.${path.join('.')}`).join('\n')
 
@@ -193,7 +221,6 @@ const msgVariant = (path: string[]) : string =>
 const msg = (path: string[]) : string =>
   `Pages.${path.join('.')}.Msg`
 
-
 export const pagesInitBody = (paths: string[][]) : string =>
   indent(caseExpression(paths, {
     variable: 'route',
@@ -241,3 +268,13 @@ const pageModelArguments = (path: string[], options : Options) : string =>
   options.isStatic(path)
     ? `params ()`
     : `params model`
+
+// Used in place of sophisticated AST parsing
+const exposes = (keyword: string) => (elmSourceCode: string): boolean =>
+  new RegExp(`module\\s(\\S)+\\sexposing(\\s)+\\([^\\)]*${keyword}[^\\)]*\\)`, 'm').test(elmSourceCode)
+
+export const exposesModel = exposes('Model')
+export const exposesMsg = exposes('Msg')
+
+export const isStaticPage = (sourceCode : string) : boolean =>
+  !exposesModel(sourceCode) || !exposesMsg(sourceCode)
