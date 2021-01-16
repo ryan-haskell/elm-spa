@@ -29,39 +29,3 @@ elm-spa watch  # builds code as you go (without the server)
 
 You can learn more at [elm-spa.dev](https://elm-spa.dev)
 
-
-## guide 
-
-- Overview
-  - Features
-  - Quickstart
-  - Installation
-- CLI
-  - Creating new projects
-  - Adding new pages
-  - Production build
-  - Developing locally
-  - Using other dev servers
-- Basics
-  - Routing
-  - Pages
-    - Not Found (Pages/NotFound.elm)
-  - Shared (Shared)
-  - Components
-  - View (View)
-  - Static Assets
-- Advanced
-  - Custom Development Server
-    - Parcel
-    - Webpack
-  - Deployment & hosting
-    - Netlify
-    - Github pages
-  - User authentication
-    - Storing tokens
-    - Redirecting pages
-  - Local storage
-  - Page Transitions (Main)
-    - Customizing Main.elm
-  - REST APIs
-  - GraphQL
