@@ -112,10 +112,6 @@ update msg model =
 -- VIEW
 
 
-valuew =
-    Route.NotFound
-
-
 view : Shared.Model -> Url -> Model -> View Msg
 view shared url model =
     { title =
