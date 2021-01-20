@@ -1,4 +1,4 @@
-module Request exposing (Request, create)
+module Request exposing (Request, create, pushUrl, replaceUrl)
 
 import Browser.Navigation exposing (Key)
 import ElmSpa.Request as ElmSpa
@@ -13,3 +13,13 @@ type alias Request params =
 create : params -> Url -> Key -> Request params
 create params url key =
     ElmSpa.create (Route.fromUrl url) params url key
+
+
+pushRoute : Route -> Request params -> Cmd msg
+pushRoute route req =
+    Browser.Navigation.pushUrl req.key (Route.toHref route)
+
+
+replaceRoute : Route -> Request params -> Cmd msg
+replaceRoute route req =
+    Browser.Navigation.replaceUrl req.key (Route.toHref route)
