@@ -34,7 +34,7 @@ import Spa.Document as Document exposing (Document)
 import Spa.Generated.Route as Route exposing (Route)
 import Spa.Page exposing (Page)
 import Spa.Url as Url
-import Theme exposing (Theme)
+import Theme exposing (Palette)
 import UI exposing (Components)
 
 
@@ -68,7 +68,7 @@ import UI exposing (Components)
 {{pagesBundle}}
 
 
-view : Theme Color -> Model -> Document Msg
+view : Palette Color -> Model -> Document Msg
 view theme model =
     (bundle model).view theme
 
@@ -100,7 +100,7 @@ type alias Upgraded params model msg =
 
 
 type alias Bundle =
-    { view : Theme Color -> Document Msg
+    { view : Palette Color -> Document Msg
     , subscriptions : () -> Sub Msg
     , save : () -> Shared.Model -> Shared.Model
     , load : () -> Shared.Model -> ( Model, Cmd Msg )
