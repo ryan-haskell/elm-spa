@@ -35,7 +35,7 @@ import Spa.Generated.Route as Route exposing (Route)
 import Spa.Page exposing (Page)
 import Spa.Url as Url
 import Theme exposing (Palette)
-import UI exposing (Components)
+import UI
 
 
 -- TYPES
