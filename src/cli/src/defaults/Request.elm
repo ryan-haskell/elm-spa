@@ -1,4 +1,4 @@
-module Request exposing (Request, create, pushUrl, replaceUrl)
+module Request exposing (Request, create, pushRoute, replaceRoute)
 
 import Browser.Navigation exposing (Key)
 import ElmSpa.Request as ElmSpa

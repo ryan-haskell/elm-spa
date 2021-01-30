@@ -27,8 +27,8 @@ const config = {
     dist: path.join(cwd, 'public', 'dist'),
   },
   binaries: {
-    elm: path.join(root, 'node_modules', '.bin', 'elm'),
-    terser: path.join(root, 'node_modules', '.bin', 'terser')
+    elm: `npx elm`,
+    terser: `npx terser`
   },
   defaults: [
     [ 'Main.elm' ],
