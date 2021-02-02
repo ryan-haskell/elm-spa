@@ -10,9 +10,13 @@ import ParamsTemplate from '../templates/params'
 import * as Process from '../process'
 import { bold, underline, colors, reset, check, dim } from "../terminal"
 import { isStaticPage } from "../templates/utils"
+import { createMissingAddTemplates } from "./_common"
 
 export const build = (env : Environment) => () =>
-  createMissingDefaultFiles()
+  Promise.all([
+    createMissingDefaultFiles(),
+    createMissingAddTemplates()
+  ])
     .then(createGeneratedFiles)
     .then(compileMainElm(env))
 

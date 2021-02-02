@@ -22,6 +22,10 @@ const config = {
       dest: path.join(cwd, '.elm-spa', 'defaults')
     },
     generated: path.join(cwd, '.elm-spa', 'generated'),
+    templates: {
+      defaults: path.join(root, 'src', 'templates', 'add'),
+      user: path.join(cwd, '.elm-spa', 'templates')
+    },
     package: path.join(cwd, '.elm-spa', 'package'),
     public: path.join(cwd, 'public'),
     dist: path.join(cwd, 'public', 'dist'),

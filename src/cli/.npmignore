@@ -6,3 +6,4 @@ elm-stuff
 /src/**
 !/src/new/**
 !/src/defaults/**
+!/src/templates/add/**
