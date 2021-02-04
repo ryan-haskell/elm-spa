@@ -6,14 +6,6 @@
 npm install -g elm-spa@beta
 ```
 
-## **Learn more**
-
-__Visit the official site__ at [elm-spa.dev](https://v6.elm-spa.dev) for more examples, guides, and other documentation.
-
-## **The Elm package**
-
-__If you are using elm-spa__, there's no read through the [Elm package](https://package.elm-lang.org/packages/ryannhg/elm-spa/latest/) documentation. The package exists to constrain the CLI, and serves as a reference for future contributions.
-
 # **At a glance**
 
 ## **1. Create a new project**
@@ -38,3 +30,11 @@ your-elm-app/
 ```bash
 elm-spa server   # Ready at http://localhost:1234
 ```
+
+# **Learn more**
+
+__Visit the official site__ at [elm-spa.dev](https://v6.elm-spa.dev) for more examples, guides, and other documentation.
+
+## **Do I need the Elm package?**
+
+__If you are using elm-spa__, there's no need to read through the [ryannhg/elm-spa](https://package.elm-lang.org/packages/ryannhg/elm-spa/latest/) package documentation. The package exists to constrain the CLI, and provides basic internal helper functions. Check out the official guide instead!
