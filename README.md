@@ -6,20 +6,20 @@
 npm install -g elm-spa@beta
 ```
 
-# **At a glance**
+# **Quick start**
 
 ## **1. Create a new project**
 
 ```bash
-mkdir your-new-app
-cd your-new-app
+mkdir your-new-project
+cd your-new-project
 elm-spa new
 ```
 
 ## **2. Check out the new files**
 
 ```bash
-your-elm-app/
+your-new-project/
   - elm.json
   - src/Pages/Home_.elm
   - public/index.html
