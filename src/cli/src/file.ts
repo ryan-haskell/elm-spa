@@ -64,7 +64,7 @@ export const copy = (src : string, dest : string) => {
   const exists = oldFs.existsSync(src)
   const stats = exists && oldFs.statSync(src)
   if (stats && stats.isDirectory()) {
-    try { oldFs.mkdirSync(dest) } catch (_) {}
+    try { oldFs.mkdirSync(dest, { recursive: true }) } catch (_) {}
     oldFs.readdirSync(src).forEach(child =>
       copy(path.join(src, child), path.join(dest, child))
     )
