@@ -42,8 +42,8 @@ Instead of importing this module, your project will have a `Page` module with a 
 This makes all the generic `route`, `effect`, and `view` arguments disappear!
 
 -}
-type Page shared request route effect view model msg
-    = Page (Internals shared request route effect view model msg)
+type Page shared route effect view model msg
+    = Page (Internals shared route effect view model msg)
 
 
 {-| A page that only needs to render a static view.
@@ -64,7 +64,7 @@ static :
     ->
         { view : view
         }
-    -> Page shared request route effect view () msg
+    -> Page shared route effect view () msg
 static none page =
     Page
         (\_ _ ->
@@ -103,7 +103,7 @@ sandbox :
         , update : msg -> model -> model
         , view : model -> view
         }
-    -> Page shared request route effect view model msg
+    -> Page shared route effect view model msg
 sandbox none page =
     Page
         (\_ _ ->
@@ -145,7 +145,7 @@ element :
         , view : model -> view
         , subscriptions : model -> Sub msg
         }
-    -> Page shared request route effect view model msg
+    -> Page shared route effect view model msg
 element fromCmd page =
     Page
         (\_ _ ->
@@ -184,7 +184,7 @@ advanced :
     , view : model -> view
     , subscriptions : model -> Sub msg
     }
-    -> Page shared request route effect view model msg
+    -> Page shared route effect view model msg
 advanced page =
     Page
         (\_ _ ->
@@ -217,34 +217,34 @@ advanced page =
 protected :
     { effectNone : effect
     , fromCmd : Cmd msg -> effect
-    , user : shared -> request -> Maybe user
+    , user : shared -> Request route () -> Maybe user
     , route : route
     }
     ->
         { static :
             { view : user -> view
             }
-            -> Page shared request route effect view () msg
+            -> Page shared route effect view () msg
         , sandbox :
             { init : user -> model
             , update : user -> msg -> model -> model
             , view : user -> model -> view
             }
-            -> Page shared request route effect view model msg
+            -> Page shared route effect view model msg
         , element :
             { init : user -> ( model, Cmd msg )
             , update : user -> msg -> model -> ( model, Cmd msg )
             , view : user -> model -> view
             , subscriptions : user -> model -> Sub msg
             }
-            -> Page shared request route effect view model msg
+            -> Page shared route effect view model msg
         , advanced :
             { init : user -> ( model, effect )
             , update : user -> msg -> model -> ( model, effect )
             , view : user -> model -> view
             , subscriptions : user -> model -> Sub msg
             }
-            -> Page shared request route effect view model msg
+            -> Page shared route effect view model msg
         }
 protected options =
     let
@@ -327,21 +327,11 @@ bundle :
     , fromCmd : Cmd any -> pagesEffect
     , mapEffect : effect -> pagesEffect
     , mapView : view -> pagesView
-    , page : shared -> Request route params -> Page shared (Request route params) route effect view model msg
+    , page : shared -> Request route params -> Page shared route effect view model msg
     , toModel : params -> model -> pagesModel
     , toMsg : msg -> pagesMsg
     }
     -> Bundle params model msg shared pagesEffect pagesModel pagesMsg pagesView
-
-
-
--- { init : params -> shared -> Url -> Key -> ( pagesModel, pagesEffect )
--- , update : params -> msg -> model -> shared -> Url -> Key -> ( pagesModel, pagesEffect )
--- , view : params -> model -> shared -> Url -> Key -> pagesView
--- , subscriptions : params -> model -> shared -> Url -> Key -> Sub pagesMsg
--- }
-
-
 bundle { redirecting, toRoute, toUrl, fromCmd, mapEffect, mapView, page, toModel, toMsg } =
     { init =
         \params shared url key ->
@@ -399,7 +389,7 @@ bundle { redirecting, toRoute, toUrl, fromCmd, mapEffect, mapView, page, toModel
 
 
 toResult :
-    (shared -> Request route params -> Page shared (Request route params) route effect view model msg)
+    (shared -> Request route params -> Page shared route effect view model msg)
     -> shared
     -> Request route params
     -> Result route (PageRecord effect view model msg)
@@ -408,15 +398,15 @@ toResult toPage shared req =
         (Page toResult_) =
             toPage shared req
     in
-    toResult_ shared req
+    toResult_ shared (ElmSpa.Request.create req.route () req.url req.key)
 
 
 
 -- INTERNALS
 
 
-type alias Internals shared request route effect view model msg =
-    shared -> request -> Result route (PageRecord effect view model msg)
+type alias Internals shared route effect view model msg =
+    shared -> Request route () -> Result route (PageRecord effect view model msg)
 
 
 type alias PageRecord effect view model msg =

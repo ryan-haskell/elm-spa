@@ -48,7 +48,7 @@ unauthorizedRoute =
 
 
 type alias Page model msg =
-    ElmSpa.Page Shared.Model (Request ()) Gen.Route.Route (Effect msg) (View msg) model msg
+    ElmSpa.Page Shared.Model Gen.Route.Route (Effect msg) (View msg) model msg
 
 
 static :
