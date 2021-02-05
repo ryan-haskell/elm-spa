@@ -12,27 +12,6 @@ import Url exposing (Url)
 import Utils.String
 
 
-sidebarSections : List Section
-sidebarSections =
-    [ Section "Guide"
-        "/guide"
-        [ Link "Overview" "/guide"
-        , Link "The CLI" "/guide/cli"
-        , Link "Routing" "/guide/routing"
-        , Link "Pages" "/guide/pages"
-        , Link "Shared State" "/guide/shared-state"
-        , Link "Requests" "/guide/requests"
-        , Link "Views" "/guide/views"
-        ]
-    , Section "Examples"
-        "/guide"
-        [ Link "User Authentication" "/guide/users"
-        , Link "Elm UI" "/guide/apis"
-        , Link "Page Transitions" "/guide/transitions"
-        ]
-    ]
-
-
 parseTableOfContents : String -> List Section
 parseTableOfContents =
     Markdown.Parser.parse
@@ -46,12 +25,12 @@ parseTableOfContents =
 type alias Section =
     { header : String
     , url : String
-    , links : List Link
+    , pages : List Link
     }
 
 
 type alias Link =
-    { name : String
+    { label : String
     , url : String
     }
 
@@ -76,16 +55,16 @@ headersToSections =
             in
             case ( level, current ) of
                 ( Heading2, Just existing ) ->
-                    ( sections ++ [ existing ], Just { header = text, url = url, links = [] } )
+                    ( sections ++ [ existing ], Just { header = text, url = url, pages = [] } )
 
                 ( Heading2, Nothing ) ->
-                    ( sections, Just { header = text, url = url, links = [] } )
+                    ( sections, Just { header = text, url = url, pages = [] } )
 
                 ( Heading3, Just existing ) ->
-                    ( sections, Just { existing | links = existing.links ++ [ { name = text, url = url } ] } )
+                    ( sections, Just { existing | pages = existing.pages ++ [ { label = text, url = url } ] } )
 
                 ( Heading3, Nothing ) ->
-                    ( sections ++ [ { header = text, url = url, links = [] } ], Nothing )
+                    ( sections ++ [ { header = text, url = url, pages = [] } ], Nothing )
     in
     List.foldl loop ( [], Nothing )
         >> (\( sections, maybe ) ->
@@ -135,7 +114,7 @@ tableOfContentsRenderer =
 
 
 viewSidebar : { url : Url, index : Index } -> Html msg
-viewSidebar { url } =
+viewSidebar { url, index } =
     let
         viewSidebarLink : Link -> Html msg
         viewSidebarLink link__ =
@@ -144,15 +123,15 @@ viewSidebar { url } =
         viewSidebarSection : Section -> Html msg
         viewSidebarSection section =
             UI.col.sm []
-                [ Html.h4 [ Attr.class "h4 bold" ] [ Html.text section.header ]
-                , if List.isEmpty section.links then
+                [ Html.a [ Attr.href section.url, Attr.class "h4 bold" ] [ Html.text section.header ]
+                , if List.isEmpty section.pages then
                     Html.text ""
 
                   else
-                    UI.col.md [ Attr.class "border-left pad-y-sm pad-x-md align-left" ] (List.map viewSidebarLink section.links)
+                    UI.col.md [ Attr.class "border-left pad-y-sm pad-x-md align-left" ] (List.map viewSidebarLink section.pages)
                 ]
     in
-    UI.col.md [] (List.map viewSidebarSection sidebarSections)
+    UI.col.md [] (List.map viewSidebarSection (Domain.Index.sections index))
 
 
 viewDocumentationLink : Bool -> Link -> Html msg
@@ -162,7 +141,7 @@ viewDocumentationLink isActive link__ =
         , Attr.classList [ ( "bold text-blue", isActive ) ]
         , Attr.href link__.url
         ]
-        [ Html.text link__.name ]
+        [ Html.text link__.label ]
 
 
 viewTableOfContents : { url : Url, content : String } -> Html msg
@@ -175,13 +154,13 @@ viewTableOfContents { url, content } =
         viewTocSection : Section -> Html msg
         viewTocSection section =
             Html.div [ Attr.class "col gap-xs align-left" ]
-                [ viewTableOfContentsLink { name = section.header, url = section.url }
-                , if List.isEmpty section.links then
+                [ viewTableOfContentsLink { label = section.header, url = section.url }
+                , if List.isEmpty section.pages then
                     Html.text ""
 
                   else
                     Html.div [ Attr.class "col pad-left-sm pad-xs gap-sm" ]
-                        (section.links
+                        (section.pages
                             |> List.map (\l -> Html.div [ Attr.class "h6" ] [ viewTableOfContentsLink l ])
                         )
                 ]

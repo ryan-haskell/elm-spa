@@ -2,9 +2,10 @@ module Main exposing (main)
 
 import Browser
 import Browser.Navigation as Nav exposing (Key)
+import Effect
 import Gen.Pages as Pages
 import Gen.Route as Route
-import Request exposing (Request)
+import Request
 import Shared
 import Url exposing (Url)
 import View
@@ -40,14 +41,13 @@ init flags url key =
         ( shared, sharedCmd ) =
             Shared.init (Request.create () url key) flags
 
-        ( page, pageCmd, sharedPageCmd ) =
+        ( page, effect ) =
             Pages.init (Route.fromUrl url) shared url key
     in
     ( Model url key shared page
     , Cmd.batch
         [ Cmd.map Shared sharedCmd
-        , Cmd.map Shared sharedPageCmd
-        , Cmd.map Page pageCmd
+        , Effect.toCmd ( Shared, Page ) effect
         ]
     )
 
@@ -79,14 +79,11 @@ update msg model =
         ChangedUrl url ->
             if url.path /= model.url.path then
                 let
-                    ( page, pageCmd, sharedPageCmd ) =
+                    ( page, effect ) =
                         Pages.init (Route.fromUrl url) model.shared url model.key
                 in
                 ( { model | url = url, page = page }
-                , Cmd.batch
-                    [ Cmd.map Page pageCmd
-                    , Cmd.map Shared sharedPageCmd
-                    ]
+                , Effect.toCmd ( Shared, Page ) effect
                 )
 
             else
@@ -103,14 +100,11 @@ update msg model =
 
         Page pageMsg ->
             let
-                ( page, pageCmd, sharedPageCmd ) =
+                ( page, effect ) =
                     Pages.update pageMsg model.page model.shared model.url model.key
             in
             ( { model | page = page }
-            , Cmd.batch
-                [ Cmd.map Page pageCmd
-                , Cmd.map Shared sharedPageCmd
-                ]
+            , Effect.toCmd ( Shared, Page ) effect
             )
 
 

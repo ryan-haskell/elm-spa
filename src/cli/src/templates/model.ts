@@ -1,3 +1,4 @@
+import config from "../config"
 import {
   pagesImports, paramsImports,
   pagesModelDefinition,
@@ -11,6 +12,6 @@ ${paramsImports(pages)}
 ${pagesImports(pages)}
 
 
-${pagesModelDefinition(pages, options)}
+${pagesModelDefinition([ [ config.reserved.redirecting ] ].concat(pages), options)}
 
 `.trimLeft()

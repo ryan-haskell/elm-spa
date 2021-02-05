@@ -166,10 +166,12 @@ const pageModuleName = (path : string[]) : string =>
 
 export const pagesModelDefinition = (paths : string[][], options : Options) : string =>
   customType('Model',
-    paths.map(path => 
-      options.isStatic(path)
-        ? `${modelVariant(path)} ${params(path)}`
-        : `${modelVariant(path)} ${params(path)} ${model(path)}`
+    paths.map(path =>
+      path[0] === config.reserved.redirecting
+        ? config.reserved.redirecting
+        : options.isStatic(path)
+          ? `${modelVariant(path)} ${params(path)}`
+          : `${modelVariant(path)} ${params(path)} ${model(path)}`
     )
   )
 
@@ -238,10 +240,10 @@ export const pagesUpdateBody = (paths: string[][], options : Options) : string =
 export const pagesUpdateCatchAll =
 `
         _ ->
-            \\_ _ _ -> ( model_, Cmd.none, Cmd.none )`
+            \\_ _ _ -> ( model_, Effect.none )`
 
 export const pagesViewBody = (paths: string[][], options : Options) : string =>
-  indent(caseExpression(paths, {
+  indent(caseExpressionWithRedirectingModel(`\\_ _ _ -> View.none`, paths, {
     variable: 'model_',
     condition: path => `${destructuredModel(path, options)}`,
     result: path => `pages.${bundleName(path)}.view ${pageModelArguments(path, options)}`
@@ -249,11 +251,22 @@ export const pagesViewBody = (paths: string[][], options : Options) : string =>
 
 
 export const pagesSubscriptionsBody = (paths: string[][], options : Options) : string =>
-  indent(caseExpression(paths, {
+  indent(caseExpressionWithRedirectingModel(`\\_ _ _ -> Sub.none`, paths, {
     variable: 'model_',
     condition: path => `${destructuredModel(path, options)}`,
     result: path => `pages.${bundleName(path)}.subscriptions ${pageModelArguments(path, options)}`
   }))
+
+const caseExpressionWithRedirectingModel = (fallback : string, items: string[][], options : { variable : string, condition : (item: string[]) => string, result: (item: string[]) => string }) =>
+  caseExpression([ [ config.reserved.redirecting ] ].concat(items), {
+    variable: options.variable,
+    condition: (item) => item[0] === config.reserved.redirecting
+      ? `Model.${config.reserved.redirecting}`
+      : options.condition(item),
+    result: (item) => item[0] === config.reserved.redirecting
+      ? fallback
+      : options.result(item)
+  })
 
 const caseExpression = <T>(items: T[], options : { variable : string, condition : (item: T) => string, result: (item: T) => string }) =>
 `case ${options.variable} of

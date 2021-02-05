@@ -15,7 +15,6 @@ module UI.Layout exposing
 
 import Html exposing (Html)
 import Html.Attributes as Attr
-import Html.Events as Events
 import Page exposing (Page, shared)
 import Request exposing (Request)
 import Shared
@@ -81,12 +80,16 @@ viewDocumentation options markdownContent view =
                     , url = options.url
                     }
                 ]
-            , Html.main_ [ Attr.class "col flex" ] view
-            , Html.div [ Attr.class "hidden-mobile sticky pad-y-lg", Attr.style "width" "16em" ]
-                [ UI.Sidebar.viewTableOfContents
-                    { content = markdownContent
-                    , url = options.url
-                    }
+            , Html.main_ [ Attr.class "flex" ]
+                [ UI.row.lg [ UI.align.top ]
+                    [ Html.div [ Attr.class "col flex" ] view
+                    , Html.div [ Attr.class "hidden-mobile sticky pad-y-lg", Attr.style "width" "16em" ]
+                        [ UI.Sidebar.viewTableOfContents
+                            { content = markdownContent
+                            , url = options.url
+                            }
+                        ]
+                    ]
                 ]
             ]
         ]

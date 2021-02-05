@@ -1,4 +1,4 @@
-module View exposing (View, map, placeholder, toBrowserDocument)
+module View exposing (View, map, none, placeholder, toBrowserDocument)
 
 import Browser
 import Html exposing (Html)
@@ -15,6 +15,11 @@ placeholder str =
     { title = str
     , body = [ Html.text str ]
     }
+
+
+none : View msg
+none =
+    placeholder ""
 
 
 map : (a -> b) -> View a -> View b

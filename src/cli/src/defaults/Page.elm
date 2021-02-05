@@ -1,26 +1,54 @@
 module Page exposing
     ( Page
-    , static, sandbox, element, shared
+    , static, sandbox, element, advanced
+    , protected
     )
 
 {-|
 
 @docs Page
-@docs static, sandbox, element, shared
+@docs static, sandbox, element, advanced
 
 -}
 
-import ElmSpa.Page
+import Effect exposing (Effect)
+import ElmSpa.Internals.Page as ElmSpa
+import Gen.Route exposing (Route)
+import Request exposing (Request)
 import Shared
 import View exposing (View)
 
 
+
+-- PROTECTED OPTIONS
+
+
+{-| Replace "()" with your User type
+-}
+type alias User =
+    ()
+
+
+{-| This function attempts to get your user from shared state.
+-}
+getUser : Shared.Model -> Request () -> Maybe User
+getUser _ _ =
+    Nothing
+
+
+{-| This is the route elm-spa redirects to when a user is not signed in on a protected page.
+-}
+unauthorizedRoute : Route
+unauthorizedRoute =
+    Gen.Route.NotFound
+
+
+
+-- PAGES
+
+
 type alias Page model msg =
-    { init : () -> ( model, Cmd msg, List Shared.Msg )
-    , update : msg -> model -> ( model, Cmd msg, List Shared.Msg )
-    , view : model -> View msg
-    , subscriptions : model -> Sub msg
-    }
+    ElmSpa.Page Shared.Model (Request ()) Gen.Route.Route (Effect msg) (View msg) model msg
 
 
 static :
@@ -28,7 +56,7 @@ static :
     }
     -> Page () Never
 static =
-    ElmSpa.Page.static
+    ElmSpa.static Effect.none
 
 
 sandbox :
@@ -38,7 +66,7 @@ sandbox :
     }
     -> Page model msg
 sandbox =
-    ElmSpa.Page.sandbox
+    ElmSpa.sandbox Effect.none
 
 
 element :
@@ -49,15 +77,50 @@ element :
     }
     -> Page model msg
 element =
-    ElmSpa.Page.element
+    ElmSpa.element Effect.fromCmd
 
 
-shared :
-    { init : ( model, Cmd msg, List Shared.Msg )
-    , update : msg -> model -> ( model, Cmd msg, List Shared.Msg )
+advanced :
+    { init : ( model, Effect msg )
+    , update : msg -> model -> ( model, Effect msg )
     , view : model -> View msg
     , subscriptions : model -> Sub msg
     }
     -> Page model msg
-shared =
-    ElmSpa.Page.shared
+advanced =
+    ElmSpa.advanced
+
+
+protected :
+    { static :
+        { view : User -> View msg
+        }
+        -> Page () msg
+    , sandbox :
+        { init : User -> model
+        , update : User -> msg -> model -> model
+        , view : User -> model -> View msg
+        }
+        -> Page model msg
+    , element :
+        { init : User -> ( model, Cmd msg )
+        , update : User -> msg -> model -> ( model, Cmd msg )
+        , view : User -> model -> View msg
+        , subscriptions : User -> model -> Sub msg
+        }
+        -> Page model msg
+    , advanced :
+        { init : User -> ( model, Effect msg )
+        , update : User -> msg -> model -> ( model, Effect msg )
+        , view : User -> model -> View msg
+        , subscriptions : User -> model -> Sub msg
+        }
+        -> Page model msg
+    }
+protected =
+    ElmSpa.protected
+        { effectNone = Effect.none
+        , fromCmd = Effect.fromCmd
+        , user = getUser
+        , route = unauthorizedRoute
+        }

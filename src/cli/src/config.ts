@@ -2,6 +2,7 @@ import path from 'path'
 
 const reserved = {
   homepage: 'Home_',
+  redirecting: 'Redirecting_',
   notFound: 'NotFound'
 }
 
@@ -35,6 +36,7 @@ const config = {
     terser: `npx terser`
   },
   defaults: [
+    [ 'Effect.elm' ],
     [ 'Main.elm' ],
     [ 'Shared.elm' ],
     [ `Pages`, `${reserved.notFound}.elm` ],

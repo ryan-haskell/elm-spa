@@ -6,7 +6,6 @@ import Request exposing (Request)
 import Shared
 import UI
 import UI.Layout
-import Url exposing (Url)
 import View exposing (View)
 
 

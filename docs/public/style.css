@@ -65,8 +65,8 @@ pre {
   background-color: white;
 }
 
-main .markdown {
-  animation: fadeIn 200ms 300ms ease-in forwards;
+main {
+  animation: fadeIn 200ms 400ms ease-in forwards;
   opacity: 0;
 }
 

@@ -1,12 +1,14 @@
 module Domain.Index exposing
     ( Index, decoder
     , Link, search
+    , Section, sections
     )
 
 {-|
 
 @docs Index, decoder
 @docs Link, search
+@docs Section, sections
 
 -}
 
@@ -81,3 +83,73 @@ search query index =
                 }
             )
         |> List.filter (\link -> Utils.String.caseInsensitiveContains query link.label)
+
+
+
+-- SECTIONS
+
+
+type alias Section =
+    { header : String
+    , url : String
+    , pages : List SectionLink
+    }
+
+
+type alias SectionLink =
+    { label : String
+    , url : String
+    }
+
+
+sections : Index -> List Section
+sections index =
+    let
+        sectionOrder =
+            [ "Guide"
+            , "Examples"
+            ]
+
+        toLabelUrls =
+            List.filterMap
+                (\doc ->
+                    doc.headers
+                        |> Dict.filter (\_ level -> level == 1)
+                        |> Dict.toList
+                        |> List.head
+                        |> Maybe.map (Tuple.first >> (\label -> { label = label, url = doc.url }))
+                )
+
+        topLevelLabelUrls : List { label : String, url : String }
+        topLevelLabelUrls =
+            let
+                isOneLevelDeep doc =
+                    List.length (String.split "/" doc.url) == 2
+            in
+            index
+                |> List.filter isOneLevelDeep
+                |> toLabelUrls
+
+        toSection top children =
+            { header = top.label
+            , url = top.url
+            , pages = children
+            }
+    in
+    topLevelLabelUrls
+        |> List.map
+            (\top ->
+                index
+                    |> List.filter (.url >> (\url -> String.startsWith top.url url && url /= top.url))
+                    |> toLabelUrls
+                    |> toSection top
+            )
+        |> List.sortBy
+            (\section ->
+                sectionOrder
+                    |> List.indexedMap Tuple.pair
+                    |> List.filter (Tuple.second >> (==) section.header)
+                    |> List.map Tuple.first
+                    |> List.head
+                    |> Maybe.withDefault -1
+            )

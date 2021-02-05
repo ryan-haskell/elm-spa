@@ -1,6 +1,5 @@
 module UI.Docs exposing (Model, Msg, page)
 
-import Gen.Route as Route
 import Http
 import Page exposing (Page)
 import Request exposing (Request)
@@ -45,16 +44,6 @@ withDefault fallback fetchable =
 
         _ ->
             fallback
-
-
-toMaybe : Fetchable value -> Maybe value
-toMaybe fetchable =
-    case fetchable of
-        Success value ->
-            Just value
-
-        _ ->
-            Nothing
 
 
 init : Url -> ( Model, Cmd Msg )

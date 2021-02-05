@@ -3,7 +3,7 @@
 The [official __elm-spa__ CLI tool](https://npmjs.org/elm-spa) has a few commands to help you build single page applications. As we saw in [the previous section](/guide/overview), you can use the CLI from your terminal by running:
 
 ```terminal
-npm install -g elm-spa@latest
+npm install -g elm-spa@beta
 ```
 
 At any time running `elm-spa` or `elm-spa help` will show you the available commands:
@@ -24,20 +24,22 @@ The `new` command creates a new project in the current folder:
 elm-spa new
 ```
 
-This command will only create a few files, so don't worry about getting overwhelmed with new files in your repo! Other than a `.gitignore`, there are only 2 new files created.
+This command will only create a few files, so don't worry about getting overwhelmed with new files in your repo! Other than a `.gitignore`, there are only 3 new files created.
 
 File | Description
 --- | ---
 `elm.json` | Your project's dependencies.
-`src` | An empty folder for your Elm code.
+`src/Pages/Home_.elm` | The homepage.
 `public/index.html` | The entrypoint to your application.
 
 ```
 your-project/
-  - elm.json
-  - src/
-  - public/
-     - index.html
+|- elm.json
+|- src/
+|  |- Pages/
+|     |- Home_.elm
+|- public/
+   |- index.html
 ```
 
 The `public` folder is a place for static assets! For example, a file at `./public/style.css` will be available at `/style.css` in your web browser.
