@@ -16,13 +16,13 @@ In this section, we'll cover the 3 kinds of routes you can find in an __elm-spa_
 
 ## The homepage
 
-The `src/Pages/Home_.elm` file is a reserved page that handles requests to `/`. The easiest way to make a new homepage is with the [`add` command](/guide/cli#adding-a-homepage) covered in the CLI section:
+The `src/Pages/Home_.elm` file is a __dynamic route__ that's reserved and handles requests to `/`. The easiest way to make a new homepage is with the [`add` command](/guide/cli#adding-a-homepage) covered in the CLI section:
 
 ```terminal
 elm-spa add /
 ```
 
-__Note:__ Without the trailing underscore, __elm-spa__ will treat `Home.elm` as a route to `/home`! This is called a "static route", and will be covered at the end of this sentence.
+__Note:__ Without the trailing underscore, __elm-spa__ will treat `Home.elm` as a route to `/home`! This is called a "static route", and will be covered next.
 
 ## Static routes
 

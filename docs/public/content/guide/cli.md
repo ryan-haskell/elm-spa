@@ -95,7 +95,7 @@ We'll cover this in more detail in the [routing section](./routing)
 
 ### using page templates
 
-The `elm-spa add` command also accepts an optional `template` argument to for common
+The `elm-spa add` command also accepts an optional `template` argument too for common
 pages you might create.
 
 ```bash

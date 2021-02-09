@@ -73,7 +73,7 @@ This is less common than `req.params` and `req.query`, but can be useful for get
 
 ## Getting the current route
 
-The `Request` type also has access to the `Route` value, so you can easily do comparisons agains the current route!
+The `Request` type also has access to the `Route` value, so you can easily do comparisons against the current route!
 
 ```elm
 -- "/"

@@ -44,7 +44,7 @@ npx elm-spa server
 So far, we've used [npx](https://www.npmjs.com/package/npx) so we don't need to install __elm-spa__ directly. If you'd like to run commands from the terminal, without the `npx` prefix, you can install __elm-spa__ like this:
 
 ```terminal
-npm install -g elm-spa@next
+npm install -g elm-spa@beta
 ```
 
 You can verify the install succeeded by running `elm-spa help` from your terminal:
