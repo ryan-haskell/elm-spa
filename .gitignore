@@ -2,8 +2,7 @@
 .elm-spa
 elm-stuff
 node_modules
-# dist
-Generated
-elm-spa-*.tgz
+dist
+
 # Local Netlify folder
 .netlify
