@@ -16,7 +16,7 @@ toId : String -> String
 toId =
     String.toLower
         >> String.words
-        >> List.map (String.filter Char.isAlphaNum)
+        >> List.map (String.filter (\c -> c == '-' || Char.isAlphaNum c))
         >> String.join "-"
 
 

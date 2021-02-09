@@ -164,7 +164,7 @@ markdown options str =
                             Html.Keyed.node "div"
                                 []
                                 [ ( body
-                                  , Html.node "highlight-js"
+                                  , Html.node "prism-js"
                                         [ Attr.property "body" (Json.string body)
                                         , Attr.property "language" (Json.string "elm")
                                         ]

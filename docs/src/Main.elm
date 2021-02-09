@@ -2,6 +2,7 @@ module Main exposing (main)
 
 import Browser
 import Browser.Navigation as Nav exposing (Key)
+import Effect
 import Gen.Pages as Pages
 import Gen.Route as Route
 import Ports
@@ -41,14 +42,13 @@ init flags url key =
         ( shared, sharedCmd ) =
             Shared.init (request { url = url, key = key }) flags
 
-        ( page, pageCmd, sharedPageCmd ) =
+        ( page, effect ) =
             Pages.init (Route.fromUrl url) shared url key
     in
     ( Model url key shared page
     , Cmd.batch
         [ Cmd.map Shared sharedCmd
-        , Cmd.map Shared sharedPageCmd
-        , Cmd.map Page pageCmd
+        , Effect.toCmd ( Shared, Page ) effect
         ]
     )
 
@@ -89,13 +89,12 @@ update msg model =
 
             else
                 let
-                    ( page, pageCmd, sharedPageCmd ) =
+                    ( page, effect ) =
                         Pages.init (Route.fromUrl url) model.shared url model.key
                 in
                 ( { model | url = url, page = page }
                 , Cmd.batch
-                    [ Cmd.map Page pageCmd
-                    , Cmd.map Shared sharedPageCmd
+                    [ Effect.toCmd ( Shared, Page ) effect
                     , Ports.onUrlChange ()
                     ]
                 )
@@ -111,14 +110,11 @@ update msg model =
 
         Page pageMsg ->
             let
-                ( page, pageCmd, sharedPageCmd ) =
+                ( page, effect ) =
                     Pages.update pageMsg model.page model.shared model.url model.key
             in
             ( { model | page = page }
-            , Cmd.batch
-                [ Cmd.map Page pageCmd
-                , Cmd.map Shared sharedPageCmd
-                ]
+            , Effect.toCmd ( Shared, Page ) effect
             )
 
 

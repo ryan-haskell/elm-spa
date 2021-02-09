@@ -21,7 +21,6 @@ type alias Flags =
 
 type alias Model =
     { index : Index
-    , token : Maybe Token
     }
 
 

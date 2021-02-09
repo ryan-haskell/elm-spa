@@ -10,6 +10,7 @@ type alias Request params =
   { params : params
   , query : Dict String String
   , url : Url
+  , route : Route
   , key : Nav.Key
   }
 ```
@@ -39,7 +40,7 @@ __Note:__ When working with [shared state](/guide/shared-state), all requests ar
 
 ## Query Parameters
 
-For convenience, query parameters are automatically turned into a `Dict String String`, making it easy to handle URLs like this:
+For convenience, query parameters are automatically turned into a `Dict String String`, making it easy to handle common query URL parameters like these:
 
 ```
 /people?team=design&ascending
@@ -70,6 +71,21 @@ type alias Url =
 
 This is less common than `req.params` and `req.query`, but can be useful for getting the `hash` at the end of a URL too!
 
+## Getting the current route
+
+The `Request` type also has access to the `Route` value, so you can easily do comparisons agains the current route!
+
+```elm
+-- "/"
+req.route == Gen.Route.Home_
+
+-- "/about-us"
+req.route == Gen.Route.AboutUs
+
+-- "/people/ryan"
+req.route == Gen.Route.People_ { name = "ryan" }
+```
+
 ## Programmatic Navigation
 
 Most of the time, navigation in Elm is as easy as giving an `href` attribute to an anchor tag:
@@ -80,7 +96,7 @@ a [ href "/guide" ] [ text "elm-spa guide" ]
 
 Other times, you'll want to do __programmatic navigation__ – navigating to another page after some event completes. Maybe you want to __redirect__ to a sign in page, or head to the __dashboard after signing in successfully__.
 
-In that case you'll need access to `req.key` in order to use `Nav.pushUrl` or `Nav.replaceUrl`. Here's a quick example of what that looks like:
+In that case we store `req.key` in order to use `Request.pushRoute` or `Request.replaceRoute`. Here's a quick example of what that looks like:
 
 ```elm
 type Msg = SignedIn User
@@ -90,8 +106,8 @@ update req msg model =
   case msg of
     SignedIn user ->
       ( model
-      , Nav.pushUrl req.key "/dashboard"
+      , Request.pushRoute Gen.Route.Dashboard req
       )
 ```
 
-When the `SignedIn` message is fired, this code will redirect the user to the dashboard. Feel free to check out the [elm/browser](https://package.elm-lang.org/packages/elm/browser/latest/Browser-Navigation) package docs for more in-depth examples.
+When the `SignedIn` message is fired, this code will redirect the user to the `Dashboard` route.

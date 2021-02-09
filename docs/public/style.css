@@ -28,7 +28,6 @@
   --shadow-dark: 0 0.5em 2em rgb(0, 0, 0, 0.2);
 }
 
-
 /* Resets */
 @media screen and (min-width: 1920px ) {
   html { font-size: 20px; }
@@ -137,12 +136,16 @@ hr { border: 0; }
   max-width: 36em;
 }
 
+.markdown hr {
+  margin-top: 2em;
+}
+
 .markdown > h1:not(:first-child),
-.markdown > h2:not(:first-child),
-.markdown > h3:not(:first-child) {
+.markdown > h2:not(:first-child) {
   padding-top: 2rem;
 }
 
+.markdown > h3:not(:first-child),
 .markdown > h4:not(:first-child) {
   padding-top: 1rem;
 }

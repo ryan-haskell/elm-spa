@@ -27,19 +27,16 @@ window.addEventListener('keypress', (e) => {
 })
 
 // HighlightJS custom element
-customElements.define('highlight-js', class HighlightJS extends HTMLElement {
+customElements.define('prism-js', class HighlightJS extends HTMLElement {
   constructor () { super() }
   connectedCallback () {
     const pre = document.createElement('pre')
-    const code = document.createElement('code')
 
     pre.className = `language-elm`
-    code.innerText = this.body
-    
-    pre.appendChild(code)
+    pre.textContent = this.body
 
     this.appendChild(pre)
-    window.hljs.highlightBlock(pre)
+    window.Prism.highlightElement(pre)
   }
 })
 

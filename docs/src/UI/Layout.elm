@@ -15,7 +15,7 @@ module UI.Layout exposing
 
 import Html exposing (Html)
 import Html.Attributes as Attr
-import Page exposing (Page, shared)
+import Page exposing (Page)
 import Request exposing (Request)
 import Shared
 import UI
