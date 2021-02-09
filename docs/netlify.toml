@@ -1,6 +1,6 @@
 [build]
   publish = "public"
-  command = "npm i elm-spa@beta && npx elm-spa build"
+  command = "npm i elm-spa@beta && node scripts/generate-index.js && npx elm-spa build"
 
 [[redirects]]
   from = "/*"
