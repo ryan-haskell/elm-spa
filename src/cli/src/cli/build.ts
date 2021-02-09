@@ -137,8 +137,23 @@ const compileMainElm = (env : Environment) => async () => {
       .catch(colorElmError)
   }
 
+  const red = colors.RED
+  const green = colors.green
+
   const colorElmError = (err : string) => {
-    const errors = JSON.parse(err).errors as Error[] || []
+    let errors = []
+
+    try {
+      errors = JSON.parse(err).errors as Error[] || []
+    } catch (e) {
+      return Promise.reject([
+        `${red}Something went wrong with elm-spa.${reset}`,
+        `Please report this entire error to ${green}https://github.com/ryannhg/elm-spa/issues${reset}`,
+        `-----`,
+        err,
+        `-----`
+      ].join('\n\n'))
+    }
 
     const strIf = (str : string) => (cond : boolean) : string => cond ? str : ''
     const boldIf = strIf(bold)
