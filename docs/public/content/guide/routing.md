@@ -15,8 +15,8 @@ URL | File
 In this section, we'll cover the 3 kinds of routes you can find in an __elm-spa__ application.
 
 ## The homepage
-
-The `src/Pages/Home_.elm` file is a __dynamic route__ that's reserved and handles requests to `/`. The easiest way to make a new homepage is with the [`add` command](/guide/cli#adding-a-homepage) covered in the CLI section:
+ 
+The `src/Pages/Home_.elm` is a reserved filename that handles requests to /. The easiest way to make a new homepage is with the [`add` command](/guide/cli#adding-a-homepage) covered in the CLI section:
 
 ```terminal
 elm-spa add /
