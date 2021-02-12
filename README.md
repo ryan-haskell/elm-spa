@@ -1,9 +1,9 @@
-# [![elm-spa](https://sad-kirch-e164e1.netlify.app/images/logo.png)](https://v6.elm-spa.dev)
+# [![elm-spa](https://v6-elm-spa.netlify.app/images/outlined-to-edge.png)](https://elm-spa.dev)
 
 # **Installation**
 
 ```bash
-npm install -g elm-spa@beta
+npm install -g elm-spa@latest
 ```
 
 # **Quick start**
@@ -33,7 +33,7 @@ elm-spa server   # Ready at http://localhost:1234
 
 # **Learn more**
 
-__Visit the official site__ at [elm-spa.dev](https://v6.elm-spa.dev) for more examples, guides, and other documentation.
+__Visit the official site__ at [elm-spa.dev](https://elm-spa.dev) for more examples, guides, and other documentation.
 
 ## **Do I need the Elm package?**
 
