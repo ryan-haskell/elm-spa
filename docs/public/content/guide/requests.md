@@ -83,7 +83,7 @@ req.route == Gen.Route.Home_
 req.route == Gen.Route.AboutUs
 
 -- "/people/ryan"
-req.route == Gen.Route.People_ { name = "ryan" }
+req.route == Gen.Route.People.Name_ { name = "ryan" }
 ```
 
 ## Programmatic Navigation
