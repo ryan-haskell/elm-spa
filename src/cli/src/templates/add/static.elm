@@ -1,4 +1,4 @@
-module Pages.{{module}} exposing (Model, Msg, page)
+module Pages.{{module}} exposing (page)
 
 import Gen.Params.{{module}} exposing (Params)
 import Page exposing (Page)
@@ -7,21 +7,13 @@ import Shared
 import View exposing (View)
 
 
-type alias Model =
-    ()
-
-
-type alias Msg =
-    Never
-
-
-page : Shared.Model -> Request Params -> Page Model Msg
+page : Shared.Model -> Request Params -> Page () Never
 page shared req =
     Page.static
         { view = view
         }
 
 
-view : View Msg
+view : View Never
 view =
     View.placeholder "{{module}}"

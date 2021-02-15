@@ -1,8 +1,8 @@
-module Pages.NotFound exposing (page)
+module Pages.NotFound exposing (view)
 
 import View exposing (View)
 
 
-page : View Never
-page =
+view : View Never
+view =
     View.placeholder "Page not found."

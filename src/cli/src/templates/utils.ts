@@ -1,8 +1,21 @@
 import config from "../config"
 
+
+export type PageKind = 'view' | 'static-page' | 'page'
+
 export type Options = {
-  isStatic: (path: string[]) => boolean
+  kind: (path: string[]) => PageKind
+  isStaticView: (path: string[]) => boolean
+  isStaticPage: (path: string[]) => boolean
+  isStandardPage: (path: string[]) => boolean
 }
+
+export const options = (kind: (path: string[]) => PageKind) : Options => ({
+  kind,
+  isStaticView: p => kind(p) === 'view',
+  isStaticPage: p => kind(p) === 'static-page',
+  isStandardPage: p => kind(p) === 'page',
+})
 
 // [ 'Home_' ] => true
 const isHomepage = (path: string[]) =>
@@ -166,29 +179,33 @@ const pageModuleName = (path : string[]) : string =>
 
 export const pagesModelDefinition = (paths : string[][], options : Options) : string =>
   customType('Model',
-    paths.map(path =>
-      path[0] === config.reserved.redirecting
-        ? config.reserved.redirecting
-        : options.isStatic(path)
-          ? `${modelVariant(path)} ${params(path)}`
-          : `${modelVariant(path)} ${params(path)} ${model(path)}`
-    )
+    paths.map(path => (() => {
+      if (path[0] === config.reserved.redirecting) return config.reserved.redirecting
+      
+      switch (options.kind(path)) {
+        case 'view': return `${modelVariant(path)} ${params(path)}`
+        case 'static-page': return `${modelVariant(path)} ${params(path)} ${model(path, options)}`
+        case 'page': return `${modelVariant(path)} ${params(path)} ${model(path, options)}`
+      }
+    })())
   )
 
-export const pagesMsgDefinition = (paths : string[][]) : string =>
+export const pagesMsgDefinition = (paths : string[][], options: Options) : string =>
   (paths.length === 0)
       ? `type Msg = None`
-      : customType('Msg',
-          paths.map(path => `${msgVariant(path)} ${msg(path)}`)
-        )
+      : customType('Msg', paths.map(path => `${msgVariant(path)} ${msg(path, options)}`))
 
 export const pagesBundleAnnotation = (paths : string[][], options : Options) : string =>
   indent(multilineRecord(':',
     paths.map(path => [
       bundleName(path),
-      options.isStatic(path)
-        ? `Static ${params(path)}`
-        : `Bundle ${params(path)} ${model(path)} ${msg(path)}`
+      (() => {
+        switch (options.kind(path)) {
+          case 'view': return `Static ${params(path)}`
+          case 'static-page': return `Bundle ${params(path)} ${model(path, options)} ${msg(path, options)}`
+          case `page`: return `Bundle ${params(path)} ${model(path, options)} ${msg(path, options)}`
+        }
+      })()
     ])
   ))
 
@@ -196,9 +213,13 @@ export const pagesBundleDefinition = (paths : string[][], options : Options) : s
   indent(multilineRecord('=',
     paths.map(path => [
       bundleName(path),
-      options.isStatic(path)
-        ? `static ${pageModuleName(path)}.page Model.${modelVariant(path)}`
-        : `bundle ${pageModuleName(path)}.page Model.${modelVariant(path)} Msg.${msgVariant(path)}`
+      (() => {
+        switch (options.kind(path)) {
+          case 'view': return `static ${pageModuleName(path)}.view Model.${modelVariant(path)}`
+          case 'static-page': return `bundle ${pageModuleName(path)}.page Model.${modelVariant(path)} Msg.${msgVariant(path)}`
+          case `page`: return `bundle ${pageModuleName(path)}.page Model.${modelVariant(path)} Msg.${msgVariant(path)}`
+        }
+      })()
     ])
   ))
 
@@ -211,8 +232,13 @@ const paramsModule = (path : string[]) =>
 const params = (path : string[]) =>
   `${paramsModule(path)}.Params`
 
-const model = (path: string[]) : string =>
-  `Pages.${path.join('.')}.Model`
+const model = (path: string[], options : Options) : string => {
+  switch (options.kind(path)) {
+    case 'view': return `()`
+    case 'static-page': return `()`
+    case 'page': return `Pages.${path.join('.')}.Model`
+  }
+}
 
 const modelVariant = (path: string[]) : string =>
   `${path.join('__')}`
@@ -220,8 +246,10 @@ const modelVariant = (path: string[]) : string =>
 const msgVariant = (path: string[]) : string =>
   `${path.join('__')}`
 
-const msg = (path: string[]) : string =>
-  `Pages.${path.join('.')}.Msg`
+const msg = (path: string[], options: Options) : string =>
+  options.isStandardPage(path)
+    ? `Pages.${path.join('.')}.Msg`
+    : `Never`
 
 export const pagesInitBody = (paths: string[][]) : string =>
   indent(caseExpression(paths, {
@@ -272,15 +300,21 @@ const caseExpression = <T>(items: T[], options : { variable : string, condition 
 `case ${options.variable} of
 ${items.map(item => `    ${options.condition(item)} ->\n        ${options.result(item)}`).join('\n\n')}`
 
-const destructuredModel = (path: string[], options : Options) : string =>
-  options.isStatic(path)
-    ? `Model.${modelVariant(path)} params`
-    : `Model.${modelVariant(path)} params model`
+const destructuredModel = (path: string[], options : Options) : string => {
+  switch (options.kind(path)) {
+    case 'view': return `Model.${modelVariant(path)} params`
+    case 'static-page': return `Model.${modelVariant(path)} params model`
+    case 'page': return `Model.${modelVariant(path)} params model`
+  }
+}
 
-const pageModelArguments = (path: string[], options : Options) : string =>
-  options.isStatic(path)
-    ? `params ()`
-    : `params model`
+const pageModelArguments = (path: string[], options : Options) : string => {
+  switch (options.kind(path)) {
+    case 'view': return `params ()`
+    case 'static-page': return `params model`
+    case 'page': return  `params model`
+  }
+}
 
 // Used in place of sophisticated AST parsing
 const exposes = (keyword: string) => (elmSourceCode: string): boolean =>
@@ -288,6 +322,16 @@ const exposes = (keyword: string) => (elmSourceCode: string): boolean =>
 
 export const exposesModel = exposes('Model')
 export const exposesMsg = exposes('Msg')
+export const exposesPageFunction = exposes('page')
+export const exposesViewFunction = exposes('view')
 
-export const isStaticPage = (sourceCode : string) : boolean =>
-  !exposesModel(sourceCode) || !exposesMsg(sourceCode)
+export const isStandardPage = (src : string) =>
+  exposesPageFunction(src)
+    && exposesModel(src)
+    && exposesMsg(src)
+
+export const isStaticPage = (src : string) =>
+  exposesPageFunction(src)
+
+export const isStaticView = (src : string) =>
+  exposesViewFunction(src)

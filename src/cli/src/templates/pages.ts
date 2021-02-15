@@ -44,7 +44,7 @@ ${pagesInitBody(pages)}
 
 update : Msg -> Model -> Shared.Model -> Url -> Key -> ( Model, Effect Msg )
 update msg_ model_ =
-${pagesUpdateBody(pages.filter(page => options.isStatic(page) === false), options)}
+${pagesUpdateBody(pages.filter(page => !options.isStaticView(page)), options)}
 ${pages.length > 1 ? pagesUpdateCatchAll : ''}
 
 

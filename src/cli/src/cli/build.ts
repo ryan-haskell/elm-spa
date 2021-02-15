@@ -8,8 +8,8 @@ import ModelTemplate from '../templates/model'
 import MsgTemplate from '../templates/msg'
 import ParamsTemplate from '../templates/params'
 import * as Process from '../process'
-import { bold, underline, colors, reset, check, dim } from "../terminal"
-import { isStaticPage } from "../templates/utils"
+import { bold, underline, colors, reset, check, dim, dot } from "../terminal"
+import { isStandardPage, isStaticPage, isStaticView, options, PageKind } from "../templates/utils"
 import { createMissingAddTemplates } from "./_common"
 
 export const build = (env : Environment) => () =>
@@ -60,32 +60,64 @@ const createMissingDefaultFiles = async () => {
   return Promise.all(actions.map(performDefaultFileAction))
 }
 
-const scanForStaticPages = async (entries: PageEntry[]) : Promise<string[][]> => {
+type FilepathSegments = {
+  kind: PageKind,
+  entry: PageEntry
+}
+
+const getFilepathSegments = async (entries: PageEntry[]) : Promise<FilepathSegments[]> => {
   const contents = await Promise.all(entries.map(e => File.read(e.filepath)))
-  return contents
-    .map((content, i) => isStaticPage(content) ? i : undefined)
-    .filter(a => typeof a === 'number')
-    .map((i : any) => entries[i].segments)
+
+  return Promise.all(entries.map(async (entry, i) => {
+    const c = contents[i]
+    const kind : PageKind = await (
+      isStandardPage(c) ? Promise.resolve('page')
+      : isStaticPage(c) ? Promise.resolve('static-page')
+      : isStaticView(c) ? Promise.resolve('view')
+      : Promise.reject(invalidExportsMessage(entry))
+    )
+    return { kind, entry }
+  }))
+}
+
+const invalidExportsMessage = (entry : PageEntry) => {
+  const moduleName = `${bold}Pages.${entry.segments.join('.')}${reset}`
+  const cyan = (str: string) => `${colors.cyan}${str}${reset}`
+
+  return [
+    `${colors.RED}!${reset} Ran into a problem at ${bold}${colors.yellow}src/Pages/${entry.segments.join('/')}.elm${reset}`,
+    ``,
+    `${bold}elm-spa${reset} expected one of these module definitions:`,
+    ``,
+    `  ${dot} module ${moduleName} exposing (${cyan('view')})`,
+    `  ${dot} module ${moduleName} exposing (${cyan('page')})`,
+    `  ${dot} module ${moduleName} exposing (${cyan('Model')}, ${cyan('Msg')}, ${cyan('page')})`,
+    ``,
+    `Visit ${colors.green}https://elm-spa.dev/guide/pages${reset} for more details!`
+  ].join('\n')
 }
 
 const createGeneratedFiles = async () => {
   const entries = await getAllPageEntries()
-  const filepaths = entries.map(e => e.segments)
+  const segments = entries.map(e => e.segments)
 
-  const staticPages = await scanForStaticPages(entries)
-  const isStatic = (path : string[]) => staticPages.map(p => p.join('.')).includes(path.join('.'))
+  const filepathSegments = await getFilepathSegments(entries)
+  const kindForPage = (p : string[]) : PageKind =>
+    filepathSegments
+      .filter(item => item.entry.segments.join('.') == p.join('.'))
+      .map(fps => fps.kind)[0] || 'page'
 
-  const paramFiles = filepaths.map(filepath => ({
+  const paramFiles = segments.map(filepath => ({
     filepath: [ 'Gen', 'Params', ...filepath ],
-    contents: ParamsTemplate(filepath, { isStatic })
+    contents: ParamsTemplate(filepath, options(kindForPage))
   }))
 
   const filesToCreate = [
     ...paramFiles,
-    { filepath: [ 'Gen', 'Route' ], contents: RouteTemplate(filepaths, { isStatic }) },
-    { filepath: [ 'Gen', 'Pages' ], contents: PagesTemplate(filepaths, { isStatic }) },
-    { filepath: [ 'Gen', 'Model' ], contents: ModelTemplate(filepaths, { isStatic }) },
-    { filepath: [ 'Gen', 'Msg' ], contents: MsgTemplate(filepaths, { isStatic }) }
+    { filepath: [ 'Gen', 'Route' ], contents: RouteTemplate(segments, options(kindForPage)) },
+    { filepath: [ 'Gen', 'Pages' ], contents: PagesTemplate(segments, options(kindForPage)) },
+    { filepath: [ 'Gen', 'Model' ], contents: ModelTemplate(segments, options(kindForPage)) },
+    { filepath: [ 'Gen', 'Msg' ], contents: MsgTemplate(segments, options(kindForPage)) }
   ]
 
   return Promise.all(filesToCreate.map(({ filepath, contents }) =>

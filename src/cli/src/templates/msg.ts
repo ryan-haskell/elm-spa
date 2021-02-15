@@ -11,6 +11,6 @@ ${paramsImports(pages)}
 ${pagesImports(pages)}
 
 
-${pagesMsgDefinition(pages.filter(path => options.isStatic(path) === false))}
+${pagesMsgDefinition(pages.filter(path => !options.isStaticView(path)), options)}
 
 `.trimLeft()

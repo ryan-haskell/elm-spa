@@ -1,11 +1,11 @@
-module Pages.Home_ exposing (page)
+module Pages.Home_ exposing (view)
 
 import Html
 import View exposing (View)
 
 
-page : View Never
-page =
+view : View Never
+view =
     { title = "Homepage"
     , body = [ Html.text "Hello, world!" ]
     }
