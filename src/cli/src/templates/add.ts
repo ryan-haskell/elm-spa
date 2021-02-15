@@ -1,11 +1,11 @@
 export default (page : string[]) : string => `
-module Pages.${page.join('.')} exposing (page)
+module Pages.${page.join('.')} exposing (view)
 
 import View exposing (View)
 
 
-page : View Never
-page =
+view : View Never
+view =
     View.placeholder "${page.join('.')}"
 
 `.trimLeft()

@@ -20,27 +20,30 @@ import View exposing (View)
 
 
 
--- PROTECTED OPTIONS
+-- PROTECTED PAGES
 
 
-{-| Replace "()" with your User type
+{-| Replace "()" with your actual User type
 -}
 type alias User =
     ()
 
 
-{-| This function attempts to get your user from shared state.
--}
-getUser : Shared.Model -> Request () -> Maybe User
-getUser _ _ =
-    Nothing
+{-| This function will run before any `protected` pages.
 
+Here, you can provide logic on where to redirect if a user is not signed in. Here's an example:
 
-{-| This is the route elm-spa redirects to when a user is not signed in on a protected page.
+    case shared.user of
+        Just user ->
+            ElmSpa.Provide user
+
+        Nothing ->
+            ElmSpa.RedirectTo Gen.Route.SignIn
+
 -}
-unauthorizedRoute : Route
-unauthorizedRoute =
-    Gen.Route.NotFound
+beforeProtectedInit : Shared.Model -> Request () -> ElmSpa.Protected User Route
+beforeProtectedInit shared req =
+    ElmSpa.RedirectTo Gen.Route.NotFound
 
 
 
@@ -48,7 +51,7 @@ unauthorizedRoute =
 
 
 type alias Page model msg =
-    ElmSpa.Page Shared.Model Gen.Route.Route (Effect msg) (View msg) model msg
+    ElmSpa.Page Shared.Model Route (Effect msg) (View msg) model msg
 
 
 static :
@@ -118,9 +121,8 @@ protected :
         -> Page model msg
     }
 protected =
-    ElmSpa.protected
+    ElmSpa.protected2
         { effectNone = Effect.none
         , fromCmd = Effect.fromCmd
-        , user = getUser
-        , route = unauthorizedRoute
+        , beforeInit = beforeProtectedInit
         }

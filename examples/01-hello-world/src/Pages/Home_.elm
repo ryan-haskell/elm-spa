@@ -1,9 +1,9 @@
-module Pages.Home_ exposing (page)
+module Pages.Home_ exposing (view)
 
 import Html
 
 
-page =
+view =
     { title = "Homepage"
     , body =
         [ Html.text "Hello, world!"
