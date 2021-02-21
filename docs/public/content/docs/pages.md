@@ -13,11 +13,11 @@ view =
     }
 ```
 
-This homepage renders the tab `title`, and a HTML `body` onto the page. This is great when you have a static page that just needs to render some elements.
+This homepage renders the tab `title`, and a HTML `body` onto the page. This is great when you have a static page that just needs to render some HTML.
 
 Because the file is named `Home_.elm`, we know it's the homepage. These 8 lines of code are all we need to tell __elm-spa__ we'd like to render this when users visit the homepage.
 
-For real world applications, we'll need pages that can do more. That's where the `Page` module comes in handy.
+For real world applications, our pages will need to do more than print "Hello, world!". Let's upgrade!
 
 ### Upgrading "Hello World!"
 
@@ -26,13 +26,12 @@ Let's start by introducing the `page` function, marking the start of our journey
 ```elm
 module Pages.Home_ exposing (page)
 
--- our other imports
+import Html
 import Page exposing (Page)
+import Request exposing (Request)
+import Shared
 
-page :
-    Shared.Model
-    -> Request Params
-    -> Page () Never
+page : Shared.Model -> Request -> Page
 page shared req =
     Page.static
         { view = view
@@ -46,13 +45,13 @@ view =
 
 Here, our code hasn't changed very much- except now we have this new `page` function that:
 
-1. Takes in two inputs: `Shared.Model` and `Request Params`
-2. Returns a `Page () Never` value.
-3. Is exposed at the top of our `Pages.Home_` module.
+1. Accepts two inputs: `Shared.Model` and `Request`
+2. Returns a `Page` value
+3. Has been __exposed__ at the top of the file
 
-> Without exposing `page`, __elm-spa__ will not understand how to compile your application. Make sure to _always_ expose `page` from modules within the `src/Pages` folder.
+> Exposing `page` from this module lets __elm-spa__ know to use it instead of the plain `view` function from before.
 
-This new `page` will always get the latest `Shared.Model` and URL information, which means you don't have to worry about tracking that stuff yourself.
+This new `page` will always get the latest `Shared.Model` and a `Request` value (that contains URL information).
 
 This is great, but there is still more that our `page` function can do other than render a view!
 
@@ -153,9 +152,17 @@ Notice how the type annotations of `init` and `update` changed to accept their i
 ## Page.static
 
 ```elm
+module Pages.Example exposing (page)
+```
+
+```elm
 Page.static
-    { view : View Never
+    { view = view
     }
+```
+
+```elm
+view : View Never
 ```
 
 ( video introducing concept )
@@ -163,16 +170,30 @@ Page.static
 ## Page.sandbox
 
 ```elm
+module Pages.Example exposing (Model, Msg, page)
+```
+
+```elm
 Page.sandbox
-    { init : Model
-    , update : Msg -> Model -> Model
-    , view : Model -> View Msg
+    { init = init
+    , update = update
+    , view = view
     }
+```
+
+```elm
+init : Model
+update : Msg -> Model -> Model
+view : Model -> View Msg
 ```
 
 ( video introducing concept )
 
 ## Page.element
+
+```elm
+module Pages.Example exposing (Model, Msg, page)
+```
 
 ```elm
 Page.element
@@ -186,6 +207,10 @@ Page.element
 ( video introducing concept )
 
 ## Page.advanced
+
+```elm
+module Pages.Example exposing (Model, Msg, page)
+```
 
 ```elm
 Page.advanced

@@ -16,7 +16,7 @@
   --color--green: #407742;
   --color--green-light: #d7ead8;
 
-  --size--h1: 4em;
+  --size--h1: 3em;
   --size--h2: 2em;
   --size--h3: 1.5em;
   --size--h4: 1.2em;
@@ -62,6 +62,16 @@ pre {
   border-radius: 0.25rem;
   padding: 1rem;
   background-color: white;
+}
+
+.aside {
+  white-space: nowrap;
+}
+
+.table-of-contents {
+  min-width: 14em;
+  max-width: 14em;
+  white-space: nowrap;
 }
 
 main {
@@ -163,12 +173,14 @@ hr { border: 0; }
   line-height: 1.4;
 }
 
-.markdown p code {
+.markdown p code,
+.markdown li code {
+  font-size: 0.92em;
   color: var(--color--green);
 }
 
-.markdown p code::before { content: '`'; opacity: 0.75; pointer-events: none; user-select: none; }
-.markdown p code::after { content: '`'; opacity: 0.75; pointer-events: none; user-select: none; }
+.markdown p code::before, .markdown li code::before { content: '`'; opacity: 0.75; pointer-events: none; user-select: none; }
+.markdown p code::after, .markdown li code::after { content: '`'; opacity: 0.75; pointer-events: none; user-select: none; }
 
 .markdown blockquote {
   padding-left: 1rem;
@@ -243,9 +255,7 @@ hr { border: 0; }
 }
 
 .markdown th,
-.markdown td {
-  padding: 0.75em;
-}
+.markdown td { padding: 0.75em }
 
 .markdown tbody tr:nth-child(2n + 1) {
   background-color: var(--color--grey-100);

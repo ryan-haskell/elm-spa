@@ -1,4 +1,4 @@
-module Pages.Examples exposing (Model, Msg, page)
+module Pages.Docs exposing (Model, Msg, page)
 
 import Page
 import Request

@@ -145,6 +145,6 @@ subscriptions model =
 -- REQUESTS
 
 
-request : { model | url : Url, key : Key } -> Request ()
+request : { model | url : Url, key : Key } -> Request
 request model =
     Request.create () model.url model.key

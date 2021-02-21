@@ -1,6 +1,6 @@
 # Requests
 
-Every URL that a user visits in your application contains useful information. When __elm-spa__ gets an updated URL, it passes that information to every [Page](/guide/pages) as a `Request` value.
+Every URL that a user visits in your application contains useful information. When __elm-spa__ gets an updated URL, it passes that information to every [Page](/docs/pages) as a `Request` value.
 
 
 This section of the guide breaks down the [Request](https://package.elm-lang.org/packages/ryannhg/elm-spa/latest/ElmSpa-Request) type exposed by the official Elm package:
@@ -17,7 +17,7 @@ type alias Request params =
 
 ## URL Parameters
 
-Every request has parameters that you can rely on. If you are on a [dynamic route](/guide/routing#dynamic-routes), you have access to that route's URL parameters:
+Every request has parameters that you can rely on. If you are on a [dynamic route](/docs/routing#dynamic-routes), you have access to that route's URL parameters:
 
 URL | Params
  --- | ---
@@ -36,7 +36,7 @@ greet req =
   "Hello, " ++ req.params.name ++ "!"
 ```
 
-__Note:__ When working with [shared state](/guide/shared-state), all requests are `Request ()`.
+__Note:__ When working with [shared state](/docs/shared-state), all requests are `Request ()`.
 
 ## Query Parameters
 

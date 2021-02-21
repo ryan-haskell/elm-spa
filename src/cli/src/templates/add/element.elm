@@ -1,13 +1,13 @@
 module Pages.{{module}} exposing (Model, Msg, page)
 
 import Gen.Params.{{module}} exposing (Params)
-import Page exposing (Page)
-import Request exposing (Request)
+import Page
+import Request
 import Shared
 import View exposing (View)
 
 
-page : Shared.Model -> Request Params -> Page Model Msg
+page : Shared.Model -> Request.With Params -> Page.With Model Msg
 page shared req =
     Page.element
         { init = init

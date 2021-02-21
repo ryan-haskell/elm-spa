@@ -6,7 +6,7 @@ module ElmSpa.Request exposing (Request, create)
 # **( These docs are for CLI contributors )**
 
 
-### If you are using **elm-spa**, check out [the official guide](https://v6.elm-spa.dev/guide) instead!
+### If you are using **elm-spa**, check out [the official guide](https://elm-spa.dev/guide) instead!
 
 ---
 

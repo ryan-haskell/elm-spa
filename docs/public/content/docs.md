@@ -1,4 +1,4 @@
-# Guide
+# Docs
 
 Welcome to __elm-spa__, a framework for building web applications with [Elm](https://elm-lang.org)!
 If you are new to Elm, you should check out [the official guide](https://guide.elm-lang.org), which
@@ -44,7 +44,7 @@ npx elm-spa server
 So far, we've used [npx](https://www.npmjs.com/package/npx) so we don't need to install __elm-spa__ directly. If you'd like to run commands from the terminal, without the `npx` prefix, you can install __elm-spa__ like this:
 
 ```terminal
-npm install -g elm-spa@next
+npm install -g elm-spa@latest
 ```
 
 You can verify the install succeeded by running `elm-spa help` from your terminal:
@@ -61,11 +61,11 @@ elm-spa build . . . . . one-time production build
 elm-spa watch . . . . . .  runs build as you code
 elm-spa server  . . . . . start a live dev server
 
-Visit https://next.elm-spa.dev for more!
+Visit https://elm-spa.dev for more!
 ```
 
 ---
 
 __Ready for more?__
 
-Let's check out [the CLI](/guide/cli) to learn more about those five commands!
+Let's check out [the CLI](/docs/cli) to learn more about those five commands!

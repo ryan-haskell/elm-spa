@@ -6,7 +6,7 @@
 This project requires the latest LTS version of [Node.js](https://nodejs.org/)
 
 ```bash
-npm install -g elm elm-spa
+npm install -g elm-spa@latest
 ```
 
 ## running locally

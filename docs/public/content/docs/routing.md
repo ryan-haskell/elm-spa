@@ -16,7 +16,7 @@ In this section, we'll cover the 3 kinds of routes you can find in an __elm-spa_
 
 ## The homepage
  
-The `src/Pages/Home_.elm` is a reserved filename that handles requests to /. The easiest way to make a new homepage is with the [`add` command](/guide/cli#adding-a-homepage) covered in the CLI section:
+The `src/Pages/Home_.elm` is a reserved filename that handles requests to /. The easiest way to make a new homepage is with the [`add` command](/docs/cli#adding-a-homepage) covered in the CLI section:
 
 ```terminal
 elm-spa add /
@@ -78,7 +78,7 @@ The __trailing underscore__ at the end of the filename (`Name_.elm`) indicates t
 
 The name of the route parameter variable (`name` in this example) is determined by the name of the file! If we named the file `Id_.elm`, the dynamic value would be available at `params.id` instead.
 
-Every page gets access to these dynamic parameters, via the [`Request params`](/guide/pages#requests) value passed in. We'll cover that in the next section!
+Every page gets access to these dynamic parameters, via the [`Request params`](/docs/pages#requests) value passed in. We'll cover that in the next section!
 
 ### Nested dynamic routes
 

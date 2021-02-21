@@ -1,4 +1,4 @@
-# Shared State
+# Shared state
 
 With __elm-spa__, every time you navigate from one page to another, the `init` function for that page is called. This means that the `Model` for the page you we're previously looking at has been cleared out. Most of the time, that's a good thing!
 
@@ -22,7 +22,7 @@ init : Flags -> Request () -> Model -> ( Model, Effect Msg )
 The `init` function is called when your page loads for the first time. It takes in two inputs:
 
 - `Flags` - initial JSON value passed in from `public/main.js
-- `Request ()` - a [Request](/guide/request) value with the current URL information
+- `Request ()` - a [Request](/docs/request) value with the current URL information
 
 The `init` function returns the initial `Model`, as well as any `Effect`s you'd like to run (like initial HTTP requests, etc)
 

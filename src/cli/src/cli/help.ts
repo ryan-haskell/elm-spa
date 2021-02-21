@@ -19,5 +19,5 @@ ${bold(`elm-spa ${cyan(`build`)}`)} . . . . . . one-time production build
 ${bold(`elm-spa ${cyan(`watch`)}`)} . . . . . . .  runs build as you code
 ${bold(`elm-spa ${cyan(`server`)}`)}  . . . . . . start a live dev server
 
-Visit ${green(`https://next.elm-spa.dev`)} for more!
+Visit ${green(`https://elm-spa.dev`)} for more!
 `

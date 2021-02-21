@@ -1,4 +1,4 @@
-# [![elm-spa](https://v6-elm-spa.netlify.app/images/outlined-to-edge.png)](https://elm-spa.dev)
+# [![elm-spa](https://elm-spa.dev/images/outlined-to-edge.png)](https://elm-spa.dev)
 
 # **Installation**
 

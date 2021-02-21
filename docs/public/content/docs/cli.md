@@ -3,16 +3,16 @@
 At the end of the last section, we installed the __elm-spa__ CLI using [npm](https://npmjs.org) like this:
 
 ```terminal
-npm install -g elm-spa@next
+npm install -g elm-spa@latest
 ```
 
 This gave us the ability to run a few commands:
 
-1. __[`elm-spa new`](#elm-spa-new)__ - creates a new project
-1. __[`elm-spa server`](#elm-spa-server)__ - runs a dev server as you code
-1. __[`elm-spa watch`](#elm-spa-watch)__ - builds as you code
-1. __[`elm-spa build`](#elm-spa-build)__ - one-time production build
-1. __[`elm-spa add`](#elm-spa-add)__ - adds a page to an existing project
+1. [__elm-spa new__](#elm-spa-new) - creates a new project
+1. [__elm-spa server__](#elm-spa-server) - runs a dev server as you code
+1. [__elm-spa watch__](#elm-spa-watch) - builds as you code
+1. [__elm-spa build__](#elm-spa-build) - one-time production build
+1. [__elm-spa add__](#elm-spa-add) - adds a page to an existing project
 
 What do these do? This section of the guide dives into more detail on each command!
 
@@ -57,7 +57,7 @@ If you want the automatic compilation on change, but don't need a HTTP server, y
 elm-spa watch
 ```
 
-This will automatically generate and compile on save, but without the server. This is a great choice when combining __elm-spa__ with another tool like [Parcel](https://parceljs.org/elm.html)
+This will automatically generate code and compile your Elm files on save, but without the server. This is a great command to combine __elm-spa__ with another tool like [Parcel](https://parceljs.org/elm.html).
 
 
 ## elm-spa build
