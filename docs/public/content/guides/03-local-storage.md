@@ -1,3 +1,0 @@
-# Local storage
-
-TODO
