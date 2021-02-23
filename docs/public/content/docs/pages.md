@@ -108,24 +108,20 @@ This was the page type we took a look at earlier, perfect for pages that render 
 
 ```elm
 module Pages.Example exposing (page)
-```
 
-```elm
+
 page : Shared.Model -> Request -> Page
 page shared req =
     Page.static
         { view = view
         }
-```
 
-```elm
+
 view : View msg
 ```
 
 
 ## Page.sandbox
-
-_Inspired by [__Browser.sandbox__](https://package.elm-lang.org/packages/elm/browser/latest/Browser#sandbox) from the official Elm package._
 
 ```terminal
 elm-spa add /example sandbox
@@ -146,9 +142,8 @@ If you are new to the Elm architecture, be sure to visit [guide.elm-lang.org](ht
 
 ```elm
 module Pages.Example exposing (Model, Msg, page)
-```
 
-```elm
+
 page : Shared.Model -> Request -> Page.With Model Msg
 page shared req =
     Page.sandbox
@@ -156,9 +151,8 @@ page shared req =
         , update = update
         , view = view
         }
-```
 
-```elm
+
 init : Model
 update : Msg -> Model -> Model
 view : Model -> View Msg
@@ -166,10 +160,13 @@ view : Model -> View Msg
 
 > Our `page` function now returns `Page.With Model Msg` instead of `Page`. This is because our page is now __stateful__.
 
+_( Inspired by [__Browser.sandbox__](https://package.elm-lang.org/packages/elm/browser/latest/Browser#sandbox) )_
 
 ## Page.element
 
-_Inspired by [__Browser.element__](https://package.elm-lang.org/packages/elm/browser/latest/Browser#element) from the official Elm package._
+```terminal
+elm-spa add /example element
+```
 
 When you are ready to send __HTTP requests__ or __subscribe to events__ like keyboard presses, mouse move, or incoming data from JS– upgrade to `Page.element`.
 
@@ -177,9 +174,8 @@ This is the same as `Page.sandbox`, but introduces `Cmd Msg` and `Sub Msg` to ha
 
 ```elm
 module Pages.Example exposing (Model, Msg, page)
-```
 
-```elm
+
 page : Shared.Model -> Request -> Page.With Model Msg
 page shared req =
     Page.element
@@ -188,17 +184,21 @@ page shared req =
         , view = view
         , subscriptions = subscriptions
         }
-```
 
-```elm
+
 init : ( Model, Cmd Msg )
 update : Msg -> Model -> ( Model, Cmd Msg )
 view : Model -> View Msg
 subscriptions : Model -> Sub Msg
 ```
 
+_( Inspired by [__Browser.element__](https://package.elm-lang.org/packages/elm/browser/latest/Browser#element) )_
 
 ## Page.advanced
+
+```terminal
+elm-spa add /example advanced
+```
 
 For many applications, `Page.element` is all you need to store a `Model`, handle `Msg` values, and work with side-effects.
 
@@ -209,9 +209,8 @@ Using a custom `Effect` module, users are able to send `Cmd Msg` value via `Effe
 
 ```elm
 module Pages.Example exposing (Model, Msg, page)
-```
 
-```elm
+
 page : Shared.Model -> Request -> Page.With Model Msg
 page shared req =
     Page.advanced
@@ -220,9 +219,8 @@ page shared req =
         , view = view
         , subscriptions = subscriptions
         }
-```
 
-```elm
+
 init : ( Model, Effect Msg )
 update : Msg -> Model -> ( Model, Effect Msg )
 view : Model -> View Msg
