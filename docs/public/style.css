@@ -3,7 +3,6 @@
   --font--body: 'Nunito', sans-serif;
   --font--monospace: 'Fira Code', monospace;
 
-  
   --weight--light: 300;
   --weight--semibold: 600;
   --weight--bold: 800;
@@ -34,6 +33,7 @@
 /* Resets */
 @media screen and (min-width: 1920px ) {
   html { font-size: 20px; }
+  :root { --height--header: 127px; }
 }
 
 body {

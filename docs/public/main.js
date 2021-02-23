@@ -2,7 +2,8 @@ const app = Elm.Main.init({ flags: window.__FLAGS__ })
 
 // Handle smoothly scrolling to links
 const scrollToHash = () => {
-  const NAVBAR_HEIGHT_PX = 102
+  const BREAKPOINT_XL = 1920
+  const NAVBAR_HEIGHT_PX = window.innerWidth > BREAKPOINT_XL ? 127 : 102
   const element = window.location.hash && document.querySelector(window.location.hash)
   if (element) {
     // element.scrollIntoView({ behavior: 'smooth' })
