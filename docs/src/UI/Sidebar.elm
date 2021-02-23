@@ -122,8 +122,13 @@ viewSidebar { url, index } =
 
         viewSidebarSection : Section -> Html msg
         viewSidebarSection section =
-            UI.col.sm []
-                [ Html.a [ Attr.href section.url, Attr.class "h4 bold" ] [ Html.text section.header ]
+            UI.col.sm [ UI.align.left ]
+                [ Html.a
+                    [ Attr.href section.url
+                    , Attr.classList [ ( "bold text-blue", url.path == section.url ) ]
+                    , Attr.class "h4 bold underline"
+                    ]
+                    [ Html.text section.header ]
                 , if List.isEmpty section.pages then
                     Html.text ""
 

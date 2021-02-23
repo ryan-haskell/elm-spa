@@ -2,9 +2,11 @@ const app = Elm.Main.init({ flags: window.__FLAGS__ })
 
 // Handle smoothly scrolling to links
 const scrollToHash = () => {
+  const NAVBAR_HEIGHT_PX = 102
   const element = window.location.hash && document.querySelector(window.location.hash)
   if (element) {
-    element.scrollIntoView({ behavior: 'smooth' })
+    // element.scrollIntoView({ behavior: 'smooth' })
+    window.scroll({ behavior: 'smooth', top: window.pageYOffset + element.getBoundingClientRect().top - NAVBAR_HEIGHT_PX })
   } else {
     window.scroll({ behavior: 'smooth', top: 0 })
   }
@@ -28,8 +30,8 @@ window.addEventListener('keypress', (e) => {
 
 // HighlightJS custom element
 customElements.define('prism-js', class HighlightJS extends HTMLElement {
-  constructor () { super() }
-  connectedCallback () {
+  constructor() { super() }
+  connectedCallback() {
     const pre = document.createElement('pre')
 
     pre.className = `language-elm`
@@ -42,10 +44,10 @@ customElements.define('prism-js', class HighlightJS extends HTMLElement {
 
 // Dropdown arrow key support
 customElements.define('dropdown-arrow-keys', class DropdownArrowKeys extends HTMLElement {
-  constructor () {
+  constructor() {
     super()
   }
-  connectedCallback () {
+  connectedCallback() {
     const component = this
     const arrows = { ArrowUp: -1, ArrowDown: 1 }
     const interactiveChildren = () => component.querySelectorAll('input, a, button')

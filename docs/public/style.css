@@ -3,10 +3,11 @@
   --font--body: 'Nunito', sans-serif;
   --font--monospace: 'Fira Code', monospace;
 
+  
   --weight--light: 300;
   --weight--semibold: 600;
   --weight--bold: 800;
-
+  
   --color--white: #ffffff;
   --color--grey-100: #f0f0f0;
   --color--grey-200: #cccccc;
@@ -15,7 +16,7 @@
   --color--grey-700: #333333;
   --color--green: #407742;
   --color--green-light: #d7ead8;
-
+  
   --size--h1: 3em;
   --size--h2: 2em;
   --size--h3: 1.5em;
@@ -23,9 +24,11 @@
   --size--h5: 1.2em;
   --size--h6: 0.75em;
   --size--paragraph: 1.2em;
-
+  
   --shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
   --shadow-dark: 0 0.5em 2em rgb(0, 0, 0, 0.2);
+
+  --height--header: 102px;
 }
 
 /* Resets */
@@ -39,6 +42,7 @@ body {
   font-family: var(--font--body);
   font-weight: var(--weight--light);
   overflow-y: scroll;
+  padding-top: var(--height--header);
 }
 
 * {
@@ -219,6 +223,7 @@ hr { border: 0; }
   background-color: var(--color--grey-700);
   color: var(--color--grey-100);
   padding: 1rem;
+  font-size: 0.9em;
 }
 
 .markdown pre.language-terminal {
@@ -325,10 +330,29 @@ hr { border: 0; }
   border-color: var(--color--green);
 }
 
+/* STICKY SCROLLING */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  background: var(--color--grey-100);
+  box-shadow: 0 1em 1em var(--color--grey-100);
+}
+
+.header__logo {
+  font-size: 1.5em;
+}
+
+@media screen and (max-width: 640px) {
+  .header__logo { font-size: 1.25em }
+}
+
 .sticky {
   position: sticky;
   left: 0;
-  top: 0;
+  top: var(--height--header);
 }
 
 /* Images & Icons */

@@ -4,7 +4,7 @@ With __elm-spa__, every time you navigate from one page to another, the `init` f
 
 Other times, it makes sense to __share state between pages__! Maybe you have a signed-in user, an API token, or settings like "dark mode" that you want to persist from one page to another. This section of the guide will show you how to do that!
 
-## Ejecting the shared file
+### Ejecting the default file
 
 Default files are automatically generated for you in the `.elm-spa/defaults`, and when you need to tweak them, you can move them into your project's `src` folder. This process is known as "ejecting default files", and comes up for advanced features.
 
@@ -13,7 +13,11 @@ __To get started__ with shared state between pages, move the `.elm-spa/defaults/
 The rest of this section walks through the different functions in the `Shared` module, so you know what's going on.
 
 
-### init
+## Shared.Model
+
+## Shared.Msg
+
+## Shared.init
 
 ```elm
 init : Flags -> Request () -> Model -> ( Model, Effect Msg )
@@ -28,7 +32,7 @@ The `init` function returns the initial `Model`, as well as any `Effect`s you'd 
 
 __Note:__ The [Effect msg] type is just an alias for `Cmd msg`, but adds support for [elm-program-test]()
 
-### update
+## Shared.update
 
 ```elm
 update : Request () -> Msg -> Model -> ( Model, Effect Msg )
@@ -36,7 +40,7 @@ update : Request () -> Msg -> Model -> ( Model, Effect Msg )
 
 The `update` function allows you to respond when one of your pages or this module send a `Shared.Msg`. Just like pages, you define `Msg` types and handle how they update the shared state here.
 
-### subscriptions
+## Shared.subscriptions
 
 ```elm
 subscriptions : Request () -> Model -> Sub Msg

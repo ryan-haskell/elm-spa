@@ -13,3 +13,31 @@ type alias View msg =
 
 By default, a `View` lets you set the tab title as well as render some `Html` in
 the `body` value.
+
+### Ejecting the default view
+
+TODO
+
+## View msg
+
+TODO
+
+## View.toBrowserDocument
+
+TODO
+
+## View.map
+
+TODO
+
+## View.empty
+
+TODO
+
+## View.placeholder
+
+TODO
+
+### Defining custom templates
+
+TODO 

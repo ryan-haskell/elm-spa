@@ -115,10 +115,10 @@ navbar { onMsg, model, shared, url } =
                 ]
                 [ Html.text options.text ]
     in
-    Html.header [ Attr.class "container pad-md" ]
+    Html.header [ Attr.class "header container pad-y-lg pad-x-md" ]
         [ Html.div [ Attr.class "row gap-md spread" ]
-            [ Html.div [ Attr.class "row align-center gap-md" ]
-                [ Html.a [ Attr.href "/" ] [ UI.logo ]
+            [ Html.div [ Attr.class "row align-center gap-lg" ]
+                [ Html.a [ Attr.class "header__logo", Attr.href "/" ] [ UI.logo ]
                 , Html.nav [ Attr.class "row gap-md hidden-mobile pad-left-xs" ]
                     [ navLink { text = "docs", route = Route.Docs }
                     , navLink { text = "guides  ", route = Route.Guides }

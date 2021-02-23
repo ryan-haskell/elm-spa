@@ -103,9 +103,3 @@ elm-spa add /example static
 elm-spa add /example sandbox
 elm-spa add /example element
 ```
-
----
-
-__So, what's a page?__
-
-Let's answer that next in the [pages section](./pages)!
