@@ -1,8 +1,8 @@
 # Routing
 
-One of the best reasons to use __elm-spa__ is the automatic routing! Inspired by popular JS frameworks like _NuxtJS_, we use file names to determine routes in your application.
+One of the best features in __elm-spa__ is the automatic routing system! Inspired by popular JS frameworks, the names of your files determine the routes in your application.
 
-Every __elm-spa__ project will have a `Pages` folder with all the pages in the application.
+Every __elm-spa__ project will have a `src/Pages` folder containing all the pages in your app:
 
 URL | File
 --- | ---
@@ -12,17 +12,17 @@ URL | File
 `/about-us` | `src/Pages/AboutUs.elm`
 `/settings/users` | `src/Pages/Settings/Users.elm`
 
-In this section, we'll cover the 3 kinds of routes you can find in an __elm-spa__ application.
+In this section, we'll cover the different kinds of routes you'll find in every __elm-spa__ application.
 
 ## The homepage
  
-The `src/Pages/Home_.elm` is a reserved filename that handles requests to /. The easiest way to make a new homepage is with the [`add` command](/docs/cli#adding-a-homepage) covered in the CLI section:
+`Home_.elm` is a reserved filename that handles requests to your homepage. The easiest way to add a new homepage is with the [`elm-spa add`](/docs/cli#elm-spa-add) covered in the CLI docs:
 
 ```terminal
 elm-spa add /
 ```
 
-__Note:__ Without the trailing underscore, __elm-spa__ will treat `Home.elm` as a route to `/home`! This is called a "static route", and will be covered next.
+> `Home.elm` (without the underscore) is seen as a route to `/home`! To handle requests to the homepage, make sure to include the trailing underscore.
 
 ## Static routes
 
@@ -32,9 +32,9 @@ Most pages will be __static routes__, meaning the filepath will translate to a s
 elm-spa add /people
 ```
 
-This command creates a page at `src/Pages/People.elm` that will be shown when the user visits `/people` in your app!
+This command creates a file called `People.elm` that will be shown when the user visits `/people` in your application.
 
-These are more examples of static routes:
+These are a few more examples of static routes:
 
 URL | File
 --- | ---
@@ -43,15 +43,23 @@ URL | File
 `/about-us` | `src/Pages/AboutUs.elm`
 `/settings/users` | `src/Pages/Settings/Users.elm`
 
+### Capitalization matters
+
+Notice how the filename `AboutUs.elm` translated to `/about-us`?
+
+If we named the file `Aboutus.elm` (with a lowercase "u"), then we'd have a path to `/aboutus` (without the dash between words).
+
+> In __elm-spa__, we use "kebab-case" rather than "snake_case" as the convention for separating words.
+
 ### Nested static routes
 
-You can use folders to have __nested static routes__:
+You can even have __nested static routes__ within folders:
 
 ```terminal
 elm-spa add /settings/users
 ```
 
-This example creates a file at `src/Pages/Settings/Users.elm`, which will handle all requests to `/settings/user`. You can nest things multiple levels by creating even more nested folders:
+This example creates a file at `Settings/Users.elm`, which will handle all requests to `/settings/user`. This pattern continues, supporting nesting things multiple levels deep:
 
 ```terminal
 elm-spa add /settings/user/contact
@@ -60,47 +68,63 @@ elm-spa add /settings/user/contact
 
 ## Dynamic routes
 
-Sometimes a 1:1 mapping is what you need, but other times, its useful to have a route that handles requests to many items.
+Sometimes a 1:1 mapping is what you need, but other times, its useful to have a single page that will handles requests to similar URL structures.
+
+A common example is providing a different ID for a blog post, user, or another item in a collection.
 
 ```terminal
 elm-spa add /people/:name
 ```
 
-This will create a file at `src/Pages/People/Name_.elm`. In __elm-spa__, this is called a __dynamic route__. It will handle requests to any URLs that match `/people/____` and provide the dynamic part in the parameters.
+This creates a file at `People/Name_.elm`. In __elm-spa__, we call this a __dynamic route__. It handles requests to any URLs that match `/people/____` and provides the dynamic bit in the `req.params` value passed into your page!
 
-URL | Params
+URL | `req.params`
 --- | ---
 `/people/ryan` | `{ name = "ryan" }`
 `/people/alexa` | `{ name = "alexa" }`
 `/people/erik` | `{ name = "erik" }`
 
-The __trailing underscore__ at the end of the filename (`Name_.elm`) indicates that this route is __dynamic__. Without the underscore, it would only handle requests to `/people/name`
+> The __underscore__ at the end of the filename (`Name_.elm`) indicates that this route is __dynamic__. Without the underscore, it would only handle requests to a single URL: `/people/name`
 
-The name of the route parameter variable (`name` in this example) is determined by the name of the file! If we named the file `Id_.elm`, the dynamic value would be available at `params.id` instead.
-
-Every page gets access to these dynamic parameters, via the [`Request params`](/docs/pages#requests) value passed in. We'll cover that in the next section!
+The name of the `req.params` variable (`name` in this example) is determined by the name of the file! If we named the file `Id_.elm` instead, the dynamic value would be at `req.params.id`.
 
 ### Nested dynamic routes
 
-Just like we saw with __nested static routes__, you can use nested folders to create nested dynamic routes!
+Just like we saw earlier with nested static routes, you can use nested folders to create __nested dynamic routes__!
 
 ```terminal
 elm-spa add /users/:name/posts/:id
 ```
 
-This creates a file at `src/Users/Name_/Posts/Id_.elm`
+This creates a file at `src/Users/Name_/Posts/Id_.elm`, which handles any request that matches `/users/___/posts/___`:
 
-URL | Params
+URL | `req.params`
 --- | ---
 `/users/ryan/posts/123` | `{ name = "ryan", id = "123" }`
 `/users/alexa/posts/456` | `{ name = "alexa", id = "456" }`
 `/users/erik/posts/789` | `{ name = "erik", id = "789" }`
 
-It will handle any request to `/users/___/posts/___`
-
 
 ## Not found page
 
-If a user visits a URL that doesn't have a corresponding page, it will redirect to the `NotFound.elm` page. This is generated for you by default in the `.elm-spa/defaults/Pages` folder. When you are ready to customize it, move it into `src/Pages` and customize it like you would any other page!
+If a user visits a URL that doesn't have a corresponding page, it will redirect to the `NotFound.elm` page. 
 
-In __elm-spa__, this technique is called "ejecting" a default file. Throughout the guide, we'll find more default files that we might want to control in our project.
+By default, the not found page is generated for you in the `.elm-spa/defaults/Pages` folder. When you are ready to customize your 404 page, move it from the defaults folder into `src/Pages`:
+
+```elm
+.elm-spa/
+ |- defaults/
+     |- Pages/
+         |- NotFound.elm
+
+-- move into
+
+src/
+ |- Pages/
+     |- NotFound.elm
+```
+
+Once you have a `NotFound.elm` within your `src/Pages` folder, __elm-spa__ will stop generating the other one, and use your custom 404 file instead.
+
+The technique of moving a file from the `.elm-spa/defaults` folder is known as "ejecting a default file". Throughout the guide, we'll find more examples of files that we might want to move into our `src` folder.
+

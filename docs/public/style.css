@@ -224,6 +224,7 @@ hr { border: 0; }
   color: var(--color--grey-100);
   padding: 1rem;
   font-size: 0.9em;
+  font-family: var(--font--monospace);
 }
 
 .markdown pre.language-terminal {
@@ -253,6 +254,7 @@ hr { border: 0; }
   overflow: hidden;
   background-color: var(--color--white);
   border-color: var(--color--grey-200);
+  font-size: 0.85em;
 }
 
 .markdown tr {

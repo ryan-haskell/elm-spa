@@ -1,49 +1,102 @@
 # Shared state
 
-With __elm-spa__, every time you navigate from one page to another, the `init` function for that page is called. This means that the `Model` for the page you we're previously looking at has been cleared out. Most of the time, that's a good thing!
+With __elm-spa__, any time we move from one page to another, the `init` function for that new page is called. This means that the state of the previous page you were looking at has been replaced by the new page.
 
-Other times, it makes sense to __share state between pages__! Maybe you have a signed-in user, an API token, or settings like "dark mode" that you want to persist from one page to another. This section of the guide will show you how to do that!
+So if we sign in a user at the `SignIn` page, we'll need a place to store the user before navigating over to the `Dashboard`.
+
+This is where the `Shared` module comes in– the perfect place to store things that every page needs to access!
 
 ### Ejecting the default file
 
-Default files are automatically generated for you in the `.elm-spa/defaults`, and when you need to tweak them, you can move them into your project's `src` folder. This process is known as "ejecting default files", and comes up for advanced features.
+By default, an empty `Shared.elm` file is generated for us in `.elm-spa/defaults`. When you are ready to share data between pages– move that file from the defaults folder to the `src` folder.
 
-__To get started__ with shared state between pages, move the `.elm-spa/defaults/Shared.elm` file into your `src` folder! After you move that file, `src/Shared.elm` will be the place to make changes!
+```elm
+.elm-spa/
+ |- defaults/
+     |- Shared.elm
 
-The rest of this section walks through the different functions in the `Shared` module, so you know what's going on.
+-- move into
 
+src/
+ |- Shared.elm
+```
+
+Once you've done that, `src/Shared.elm` is under your control– and __elm-spa__ will stop generating the old one. Let's dive into the different parts of that file!
+
+## Shared.Flags
+
+The first thing you'll see is a `Flags` type exposed from the top of the file. If we need to load some initial data from Javascript when our Elm app starts up, we can pass that data in as flags.
+
+When you have the need to send in initial JSON data, take a look at [Elm's official guide on JS interop](https://guide.elm-lang.org/interop/).
 
 ## Shared.Model
 
-## Shared.Msg
+By default, our `Model` is just an empty record:
+
+```elm
+type alias Model =
+    {}
+```
+
+If we wanted to store a signed-in user, adding it to the model would make it available to all pages:
+
+```elm
+type alias Model =
+    { user : Maybe User 
+    }
+
+type alias User =
+    { name : String
+    , email : String
+    , token : String
+    }
+```
+
+As we saw in the [pages guide](/docs/pages), this `Shared.Model` will be passed into every page– so we can check if `shared.user` has a value or not!
 
 ## Shared.init
 
 ```elm
-init : Flags -> Request () -> Model -> ( Model, Effect Msg )
+init : Flags -> Request -> ( Model, Cmd Msg )
+init flags req =
+  ...
 ```
 
-The `init` function is called when your page loads for the first time. It takes in two inputs:
+The `init` function is called when your application loads for the first time. It takes in two inputs:
 
-- `Flags` - initial JSON value passed in from `public/main.js
-- `Request ()` - a [Request](/docs/request) value with the current URL information
+- `Flags` - initial JS values passed in on startup.
+- `Request` - the [Request](/docs/request) value with current URL information.
 
-The `init` function returns the initial `Model`, as well as any `Effect`s you'd like to run (like initial HTTP requests, etc)
+The `init` function returns the initial `Shared.Model`, as well as any side effect's you'd like to run (like initial HTTP requests, etc)
 
-__Note:__ The [Effect msg] type is just an alias for `Cmd msg`, but adds support for [elm-program-test]()
+## Shared.Msg
+
+Once you become familiar with [the Elm architecture](https://guide.elm-lang.org/architecture/), you'll recognize the `Msg` type as the only way to update `Shared.Model`.
+
+Maybe it looks something like this for our user example
+
+```elm
+type Msg
+  = SignedIn User
+  | SignedOut
+```
+
+These are used in the next section on `Shared.update`!
 
 ## Shared.update
 
 ```elm
-update : Request () -> Msg -> Model -> ( Model, Effect Msg )
+update : Request -> Msg -> Model -> ( Model, Cmd Msg )
 ```
 
-The `update` function allows you to respond when one of your pages or this module send a `Shared.Msg`. Just like pages, you define `Msg` types and handle how they update the shared state here.
+The `update` function allows you to respond when one of your pages or this module send a `Shared.Msg`. Just like pages, you define a `Msg` type to handle how they update the shared state here.
 
 ## Shared.subscriptions
 
 ```elm
-subscriptions : Request () -> Model -> Sub Msg
+subscriptions : Request -> Model -> Sub Msg
 ```
 
-If you want all pages to listen for keyboard events, window resizing, or other external updates, this `subscriptions` function is a great place to wire those up! It also has access to the current URL request value, so you can conditionally subscribe to events.
+If you want all pages to listen for keyboard events, window resizing, or other external updates, this `subscriptions` function is a great place to wire those up! 
+
+It also has access to the current URL request value, so you can conditionally subscribe to events.
