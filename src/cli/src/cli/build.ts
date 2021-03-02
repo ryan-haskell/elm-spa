@@ -4,6 +4,8 @@ import config from '../config'
 import * as File from '../file'
 import RouteTemplate from '../templates/routes'
 import PagesTemplate from '../templates/pages'
+import PageTemplate from '../templates/page'
+import RequestTemplate from '../templates/request'
 import ModelTemplate from '../templates/model'
 import MsgTemplate from '../templates/msg'
 import ParamsTemplate from '../templates/params'
@@ -114,6 +116,9 @@ const createGeneratedFiles = async () => {
 
   const filesToCreate = [
     ...paramFiles,
+    { filepath: [ 'Page' ], contents: PageTemplate() },
+    { filepath: [ 'Request' ], contents: RequestTemplate() },
+    { filepath: [ 'Gen', 'Route' ], contents: RouteTemplate(segments, options(kindForPage)) },
     { filepath: [ 'Gen', 'Route' ], contents: RouteTemplate(segments, options(kindForPage)) },
     { filepath: [ 'Gen', 'Pages' ], contents: PagesTemplate(segments, options(kindForPage)) },
     { filepath: [ 'Gen', 'Model' ], contents: ModelTemplate(segments, options(kindForPage)) },

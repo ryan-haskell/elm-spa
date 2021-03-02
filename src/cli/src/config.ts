@@ -36,12 +36,11 @@ const config = {
     terser: `npx terser`
   },
   defaults: [
+    [ 'Auth.elm' ],
     [ 'Effect.elm' ],
     [ 'Main.elm' ],
     [ 'Shared.elm' ],
     [ `Pages`, `${reserved.notFound}.elm` ],
-    [ 'Page.elm' ],
-    [ 'Request.elm' ],
     [ 'View.elm' ]
   ]
 }

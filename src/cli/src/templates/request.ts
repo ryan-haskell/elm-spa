@@ -1,3 +1,4 @@
+export default (): string => `
 module Request exposing
     ( Request, With
     , create
@@ -39,3 +40,5 @@ pushRoute route req =
 replaceRoute : Route -> With params -> Cmd msg
 replaceRoute route req =
     Browser.Navigation.replaceUrl req.key (Route.toHref route)
+
+`.trimLeft()
