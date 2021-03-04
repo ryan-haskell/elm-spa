@@ -80,32 +80,44 @@ advanced =
 
 protected :
     { static :
-        { view : User -> View msg
-        }
+        (User
+            ->
+            { view : View msg
+            }
+        )
         -> With () msg
     , sandbox :
-        { init : User -> model
-        , update : User -> msg -> model -> model
-        , view : User -> model -> View msg
-        }
+        (User
+            ->
+            { init : model
+            , update : msg -> model -> model
+            , view : model -> View msg
+            }
+        )
         -> With model msg
     , element :
-        { init : User -> ( model, Cmd msg )
-        , update : User -> msg -> model -> ( model, Cmd msg )
-        , view : User -> model -> View msg
-        , subscriptions : User -> model -> Sub msg
-        }
+        (User
+            ->
+            { init : ( model, Cmd msg )
+            , update : msg -> model -> ( model, Cmd msg )
+            , view : model -> View msg
+            , subscriptions : model -> Sub msg
+            }
+        )
         -> With model msg
     , advanced :
-        { init : User -> ( model, Effect msg )
-        , update : User -> msg -> model -> ( model, Effect msg )
-        , view : User -> model -> View msg
-        , subscriptions : User -> model -> Sub msg
-        }
+        (User
+            ->
+            { init : ( model, Effect msg )
+            , update : msg -> model -> ( model, Effect msg )
+            , view : model -> View msg
+            , subscriptions : model -> Sub msg
+            }
+        )
         -> With model msg
     }
 protected =
-    ElmSpa.protected2
+    ElmSpa.protected3
         { effectNone = Effect.none
         , fromCmd = Effect.fromCmd
         , beforeInit = Auth.beforeProtectedInit

@@ -1,8 +1,8 @@
 module ElmSpa.Internals.Page exposing
     ( Page, static, sandbox, element, advanced
-    , Protected(..), protected2
+    , Protected(..), protected3
     , Bundle, bundle
-    , protected
+    , protected, protected2
     )
 
 {-|
@@ -15,7 +15,7 @@ module ElmSpa.Internals.Page exposing
 
 # **User Authentication**
 
-@docs Protected, protected2
+@docs Protected, protected3
 
 
 # For generated code
@@ -27,7 +27,7 @@ module ElmSpa.Internals.Page exposing
 
 This will be removed before release, included to prevent bumping to 6.0.0 during beta!
 
-@docs protected
+@docs protected, protected2
 
 -}
 
@@ -71,15 +71,7 @@ static :
         }
     -> Page shared route effect view () msg
 static none page =
-    Page
-        (\_ _ ->
-            Ok
-                { init = \_ -> ( (), none )
-                , update = \_ _ -> ( (), none )
-                , view = \_ -> page.view
-                , subscriptions = \_ -> Sub.none
-                }
-        )
+    Page (\_ _ -> Ok (adapters.static none page))
 
 
 {-| A page that can keep track of application state.
@@ -110,15 +102,7 @@ sandbox :
         }
     -> Page shared route effect view model msg
 sandbox none page =
-    Page
-        (\_ _ ->
-            Ok
-                { init = \_ -> ( page.init, none )
-                , update = \msg model -> ( page.update msg model, none )
-                , view = page.view
-                , subscriptions = \_ -> Sub.none
-                }
-        )
+    Page (\_ _ -> Ok (adapters.sandbox none page))
 
 
 {-| A page that can handle effects like [HTTP requests or subscriptions](https://guide.elm-lang.org/effects/).
@@ -152,15 +136,7 @@ element :
         }
     -> Page shared route effect view model msg
 element fromCmd page =
-    Page
-        (\_ _ ->
-            Ok
-                { init = \_ -> page.init |> Tuple.mapSecond fromCmd
-                , update = \msg model -> page.update msg model |> Tuple.mapSecond fromCmd
-                , view = page.view
-                , subscriptions = page.subscriptions
-                }
-        )
+    Page (\_ _ -> Ok (adapters.element fromCmd page))
 
 
 {-| A page that can handles **custom** effects like sending a `Shared.Msg` or other general user-defined effects.
@@ -191,101 +167,7 @@ advanced :
     }
     -> Page shared route effect view model msg
 advanced page =
-    Page
-        (\_ _ ->
-            Ok
-                { init = always page.init
-                , update = page.update
-                , view = page.view
-                , subscriptions = page.subscriptions
-                }
-        )
-
-
-{-| Deprecated! Will be replaced by [protected2](#protected2)
--}
-protected :
-    { effectNone : effect
-    , fromCmd : Cmd msg -> effect
-    , user : shared -> Request route () -> Maybe user
-    , route : route
-    }
-    ->
-        { static :
-            { view : user -> view
-            }
-            -> Page shared route effect view () msg
-        , sandbox :
-            { init : user -> model
-            , update : user -> msg -> model -> model
-            , view : user -> model -> view
-            }
-            -> Page shared route effect view model msg
-        , element :
-            { init : user -> ( model, Cmd msg )
-            , update : user -> msg -> model -> ( model, Cmd msg )
-            , view : user -> model -> view
-            , subscriptions : user -> model -> Sub msg
-            }
-            -> Page shared route effect view model msg
-        , advanced :
-            { init : user -> ( model, effect )
-            , update : user -> msg -> model -> ( model, effect )
-            , view : user -> model -> view
-            , subscriptions : user -> model -> Sub msg
-            }
-            -> Page shared route effect view model msg
-        }
-protected options =
-    let
-        protect pageWithUser page =
-            Page
-                (\shared req ->
-                    case options.user shared req of
-                        Just user ->
-                            Ok (pageWithUser user page)
-
-                        Nothing ->
-                            Err options.route
-                )
-    in
-    { static =
-        protect
-            (\user page ->
-                { init = \_ -> ( (), options.effectNone )
-                , update = \_ model -> ( model, options.effectNone )
-                , view = \_ -> page.view user
-                , subscriptions = \_ -> Sub.none
-                }
-            )
-    , sandbox =
-        protect
-            (\user page ->
-                { init = \_ -> ( page.init user, options.effectNone )
-                , update = \msg model -> ( page.update user msg model, options.effectNone )
-                , view = page.view user
-                , subscriptions = \_ -> Sub.none
-                }
-            )
-    , element =
-        protect
-            (\user page ->
-                { init = \_ -> page.init user |> Tuple.mapSecond options.fromCmd
-                , update = \msg model -> page.update user msg model |> Tuple.mapSecond options.fromCmd
-                , view = page.view user
-                , subscriptions = page.subscriptions user
-                }
-            )
-    , advanced =
-        protect
-            (\user page ->
-                { init = \_ -> page.init user
-                , update = page.update user
-                , view = page.view user
-                , subscriptions = page.subscriptions user
-                }
-            )
-    }
+    Page (\_ _ -> Ok (adapters.advanced page))
 
 
 {-| Actions to take when a user visits a `protected` page
@@ -311,101 +193,88 @@ type Protected user route
 
 Prefixing any of the four functions above with `protected` will guarantee that the page has access to a user. Here's an example with `sandbox`:
 
-    import Page
+    -- before
+    Page.sandbox
+        { init = init
+        , update = update
+        , view = view
+        }
 
-    page : Page Model Msg
-    page =
-        Page.protected.sandbox
+    -- after
+    Page.protected.sandbox
+        (\user ->
             { init = init
             , update = update
             , view = view
             }
+        )
 
-    -- init : User -> Model
-    -- update : User -> Msg -> Model -> Model
-    -- update : User -> Model -> View Msg
+    -- other functions have same API
+    init : Model
+    update : Msg -> Model -> Model
+    view : Model -> View Msg
 
 -}
-protected2 :
+protected3 :
     { effectNone : effect
     , fromCmd : Cmd msg -> effect
     , beforeInit : shared -> Request route () -> Protected user route
     }
     ->
         { static :
-            { view : user -> view
-            }
+            (user
+             ->
+                { view : view
+                }
+            )
             -> Page shared route effect view () msg
         , sandbox :
-            { init : user -> model
-            , update : user -> msg -> model -> model
-            , view : user -> model -> view
-            }
+            (user
+             ->
+                { init : model
+                , update : msg -> model -> model
+                , view : model -> view
+                }
+            )
             -> Page shared route effect view model msg
         , element :
-            { init : user -> ( model, Cmd msg )
-            , update : user -> msg -> model -> ( model, Cmd msg )
-            , view : user -> model -> view
-            , subscriptions : user -> model -> Sub msg
-            }
+            (user
+             ->
+                { init : ( model, Cmd msg )
+                , update : msg -> model -> ( model, Cmd msg )
+                , view : model -> view
+                , subscriptions : model -> Sub msg
+                }
+            )
             -> Page shared route effect view model msg
         , advanced :
-            { init : user -> ( model, effect )
-            , update : user -> msg -> model -> ( model, effect )
-            , view : user -> model -> view
-            , subscriptions : user -> model -> Sub msg
-            }
+            (user
+             ->
+                { init : ( model, effect )
+                , update : msg -> model -> ( model, effect )
+                , view : model -> view
+                , subscriptions : model -> Sub msg
+                }
+            )
             -> Page shared route effect view model msg
         }
-protected2 options =
+protected3 options =
     let
-        protect pageWithUser page =
+        protect toPage toRecord =
             Page
                 (\shared req ->
                     case options.beforeInit shared req of
                         Provide user ->
-                            Ok (pageWithUser user page)
+                            Ok (user |> toRecord |> toPage)
 
                         RedirectTo route ->
                             Err route
                 )
     in
-    { static =
-        protect
-            (\user page ->
-                { init = \_ -> ( (), options.effectNone )
-                , update = \_ model -> ( model, options.effectNone )
-                , view = \_ -> page.view user
-                , subscriptions = \_ -> Sub.none
-                }
-            )
-    , sandbox =
-        protect
-            (\user page ->
-                { init = \_ -> ( page.init user, options.effectNone )
-                , update = \msg model -> ( page.update user msg model, options.effectNone )
-                , view = page.view user
-                , subscriptions = \_ -> Sub.none
-                }
-            )
-    , element =
-        protect
-            (\user page ->
-                { init = \_ -> page.init user |> Tuple.mapSecond options.fromCmd
-                , update = \msg model -> page.update user msg model |> Tuple.mapSecond options.fromCmd
-                , view = page.view user
-                , subscriptions = page.subscriptions user
-                }
-            )
-    , advanced =
-        protect
-            (\user page ->
-                { init = \_ -> page.init user
-                , update = page.update user
-                , view = page.view user
-                , subscriptions = page.subscriptions user
-                }
-            )
+    { static = protect (adapters.static options.effectNone)
+    , sandbox = protect (adapters.sandbox options.effectNone)
+    , element = protect (adapters.element options.fromCmd)
+    , advanced = protect adapters.advanced
     }
 
 
@@ -526,4 +395,243 @@ type alias PageRecord effect view model msg =
     , update : msg -> model -> ( model, effect )
     , view : model -> view
     , subscriptions : model -> Sub msg
+    }
+
+
+adapters :
+    { static :
+        effect
+        ->
+            { view : view
+            }
+        -> PageRecord effect view () msg
+    , sandbox :
+        effect
+        ->
+            { init : model
+            , update : msg -> model -> model
+            , view : model -> view
+            }
+        -> PageRecord effect view model msg
+    , element :
+        (Cmd msg -> effect)
+        ->
+            { init : ( model, Cmd msg )
+            , update : msg -> model -> ( model, Cmd msg )
+            , view : model -> view
+            , subscriptions : model -> Sub msg
+            }
+        -> PageRecord effect view model msg
+    , advanced :
+        { init : ( model, effect )
+        , update : msg -> model -> ( model, effect )
+        , view : model -> view
+        , subscriptions : model -> Sub msg
+        }
+        -> PageRecord effect view model msg
+    }
+adapters =
+    { static =
+        \none page ->
+            { init = \_ -> ( (), none )
+            , update = \_ _ -> ( (), none )
+            , view = \_ -> page.view
+            , subscriptions = \_ -> Sub.none
+            }
+    , sandbox =
+        \none page ->
+            { init = \_ -> ( page.init, none )
+            , update = \msg model -> ( page.update msg model, none )
+            , view = page.view
+            , subscriptions = \_ -> Sub.none
+            }
+    , element =
+        \fromCmd page ->
+            { init = \_ -> page.init |> Tuple.mapSecond fromCmd
+            , update = \msg model -> page.update msg model |> Tuple.mapSecond fromCmd
+            , view = page.view
+            , subscriptions = page.subscriptions
+            }
+    , advanced =
+        \page ->
+            { init = always page.init
+            , update = page.update
+            , view = page.view
+            , subscriptions = page.subscriptions
+            }
+    }
+
+
+
+-- DEPRECATED - will be removed in v6
+
+
+{-| Deprecated! Will be replaced by [protected3](#protected3)
+-}
+protected :
+    { effectNone : effect
+    , fromCmd : Cmd msg -> effect
+    , user : shared -> Request route () -> Maybe user
+    , route : route
+    }
+    ->
+        { static :
+            { view : user -> view
+            }
+            -> Page shared route effect view () msg
+        , sandbox :
+            { init : user -> model
+            , update : user -> msg -> model -> model
+            , view : user -> model -> view
+            }
+            -> Page shared route effect view model msg
+        , element :
+            { init : user -> ( model, Cmd msg )
+            , update : user -> msg -> model -> ( model, Cmd msg )
+            , view : user -> model -> view
+            , subscriptions : user -> model -> Sub msg
+            }
+            -> Page shared route effect view model msg
+        , advanced :
+            { init : user -> ( model, effect )
+            , update : user -> msg -> model -> ( model, effect )
+            , view : user -> model -> view
+            , subscriptions : user -> model -> Sub msg
+            }
+            -> Page shared route effect view model msg
+        }
+protected options =
+    let
+        protect pageWithUser page =
+            Page
+                (\shared req ->
+                    case options.user shared req of
+                        Just user ->
+                            Ok (pageWithUser user page)
+
+                        Nothing ->
+                            Err options.route
+                )
+    in
+    { static =
+        protect
+            (\user page ->
+                { init = \_ -> ( (), options.effectNone )
+                , update = \_ model -> ( model, options.effectNone )
+                , view = \_ -> page.view user
+                , subscriptions = \_ -> Sub.none
+                }
+            )
+    , sandbox =
+        protect
+            (\user page ->
+                { init = \_ -> ( page.init user, options.effectNone )
+                , update = \msg model -> ( page.update user msg model, options.effectNone )
+                , view = page.view user
+                , subscriptions = \_ -> Sub.none
+                }
+            )
+    , element =
+        protect
+            (\user page ->
+                { init = \_ -> page.init user |> Tuple.mapSecond options.fromCmd
+                , update = \msg model -> page.update user msg model |> Tuple.mapSecond options.fromCmd
+                , view = page.view user
+                , subscriptions = page.subscriptions user
+                }
+            )
+    , advanced =
+        protect
+            (\user page ->
+                { init = \_ -> page.init user
+                , update = page.update user
+                , view = page.view user
+                , subscriptions = page.subscriptions user
+                }
+            )
+    }
+
+
+{-| Deprecated! Will be replaced by [protected3](#protected3)
+-}
+protected2 :
+    { effectNone : effect
+    , fromCmd : Cmd msg -> effect
+    , beforeInit : shared -> Request route () -> Protected user route
+    }
+    ->
+        { static :
+            { view : user -> view
+            }
+            -> Page shared route effect view () msg
+        , sandbox :
+            { init : user -> model
+            , update : user -> msg -> model -> model
+            , view : user -> model -> view
+            }
+            -> Page shared route effect view model msg
+        , element :
+            { init : user -> ( model, Cmd msg )
+            , update : user -> msg -> model -> ( model, Cmd msg )
+            , view : user -> model -> view
+            , subscriptions : user -> model -> Sub msg
+            }
+            -> Page shared route effect view model msg
+        , advanced :
+            { init : user -> ( model, effect )
+            , update : user -> msg -> model -> ( model, effect )
+            , view : user -> model -> view
+            , subscriptions : user -> model -> Sub msg
+            }
+            -> Page shared route effect view model msg
+        }
+protected2 options =
+    let
+        protect pageWithUser page =
+            Page
+                (\shared req ->
+                    case options.beforeInit shared req of
+                        Provide user ->
+                            Ok (pageWithUser user page)
+
+                        RedirectTo route ->
+                            Err route
+                )
+    in
+    { static =
+        protect
+            (\user page ->
+                { init = \_ -> ( (), options.effectNone )
+                , update = \_ model -> ( model, options.effectNone )
+                , view = \_ -> page.view user
+                , subscriptions = \_ -> Sub.none
+                }
+            )
+    , sandbox =
+        protect
+            (\user page ->
+                { init = \_ -> ( page.init user, options.effectNone )
+                , update = \msg model -> ( page.update user msg model, options.effectNone )
+                , view = page.view user
+                , subscriptions = \_ -> Sub.none
+                }
+            )
+    , element =
+        protect
+            (\user page ->
+                { init = \_ -> page.init user |> Tuple.mapSecond options.fromCmd
+                , update = \msg model -> page.update user msg model |> Tuple.mapSecond options.fromCmd
+                , view = page.view user
+                , subscriptions = page.subscriptions user
+                }
+            )
+    , advanced =
+        protect
+            (\user page ->
+                { init = \_ -> page.init user
+                , update = page.update user
+                , view = page.view user
+                , subscriptions = page.subscriptions user
+                }
+            )
     }
