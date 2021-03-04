@@ -1,3 +1,0 @@
-# Environment variables
-
-TODO
