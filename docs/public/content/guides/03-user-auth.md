@@ -23,16 +23,17 @@ These protected pages have slightly different signatures:
 
 ```elm
 Page.sandbox :
-  { init : Model
-  , update : Msg -> Model -> Model
-  , view : Model -> View Msg
-  }
+     { init : Model
+     , update : Msg -> Model -> Model
+     , view : Model -> View Msg
+     }
 
 Page.protected.sandbox :
-  { init : User -> Model
-  , update : User -> Msg -> Model -> Model
-  , view : User -> Model -> View Msg
-  }
+     User ->
+          { init : Model
+          , update : Msg -> Model -> Model
+          , view : Model -> View Msg
+          }
 ```
 
 Protected pages are __guaranteed__ to have access to a `User`, so you don't need to handle the impossible case where you are viewing a page without one.
@@ -275,61 +276,49 @@ Let's create a fresh homepage with the __elm-spa add__:
 elm-spa add / advanced
 ```
 
-Now that `Auth.elm` is set up, we only need to change this one line to guarantee only signed-in users can see the homepage:
+Now that `Auth.elm` is set up, we only need to change the `page` function to guarantee signed-in users are viewing the homepage:
 
 ```elm
 -- src/Pages/Home_.elm
 
-
 Page.advanced
+    { init = init
+    , update = update
+    , view = view
+    , subscriptions = subscriptions
+    }
 
 -- this becomes
 
 Page.protected.advanced
+    (\user ->
+        { init = init
+        , update = update
+        , view = view
+        , subscriptions = subscriptions
+        }
+    )
 ```
 
-This means our `init`, `update`, `view`, and `subscribe` now have access to a `User`
+
+If you want to pass a `User` into any of these functions, you can do it like this:
 
 ```elm
--- src/Pages/Home_.elm
+-- Only the view is passed a user
 
-import Auth exposing (User)
-
--- ...
-
-init : User -> ( Model, Effect Msg )
-init user =
-    ...
-
-update : User -> Msg -> Model -> ( Model, Effect Msg )
-update user msg model =
-    ...
+Page.protected.advanced
+    (\user ->
+        { init = init
+        , update = update
+        , view = view user
+        , subscriptions = subscriptions
+        }
+    )
 
 view : User -> Model -> View Msg
 view user model =
     ...
-
-subscriptions : User -> Model -> Sub Msg
-subscriptions user model =
-    ...
 ```
-
-If you don't want to pass a `User` into any of these functions, you can skip the user argument in your `page` function, using an inline function or the `always` function
-
-```elm
--- Only the view is passed User
-
-page shared req =
-    Page.protected.advanced
-        { init = \_ -> init
-        , update = \_ -> update
-        , view = view
-        , subscriptions = \_ -> subscriptions
-        }
-```
-
-> I recommend this second approach, because it doesn't affect any of our other functions!
-
 
 Let's use that `user` so the homepage greets them by name:
 
