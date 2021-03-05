@@ -9,12 +9,14 @@ import RequestTemplate from '../templates/request'
 import ModelTemplate from '../templates/model'
 import MsgTemplate from '../templates/msg'
 import ParamsTemplate from '../templates/params'
-import * as Process from '../process'
+import terser from 'terser'
 import { bold, underline, colors, reset, check, dim, dot } from "../terminal"
 import { isStandardPage, isStaticPage, isStaticView, options, PageKind } from "../templates/utils"
 import { createMissingAddTemplates } from "./_common"
+const elm = require('node-elm-compiler')
 
-export const build = (env : Environment) => () =>
+
+export const build = (env: Environment) => () =>
   Promise.all([
     createMissingDefaultFiles(),
     createMissingAddTemplates()
@@ -24,39 +26,39 @@ export const build = (env : Environment) => () =>
 
 const createMissingDefaultFiles = async () => {
   type Action
-    = [ 'DELETE_FROM_DEFAULTS', string[] ]
-    | [ 'CREATE_IN_DEFAULTS', string[] ]
-    | [ 'DO_NOTHING', string[] ]
+    = ['DELETE_FROM_DEFAULTS', string[]]
+    | ['CREATE_IN_DEFAULTS', string[]]
+    | ['DO_NOTHING', string[]]
 
-  const toAction = async (filepath : string[]) : Promise<Action> => {
-    const [ inDefaults, inSrc ] = await Promise.all([
+  const toAction = async (filepath: string[]): Promise<Action> => {
+    const [inDefaults, inSrc] = await Promise.all([
       exists(path.join(config.folders.defaults.dest, ...filepath)),
       exists(path.join(config.folders.src, ...filepath))
     ])
 
     if (inSrc && inDefaults) {
-      return [ 'DELETE_FROM_DEFAULTS', filepath ]
+      return ['DELETE_FROM_DEFAULTS', filepath]
     } else if (!inSrc) {
-      return [ 'CREATE_IN_DEFAULTS', filepath ]
+      return ['CREATE_IN_DEFAULTS', filepath]
     } else {
-      return [ 'DO_NOTHING', filepath ]
+      return ['DO_NOTHING', filepath]
     }
   }
-  
+
   const actions = await Promise.all(config.defaults.map(toAction))
 
-  const performDefaultFileAction = ([ action, relative ] : Action) : Promise<any> =>
+  const performDefaultFileAction = ([action, relative]: Action): Promise<any> =>
     action === 'CREATE_IN_DEFAULTS' ? createDefaultFile(relative)
-    : action === 'DELETE_FROM_DEFAULTS' ? deleteFromDefaults(relative)
-    : Promise.resolve()
+      : action === 'DELETE_FROM_DEFAULTS' ? deleteFromDefaults(relative)
+        : Promise.resolve()
 
-  const createDefaultFile = async (relative : string[]) =>
+  const createDefaultFile = async (relative: string[]) =>
     File.copyFile(
       path.join(config.folders.defaults.src, ...relative),
       path.join(config.folders.defaults.dest, ...relative)
     )
 
-  const deleteFromDefaults = async (relative : string[]) =>
+  const deleteFromDefaults = async (relative: string[]) =>
     File.remove(path.join(config.folders.defaults.dest, ...relative))
 
   return Promise.all(actions.map(performDefaultFileAction))
@@ -67,22 +69,22 @@ type FilepathSegments = {
   entry: PageEntry
 }
 
-const getFilepathSegments = async (entries: PageEntry[]) : Promise<FilepathSegments[]> => {
+const getFilepathSegments = async (entries: PageEntry[]): Promise<FilepathSegments[]> => {
   const contents = await Promise.all(entries.map(e => File.read(e.filepath)))
 
   return Promise.all(entries.map(async (entry, i) => {
     const c = contents[i]
-    const kind : PageKind = await (
+    const kind: PageKind = await (
       isStandardPage(c) ? Promise.resolve('page')
-      : isStaticPage(c) ? Promise.resolve('static-page')
-      : isStaticView(c) ? Promise.resolve('view')
-      : Promise.reject(invalidExportsMessage(entry))
+        : isStaticPage(c) ? Promise.resolve('static-page')
+          : isStaticView(c) ? Promise.resolve('view')
+            : Promise.reject(invalidExportsMessage(entry))
     )
     return { kind, entry }
   }))
 }
 
-const invalidExportsMessage = (entry : PageEntry) => {
+const invalidExportsMessage = (entry: PageEntry) => {
   const moduleName = `${bold}Pages.${entry.segments.join('.')}${reset}`
   const cyan = (str: string) => `${colors.cyan}${str}${reset}`
 
@@ -104,25 +106,25 @@ const createGeneratedFiles = async () => {
   const segments = entries.map(e => e.segments)
 
   const filepathSegments = await getFilepathSegments(entries)
-  const kindForPage = (p : string[]) : PageKind =>
+  const kindForPage = (p: string[]): PageKind =>
     filepathSegments
       .filter(item => item.entry.segments.join('.') == p.join('.'))
       .map(fps => fps.kind)[0] || 'page'
 
   const paramFiles = segments.map(filepath => ({
-    filepath: [ 'Gen', 'Params', ...filepath ],
+    filepath: ['Gen', 'Params', ...filepath],
     contents: ParamsTemplate(filepath, options(kindForPage))
   }))
 
   const filesToCreate = [
     ...paramFiles,
-    { filepath: [ 'Page' ], contents: PageTemplate() },
-    { filepath: [ 'Request' ], contents: RequestTemplate() },
-    { filepath: [ 'Gen', 'Route' ], contents: RouteTemplate(segments, options(kindForPage)) },
-    { filepath: [ 'Gen', 'Route' ], contents: RouteTemplate(segments, options(kindForPage)) },
-    { filepath: [ 'Gen', 'Pages' ], contents: PagesTemplate(segments, options(kindForPage)) },
-    { filepath: [ 'Gen', 'Model' ], contents: ModelTemplate(segments, options(kindForPage)) },
-    { filepath: [ 'Gen', 'Msg' ], contents: MsgTemplate(segments, options(kindForPage)) }
+    { filepath: ['Page'], contents: PageTemplate() },
+    { filepath: ['Request'], contents: RequestTemplate() },
+    { filepath: ['Gen', 'Route'], contents: RouteTemplate(segments, options(kindForPage)) },
+    { filepath: ['Gen', 'Route'], contents: RouteTemplate(segments, options(kindForPage)) },
+    { filepath: ['Gen', 'Pages'], contents: PagesTemplate(segments, options(kindForPage)) },
+    { filepath: ['Gen', 'Model'], contents: ModelTemplate(segments, options(kindForPage)) },
+    { filepath: ['Gen', 'Msg'], contents: MsgTemplate(segments, options(kindForPage)) }
   ]
 
   return Promise.all(filesToCreate.map(({ filepath, contents }) =>
@@ -135,120 +137,126 @@ type PageEntry = {
   segments: string[];
 }
 
-const getAllPageEntries = async () : Promise<PageEntry[]> => {
-  const scanPageFilesIn = async (folder : string) => {
+const getAllPageEntries = async (): Promise<PageEntry[]> => {
+  const scanPageFilesIn = async (folder: string) => {
     const items = await File.scan(folder)
-    return items.map(s =>({
+    return items.map(s => ({
       filepath: s,
       segments: s.substring(folder.length + 1, s.length - '.elm'.length).split(path.sep)
     }))
   }
-  
+
   return Promise.all([
     scanPageFilesIn(config.folders.pages.src),
     scanPageFilesIn(config.folders.pages.defaults)
-  ]).then(([ left, right ]) => left.concat(right))
+  ]).then(([left, right]) => left.concat(right))
 }
 
 type Environment = 'production' | 'development'
 
-const output = path.join(config.folders.dist, 'elm.js')
+const outputFilepath = path.join(config.folders.dist, 'elm.js')
 
-const compileMainElm = (env : Environment) => async () => {
+const compileMainElm = (env: Environment) => async () => {
   const start = Date.now()
 
   const elmMake = async () => {
-    const flags = env === 'development' ? '--debug' : '--optimize'
+    const inDevelopment = env === 'development'
+    const inProduction = env === 'production'
 
-    const isSrcMainElmDefined = await File.exists(path.join(config.folders.src, 'Main.elm'))  
-    const input = isSrcMainElmDefined
+    const isSrcMainElmDefined = await File.exists(path.join(config.folders.src, 'Main.elm'))
+    const inputFilepath = isSrcMainElmDefined
       ? path.join(config.folders.src, 'Main.elm')
       : path.join(config.folders.defaults.dest, 'Main.elm')
 
-    
-    if (await File.exists(config.folders.dist) === false) {
-      await File.mkdir(config.folders.dist)
-    }
 
-    return Process.run(`${config.binaries.elm} make ${input} --output=${output} --report=json ${flags}`)  
-      .catch(colorElmError)
+    return elm.compileToString(inputFilepath, {
+      output: outputFilepath,
+      report: 'json',
+      debug: inDevelopment,
+      optimize: inProduction,
+    })
+    .catch((error: Error) => {
+      try { return colorElmError(JSON.parse(error.message.split('\n')[1])) }
+      catch {
+        const { RED, green } = colors
+        return Promise.reject([
+          `${RED}!${reset} elm-spa failed to understand an error`,
+          `Please report the output below to ${green}https://github.com/ryannhg/elm-spa/issues${reset}`,
+          `-----`,
+          error,
+          `-----`,
+          `${RED}!${reset} elm-spa failed to understand an error`,
+          `Please send the output above to ${green}https://github.com/ryannhg/elm-spa/issues${reset}`,
+          ``
+        ].join('\n\n'))
+      }
+    })
   }
 
-  const red = colors.RED
-  const green = colors.green
+  type ElmError = {
+    path: string
+    problems: Problem[]
+  }
 
-  const colorElmError = (err : string) => {
-    let errors = []
+  type Problem = {
+    title: string
+    message: (Message | string)[]
+  }
 
-    try {
-      errors = JSON.parse(err).errors as Error[] || []
-    } catch (e) {
-      return Promise.reject([
-        `${red}Something went wrong with elm-spa.${reset}`,
-        `Please report this entire error to ${green}https://github.com/ryannhg/elm-spa/issues${reset}`,
-        `-----`,
-        err,
-        `-----`
-      ].join('\n\n'))
-    }
+  type Message = {
+    bold: boolean
+    underline: boolean
+    color: keyof typeof colors
+    string: string
+  }
 
-    const strIf = (str : string) => (cond : boolean) : string => cond ? str : ''
+  const colorElmError = (output : { errors: ElmError[] }) => {
+
+    const { errors } = output
+
+    const strIf = (str: string) => (cond: boolean): string => cond ? str : ''
     const boldIf = strIf(bold)
     const underlineIf = strIf(underline)
 
-    type Error = {
-      path : string
-      problems: Problem[]
-    }
+    const repeat = (str: string, num: number, min = 3) => [...Array(num < 0 ? min : num)].map(_ => str).join('')
 
-    type Problem = {
-      title : string
-      message : (Message | string)[]
-    }
-
-    type Message = {
-      bold : boolean
-      underline : boolean
-      color : keyof typeof colors
-      string : string
-    }
-
-    const repeat = (str : string, num : number, min = 3) => [...Array(num < 0 ? min : num)].map(_ => str).join('')
-
-    const errorToString = (error : Error) : string => {
-      const problemToString = (problem : Problem) : string => {
+    const errorToString = (error: ElmError): string => {
+      const problemToString = (problem: Problem): string => {
         const path = error.path.substr(process.cwd().length + 1)
         return [
           `${colors.cyan}-- ${problem.title} ${repeat('-', 63 - problem.title.length - path.length)} ${path}${reset}`,
           problem.message.map(messageToString).join('')
         ].join('\n\n')
       }
-      
-      const messageToString = (line : Message | string) =>
+
+      const messageToString = (line: Message | string) =>
         typeof line === 'string'
           ? line
-          : [ boldIf(line.bold), underlineIf(line.underline), colors[line.color] || '', line.string, reset ].join('')
+          : [boldIf(line.bold), underlineIf(line.underline), colors[line.color] || '', line.string, reset].join('')
 
       return error.problems.map(problemToString).join('\n\n')
     }
 
-    return errors.length
-      ? Promise.reject(errors.map(errorToString).join('\n\n\n'))
-      : err
+    return Promise.reject(errors.map(err => errorToString(err)).join('\n\n\n'))
   }
 
   const success = () => `${check} Build successful! ${dim}(${Date.now() - start}ms)${reset}`
 
-  const minify = () =>
-    Process.run(`${config.binaries.terser} ${output} --compress 'pure_funcs="F2,F3,F4,F5,F6,F7,F8,F9,A2,A3,A4,A5,A6,A7,A8,A9",pure_getters,keep_fargs=false,unsafe_comps,unsafe' | ${config.binaries.terser} --mangle --output=${output}`)
+  const minify = (rawCode: string) =>
+    terser.minify(rawCode, { compress: { pure_funcs: `F2,F3,F4,F5,F6,F7,F8,F9,A2,A3,A4,A5,A6,A7,A8,A9`.split(','), pure_getters: true, keep_fargs: false, unsafe_comps: true, unsafe: true } })
+      .then(intermediate => terser.minify(intermediate.code || '', { mangle: true }))
+      .then(minified => File.create(outputFilepath, minified.code || ''))
 
   return (env === 'development')
     ? elmMake()
-        .then(_ => success()).catch(error => error)
-    : elmMake().then(minify)
-        .then(_ => [ success() + '\n' ])
-  }
-  
+      .then(rawJsCode => File.create(outputFilepath, rawJsCode))
+      .then(_ => success())
+      .catch(error => error)
+    : elmMake()
+      .then(minify)
+      .then(_ => [success() + '\n'])
+}
+
 export default {
   run: build('production')
 }
