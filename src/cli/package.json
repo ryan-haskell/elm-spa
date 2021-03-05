@@ -1,6 +1,6 @@
 {
   "name": "elm-spa",
-  "version": "6.0.9--beta",
+  "version": "6.0.10--beta",
   "description": "single page apps made easy",
   "bin": "dist/src/index.js",
   "scripts": {
