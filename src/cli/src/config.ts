@@ -31,10 +31,6 @@ const config = {
     public: path.join(cwd, 'public'),
     dist: path.join(cwd, 'public', 'dist'),
   },
-  binaries: {
-    elm: `npx elm`,
-    terser: `npx terser`
-  },
   defaults: [
     [ 'Auth.elm' ],
     [ 'Effect.elm' ],

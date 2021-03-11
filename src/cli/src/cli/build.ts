@@ -2,15 +2,17 @@ import path from "path"
 import { exists } from "../file"
 import config from '../config'
 import * as File from '../file'
+import { createInterface } from 'readline'
 import RouteTemplate from '../templates/routes'
 import PagesTemplate from '../templates/pages'
 import PageTemplate from '../templates/page'
 import RequestTemplate from '../templates/request'
 import ModelTemplate from '../templates/model'
 import MsgTemplate from '../templates/msg'
+import ChildProcess from 'child_process'
 import ParamsTemplate from '../templates/params'
 import terser from 'terser'
-import { bold, underline, colors, reset, check, dim, dot } from "../terminal"
+import { bold, underline, colors, reset, check, dim, dot, warn, error } from "../terminal"
 import { isStandardPage, isStaticPage, isStaticView, options, PageKind } from "../templates/utils"
 import { createMissingAddTemplates } from "./_common"
 const elm = require('node-elm-compiler')
@@ -157,6 +159,8 @@ type Environment = 'production' | 'development'
 const outputFilepath = path.join(config.folders.dist, 'elm.js')
 
 const compileMainElm = (env: Environment) => async () => {
+  await ensureElmIsInstalled(env)
+
   const start = Date.now()
 
   const elmMake = async () => {
@@ -255,6 +259,51 @@ const compileMainElm = (env: Environment) => async () => {
     : elmMake()
       .then(minify)
       .then(_ => [success() + '\n'])
+}
+
+const ensureElmIsInstalled = async (environment : Environment) => {
+  await new Promise((resolve, reject) => {
+    ChildProcess.exec('elm', (err) => {
+      if (err) {
+        if (environment === 'production') {
+          attemptToInstallViaNpm(resolve, reject)
+        } else {
+          offerToInstallForDeveloper(resolve, reject)
+        }
+      } else {
+        resolve(undefined)
+      }
+    })
+  })
+}
+
+const attemptToInstallViaNpm = (resolve: (value: unknown) => void, reject: (reason: unknown) => void) => {
+  process.stdout.write(`\n  ${bold}Awesome!${reset} Installing Elm via NPM... `)
+  ChildProcess.exec(`npm install --global elm@latest`, (err) => {
+    if (err) {
+      console.info(error)
+      reject(`  The automatic install didn't work...\n  Please visit ${colors.green}https://guide.elm-lang.org/install/elm${reset} to install Elm.\n`)
+    } else {
+      console.info(check)
+      console.info(`  Elm is now installed!`)
+      resolve(undefined)
+    }
+  })
+}
+
+const offerToInstallForDeveloper = (resolve: (value: unknown) => void, reject: (reason: unknown) => void) => {
+  const rl = createInterface({
+    input: process.stdin,
+    output: process.stdout
+  })
+
+  rl.question(`\n${warn} Elm hasn't been installed yet.\n\n  May I ${colors.cyan}install${reset} it for you? ${dim}[y/n]${reset} `, answer => {
+    if (answer.toLowerCase() === 'n') {
+      reject(`  ${bold}No changes made!${reset}\n  Please visit ${colors.green}https://guide.elm-lang.org/install/elm${reset} to install Elm.`)
+    } else {
+      attemptToInstallViaNpm(resolve, reject)
+    }
+  })
 }
 
 export default {
