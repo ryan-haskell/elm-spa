@@ -279,7 +279,7 @@ const ensureElmIsInstalled = async (environment : Environment) => {
 
 const attemptToInstallViaNpm = (resolve: (value: unknown) => void, reject: (reason: unknown) => void) => {
   process.stdout.write(`\n  ${bold}Awesome!${reset} Installing Elm via NPM... `)
-  ChildProcess.exec(`npm install --global elm@latest`, (err) => {
+  ChildProcess.exec(`npm install --global elm@latest-0.19.1`, (err) => {
     if (err) {
       console.info(error)
       reject(`  The automatic install didn't work...\n  Please visit ${colors.green}https://guide.elm-lang.org/install/elm${reset} to install Elm.\n`)
