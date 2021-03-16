@@ -34,7 +34,7 @@ export default {
   
     await File.create(outputFilepath, contents)
 
-    return `  ${bold('New page created at:')}\n  ${outputFilepath}`
+    return `  ${bold('New page created at:')}\n  ${outputFilepath}\n`
   }
 }
 
