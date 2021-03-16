@@ -3,20 +3,23 @@ module Pages.Home_ exposing (Model, Msg, page, view)
 import Auth
 import Effect exposing (Effect)
 import Html
+import Html.Events as Events
 import Page
 import Request exposing (Request)
 import Shared
+import UI
 import View exposing (View)
 
 
 page : Shared.Model -> Request -> Page.With Model Msg
 page _ _ =
-    Page.protected.advanced
-        { init = always init
-        , update = always update
-        , view = view
-        , subscriptions = \_ _ -> Sub.none
-        }
+    Page.protected.advanced <|
+        \user ->
+            { init = init
+            , update = update
+            , view = view user
+            , subscriptions = \_ -> Sub.none
+            }
 
 
 
@@ -49,11 +52,12 @@ update msg model =
             )
 
 
-view : Auth.User -> Model -> View msg
+view : Auth.User -> Model -> View Msg
 view user _ =
     { title = "Homepage"
     , body =
-        [ Html.h1 [] [ Html.text ("Hello, " ++ user.name ++ "!") ]
-        , Html.button [] [ Html.text "Sign out" ]
-        ]
+        UI.layout
+            [ Html.h1 [] [ Html.text ("Hello, " ++ user.name ++ "!") ]
+            , Html.button [ Events.onClick ClickedSignOut ] [ Html.text "Sign out" ]
+            ]
     }

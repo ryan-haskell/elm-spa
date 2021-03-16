@@ -35,7 +35,7 @@ customElements.define('prism-js', class HighlightJS extends HTMLElement {
   connectedCallback() {
     const pre = document.createElement('pre')
 
-    pre.className = `language-elm`
+    pre.className = this.language ? `language-${this.language}` : `language-elm`
     pre.textContent = this.body
 
     this.appendChild(pre)

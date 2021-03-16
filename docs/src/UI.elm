@@ -160,23 +160,35 @@ markdown options str =
                 , link = link_
                 , codeBlock =
                     \{ body, language } ->
-                        if language == Just "elm" then
-                            Html.Keyed.node "div"
-                                []
-                                [ ( body
-                                  , Html.node "prism-js"
-                                        [ Attr.property "body" (Json.string body)
-                                        , Attr.property "language" (Json.string "elm")
-                                        ]
-                                        []
-                                  )
-                                ]
+                        let
+                            supported =
+                                [ "html", "css", "js", "elm" ]
 
-                        else
-                            Html.pre [ Attr.class ("language-" ++ (language |> Maybe.withDefault "none")) ]
-                                [ Html.code [ Attr.class ("language-" ++ (language |> Maybe.withDefault "none")) ]
-                                    [ Html.text body ]
-                                ]
+                            simplePre =
+                                Html.pre [ Attr.class ("language-" ++ (language |> Maybe.withDefault "none")) ]
+                                    [ Html.code [ Attr.class ("language-" ++ (language |> Maybe.withDefault "none")) ]
+                                        [ Html.text body ]
+                                    ]
+                        in
+                        case language of
+                            Just lang ->
+                                if List.member lang supported then
+                                    Html.Keyed.node "div"
+                                        []
+                                        [ ( body
+                                          , Html.node "prism-js"
+                                                [ Attr.property "body" (Json.string body)
+                                                , Attr.property "language" (Json.string lang)
+                                                ]
+                                                []
+                                          )
+                                        ]
+
+                                else
+                                    simplePre
+
+                            Nothing ->
+                                simplePre
             }
     in
     Markdown.Parser.parse str

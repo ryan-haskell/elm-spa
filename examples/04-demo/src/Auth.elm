@@ -22,6 +22,10 @@ type alias User =
 
 beforeProtectedInit : Shared.Model -> Request -> ElmSpa.Protected User Route
 beforeProtectedInit shared req =
+    let
+        _ =
+            Debug.log "user" shared.user
+    in
     case shared.user of
         Just user ->
             ElmSpa.Provide user

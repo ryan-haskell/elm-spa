@@ -9,7 +9,7 @@ import UI
 import View exposing (View)
 
 
-page : Shared.Model -> Request.With Params -> Page
+page : Shared.Model -> Request -> Page
 page shared req =
     Page.static
         { view = view

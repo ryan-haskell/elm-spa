@@ -106,7 +106,7 @@ view shared url model =
     { title =
         case model.markdown of
             Loading ->
-                "elm-spa"
+                ""
 
             Success content ->
                 let

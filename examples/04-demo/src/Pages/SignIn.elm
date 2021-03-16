@@ -8,6 +8,7 @@ import Html.Events as Events
 import Page
 import Request
 import Shared
+import UI
 import View exposing (View)
 
 
@@ -76,18 +77,19 @@ view : Model -> View Msg
 view model =
     { title = "Sign in"
     , body =
-        [ Html.form [ Events.onSubmit SubmittedSignInForm ]
-            [ Html.label []
-                [ Html.span [] [ Html.text "Name" ]
-                , Html.input
-                    [ Attr.type_ "text"
-                    , Attr.value model.name
-                    , Events.onInput UpdatedName
+        UI.layout
+            [ Html.form [ Events.onSubmit SubmittedSignInForm ]
+                [ Html.label []
+                    [ Html.span [] [ Html.text "Name" ]
+                    , Html.input
+                        [ Attr.type_ "text"
+                        , Attr.value model.name
+                        , Events.onInput UpdatedName
+                        ]
+                        []
                     ]
-                    []
+                , Html.button [ Attr.disabled (String.isEmpty model.name) ]
+                    [ Html.text "Sign in" ]
                 ]
-            , Html.button [ Attr.disabled (String.isEmpty model.name) ]
-                [ Html.text "Sign in" ]
             ]
-        ]
     }
