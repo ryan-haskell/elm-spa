@@ -101,7 +101,7 @@ The rest of this section will introduce you to the other __page types__ exposed 
 ## Page.static
 
 ```terminal
-elm-spa add /example sandbox
+elm-spa add /example static
 ```
 
 This was the page type we took a look at earlier, perfect for pages that render static HTML, but might need access to the `Shared.Model` or `Request` values.
