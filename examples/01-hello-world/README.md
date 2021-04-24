@@ -1,4 +1,4 @@
-# my new project
+# examples/01-hello-world
 > 🌳  built with [elm-spa](https://elm-spa.dev)
 
 ## dependencies
