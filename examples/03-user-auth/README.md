@@ -1,4 +1,4 @@
-# my new project
+# examples/03-user-auth
 > 🌳  built with [elm-spa](https://elm-spa.dev)
 
 ## dependencies
