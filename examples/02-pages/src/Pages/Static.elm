@@ -1,14 +1,27 @@
 module Pages.Static exposing (page)
 
-import Page
-import View
+import Gen.Params.Static exposing (Params)
+import Html
+import Page exposing (Page)
+import Request
+import Shared
+import UI
+import View exposing (View)
 
 
+page : Shared.Model -> Request -> Page
 page shared req =
     Page.static
         { view = view
         }
 
 
+view : View msg
 view =
-    View.placeholder "Static"
+    { title = "Static"
+    , body =
+        UI.layout
+            [ UI.h1 "Static"
+            , Html.p [] [ Html.text "A static page only renders a view, but has access to shared state and URL information." ]
+            ]
+    }

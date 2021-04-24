@@ -1,6 +1,13 @@
 [build]
   publish = "public"
-  command = "npm i elm-spa@beta && node scripts/generate-index.js && npx elm-spa build"
+  command = "npm i elm elm-spa@beta && node scripts/generate-index.js && npx elm-spa build"
+
+# Prevents missing markdown files from redirecting to index.html
+[[redirects]]
+  from = "/content/*"
+  to = "/content/:splat"
+  status = 200
+  force = true
 
 [[redirects]]
   from = "/*"

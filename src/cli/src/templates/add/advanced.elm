@@ -2,13 +2,14 @@ module Pages.{{module}} exposing (Model, Msg, page)
 
 import Effect exposing (Effect)
 import Gen.Params.{{module}} exposing (Params)
-import Page exposing (Page)
-import Request exposing (Request)
+import Page
+import Request
 import Shared
 import View exposing (View)
+import Page
 
 
-page : Shared.Model -> Request Params -> Page Model Msg
+page : Shared.Model -> Request.With Params -> Page.With Model Msg
 page shared req =
     Page.advanced
         { init = init

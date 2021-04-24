@@ -22,5 +22,5 @@ Other commands:
 ${bold(`elm-spa ${cyan(`gen`)}`)} . . . . generates code without elm make
 ${bold(`elm-spa ${cyan(`watch`)}`)} . . . .  runs elm-spa gen as you code
 
-Visit ${green(`https://next.elm-spa.dev`)} for more!
+Visit ${green(`https://elm-spa.dev`)} for more!
 `

@@ -6,6 +6,10 @@ const config = {
   output: path.join(__dirname, '..', 'public', 'dist')
 }
 
+// Terminal color output
+const green = ``
+const reset = ``
+
 // Recursively lists all files in the given folder
 const listContainedFiles = async (folder) => {
   let files = []
@@ -54,7 +58,7 @@ const main = () =>
       await fs.mkdir(config.output, { recursive: true })
       return fs.writeFile(path.join(config.output, 'flags.js'), contents, { encoding: 'utf-8' })
     })
-    .then(_ => console.info(`\n  ✓ Indexed the content folder\n`))
+    .then(_ => console.info(`\n  ${green}✓${reset} Indexed the content folder\n`))
     .catch(console.error)
 
 // Run the program

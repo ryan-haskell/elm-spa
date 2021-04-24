@@ -10,6 +10,6 @@ export default {
     const dest = process.cwd()
     File.copy(config.folders.init, dest)
     try { fs.renameSync(path.join(dest, '_gitignore'), path.join(dest, '.gitignore')) } catch (_) {}
-    return `  ${bold}New project created in:${reset}\n  ${process.cwd()}`
+    return `  ${bold}New project created in:${reset}\n  ${process.cwd()}\n`
   }
 }

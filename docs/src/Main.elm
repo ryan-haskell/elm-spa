@@ -3,10 +3,11 @@ module Main exposing (main)
 import Browser
 import Browser.Navigation as Nav exposing (Key)
 import Effect
+import Gen.Model
 import Gen.Pages as Pages
 import Gen.Route as Route
 import Ports
-import Request exposing (Request)
+import Request
 import Shared
 import Url exposing (Url)
 import View
@@ -40,7 +41,7 @@ init : Shared.Flags -> Url -> Key -> ( Model, Cmd Msg )
 init flags url key =
     let
         ( shared, sharedCmd ) =
-            Shared.init (request { url = url, key = key }) flags
+            Shared.init (Request.create () url key) flags
 
         ( page, effect ) =
             Pages.init (Route.fromUrl url) shared url key
@@ -69,11 +70,7 @@ update msg model =
     case msg of
         ClickedLink (Browser.Internal url) ->
             ( model
-            , if url.path == model.url.path then
-                Nav.replaceUrl model.key (Url.toString url)
-
-              else
-                Nav.pushUrl model.key (Url.toString url)
+            , Nav.pushUrl model.key (Url.toString url)
             )
 
         ClickedLink (Browser.External url) ->
@@ -82,12 +79,7 @@ update msg model =
             )
 
         ChangedUrl url ->
-            if url.path == model.url.path then
-                ( { model | url = url }
-                , Ports.onUrlChange ()
-                )
-
-            else
+            if url.path /= model.url.path then
                 let
                     ( page, effect ) =
                         Pages.init (Route.fromUrl url) model.shared url model.key
@@ -99,14 +91,31 @@ update msg model =
                     ]
                 )
 
+            else
+                ( { model | url = url }
+                , Ports.onUrlChange ()
+                )
+
         Shared sharedMsg ->
             let
                 ( shared, sharedCmd ) =
-                    Shared.update (request model) sharedMsg model.shared
+                    Shared.update (Request.create () model.url model.key) sharedMsg model.shared
+
+                ( page, effect ) =
+                    Pages.init (Route.fromUrl model.url) shared model.url model.key
             in
-            ( { model | shared = shared }
-            , Cmd.map Shared sharedCmd
-            )
+            if page == Gen.Model.Redirecting_ then
+                ( { model | shared = shared, page = page }
+                , Cmd.batch
+                    [ Cmd.map Shared sharedCmd
+                    , Effect.toCmd ( Shared, Page ) effect
+                    ]
+                )
+
+            else
+                ( { model | shared = shared }
+                , Cmd.map Shared sharedCmd
+                )
 
         Page pageMsg ->
             let
@@ -137,14 +146,5 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ Pages.subscriptions model.page model.shared model.url model.key |> Sub.map Page
-        , Shared.subscriptions (request model) model.shared |> Sub.map Shared
+        , Shared.subscriptions (Request.create () model.url model.key) model.shared |> Sub.map Shared
         ]
-
-
-
--- REQUESTS
-
-
-request : { model | url : Url, key : Key } -> Request ()
-request model =
-    Request.create () model.url model.key

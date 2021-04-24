@@ -23,18 +23,18 @@ type Msg
     = NoOp
 
 
-init : Request () -> Flags -> ( Model, Cmd Msg )
+init : Request -> Flags -> ( Model, Cmd Msg )
 init _ _ =
     ( {}, Cmd.none )
 
 
-update : Request () -> Msg -> Model -> ( Model, Cmd Msg )
+update : Request -> Msg -> Model -> ( Model, Cmd Msg )
 update _ msg model =
     case msg of
         NoOp ->
             ( model, Cmd.none )
 
 
-subscriptions : Request () -> Model -> Sub Msg
+subscriptions : Request -> Model -> Sub Msg
 subscriptions _ _ =
     Sub.none

@@ -1,12 +1,12 @@
 module Pages.Examples exposing (Model, Msg, page)
 
-import Page exposing (Page)
-import Request exposing (Request)
+import Page
+import Request
 import Shared
 import UI.Docs
 
 
-page : Shared.Model -> Request params -> Page Model Msg
+page : Shared.Model -> Request.With params -> Page.With Model Msg
 page =
     UI.Docs.page
 

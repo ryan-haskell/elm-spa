@@ -184,18 +184,18 @@ describe.each([['Model'], ['Msg']])
         module Layout exposing
             ( ${name}
             )
-      `)).toBe(true)
+      `.trim())).toBe(true)
       expect(fn(`
         module Layout exposing
             ( OtherImport
             , ${name}
             )
-      `)).toBe(true)
+      `.trim())).toBe(true)
       expect(fn(`
         module Layout exposing
             ( ${name}
             , OtherImport
             )
-      `)).toBe(true)
+      `.trim())).toBe(true)
     })
   })

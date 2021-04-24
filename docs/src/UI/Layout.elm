@@ -13,6 +13,7 @@ module UI.Layout exposing
 
 -}
 
+import Gen.Route as Route exposing (Route)
 import Html exposing (Html)
 import Html.Attributes as Attr
 import Page exposing (Page)
@@ -72,9 +73,9 @@ viewDocumentation :
     -> List (Html msg)
 viewDocumentation options markdownContent view =
     [ navbar options
-    , Html.div [ Attr.class "container pad-lg" ]
-        [ UI.row.lg [ UI.align.top, UI.padY.lg ]
-            [ Html.aside [ Attr.class "only-desktop sticky pad-y-lg", Attr.style "width" "13em" ]
+    , Html.div [ Attr.class "container pad-md" ]
+        [ UI.row.xl [ UI.align.top, UI.padY.lg ]
+            [ Html.aside [ Attr.class "only-desktop sticky pad-y-lg aside" ]
                 [ UI.Sidebar.viewSidebar
                     { index = options.shared.index
                     , url = options.url
@@ -83,7 +84,7 @@ viewDocumentation options markdownContent view =
             , Html.main_ [ Attr.class "flex" ]
                 [ UI.row.lg [ UI.align.top ]
                     [ Html.div [ Attr.class "col flex" ] view
-                    , Html.div [ Attr.class "hidden-mobile sticky pad-y-lg", Attr.style "width" "16em" ]
+                    , Html.div [ Attr.class "hidden-mobile sticky pad-y-lg table-of-contents" ]
                         [ UI.Sidebar.viewTableOfContents
                             { content = markdownContent
                             , url = options.url
@@ -105,23 +106,23 @@ navbar :
     -> Html msg
 navbar { onMsg, model, shared, url } =
     let
-        navLink : { text : String, url : String } -> Html msg
+        navLink : { text : String, route : Route } -> Html msg
         navLink options =
             Html.a
                 [ Attr.class "link"
-                , Attr.href options.url
-                , Attr.classList [ ( "bold text-blue", String.startsWith options.url url.path ) ]
+                , Attr.href (Route.toHref options.route)
+                , Attr.classList [ ( "bold text-blue", String.startsWith (Route.toHref options.route) url.path ) ]
                 ]
                 [ Html.text options.text ]
     in
-    Html.header [ Attr.class "container pad-md" ]
+    Html.header [ Attr.class "header container pad-y-lg pad-x-md" ]
         [ Html.div [ Attr.class "row gap-md spread" ]
-            [ Html.div [ Attr.class "row align-center gap-md" ]
-                [ Html.a [ Attr.href "/" ] [ UI.logo ]
+            [ Html.div [ Attr.class "row align-center gap-lg" ]
+                [ Html.a [ Attr.class "header__logo", Attr.href "/" ] [ UI.logo ]
                 , Html.nav [ Attr.class "row gap-md hidden-mobile pad-left-xs" ]
-                    [ navLink { text = "guide", url = "/guide" }
-                    , navLink { text = "docs", url = "/docs" }
-                    , navLink { text = "examples", url = "/examples" }
+                    [ navLink { text = "docs", route = Route.Docs }
+                    , navLink { text = "guides  ", route = Route.Guides }
+                    , navLink { text = "examples", route = Route.Examples }
                     ]
                 ]
             , Html.div [ Attr.class "row gap-md spread" ]
@@ -144,7 +145,7 @@ navbar { onMsg, model, shared, url } =
 -- PAGE
 
 
-page : { view : View Msg } -> Shared.Model -> Request params -> Page Model Msg
+page : { view : View Msg } -> Shared.Model -> Request.With params -> Page.With Model Msg
 page options shared req =
     Page.sandbox
         { init = init

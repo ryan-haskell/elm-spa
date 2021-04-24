@@ -1,15 +1,15 @@
 module Pages.Home_ exposing (Model, Msg, page)
 
 import Gen.Params.Home_ exposing (Params)
-import Page exposing (Page)
-import Request exposing (Request)
+import Page
+import Request
 import Shared
 import UI
 import UI.Layout
 import View exposing (View)
 
 
-page : Shared.Model -> Request Params -> Page Model Msg
+page : Shared.Model -> Request.With Params -> Page.With Model Msg
 page =
     UI.Layout.page
         { view = view
@@ -33,19 +33,16 @@ view =
             , description = "single page apps made easy"
             }
         , UI.markdown { withHeaderLinks = False } """
-## Build reliable applications.
+## A work in progress!
 
-I need to verify that the line height for paragraphs is reasonable, because if it isn't then I'll need to tweak it a bit until it's actually readable.
-Only the most readable lines should be included in the __official__ [guide](/guide), ya dig?
+This next release of elm-spa isn't _quite_ ready yet. It's currently available in `beta`, and can be installed via __npm__:
 
-Bippity boppity, my guy.
+```
+npm install -g elm-spa@beta
+```
 
----
----
-
-## Effortless routing.
-
-Use `elm-spa` to automatically wire up routes and pages.
+For now, feel free to [read the docs](/docs), see the [incomplete guides](/guides), or check the bulleted list of [example projects](/examples)
+that aren't available yet.
             """
         ]
     }

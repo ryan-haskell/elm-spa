@@ -106,7 +106,8 @@ sections : Index -> List Section
 sections index =
     let
         sectionOrder =
-            [ "Guide"
+            [ "Docs"
+            , "Guides"
             , "Examples"
             ]
 

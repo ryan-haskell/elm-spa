@@ -1,8 +1,8 @@
 module UI.Docs exposing (Model, Msg, page)
 
 import Http
-import Page exposing (Page)
-import Request exposing (Request)
+import Page
+import Request
 import Shared
 import UI
 import UI.Layout
@@ -10,7 +10,7 @@ import Url exposing (Url)
 import View exposing (View)
 
 
-page : Shared.Model -> Request params -> Page Model Msg
+page : Shared.Model -> Request.With params -> Page.With Model Msg
 page shared req =
     Page.element
         { init = init req.url
@@ -106,7 +106,7 @@ view shared url model =
     { title =
         case model.markdown of
             Loading ->
-                "elm-spa"
+                ""
 
             Success content ->
                 let

@@ -3,6 +3,7 @@ module Main exposing (main)
 import Browser
 import Browser.Navigation as Nav exposing (Key)
 import Effect
+import Gen.Model
 import Gen.Pages as Pages
 import Gen.Route as Route
 import Request
@@ -93,10 +94,22 @@ update msg model =
             let
                 ( shared, sharedCmd ) =
                     Shared.update (Request.create () model.url model.key) sharedMsg model.shared
+
+                ( page, effect ) =
+                    Pages.init (Route.fromUrl model.url) shared model.url model.key
             in
-            ( { model | shared = shared }
-            , Cmd.map Shared sharedCmd
-            )
+            if page == Gen.Model.Redirecting_ then
+                ( { model | shared = shared, page = page }
+                , Cmd.batch
+                    [ Cmd.map Shared sharedCmd
+                    , Effect.toCmd ( Shared, Page ) effect
+                    ]
+                )
+
+            else
+                ( { model | shared = shared }
+                , Cmd.map Shared sharedCmd
+                )
 
         Page pageMsg ->
             let
