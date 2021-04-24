@@ -8,8 +8,9 @@ import Help from './cli/help'
 export default {
   new: New.run,
   add: Add.run,
-  build: Build.run,
-  watch: Watch.run,
+  build: Build.build,
   server: Server.run,
+  gen: Build.gen,
+  watch: Watch.run,
   help: Help.run
 }

@@ -17,7 +17,7 @@ const pink = (str: string) => '\x1b[35m' + str + '\x1b[0m'
 export default {
   run: async () => {
     let [ url, template ] = process.argv.slice(3)
-    if (!url) {
+    if (!url || url === '--help') {
       return Promise.reject(example)
     }
     const page = urlArgumentToPages(url)

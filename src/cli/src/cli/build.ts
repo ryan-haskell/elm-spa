@@ -12,13 +12,13 @@ import { bold, underline, colors, reset, check, dim, dot } from "../terminal"
 import { isStandardPage, isStaticPage, isStaticView, options, PageKind } from "../templates/utils"
 import { createMissingAddTemplates } from "./_common"
 
-export const build = (env : Environment) => () =>
+export const build = ({ env, runElmMake } : { env : Environment, runElmMake: boolean }) => () =>
   Promise.all([
     createMissingDefaultFiles(),
     createMissingAddTemplates()
   ])
     .then(createGeneratedFiles)
-    .then(compileMainElm(env))
+    .then(runElmMake ? compileMainElm(env): identity)
 
 const createMissingDefaultFiles = async () => {
   type Action
@@ -59,6 +59,8 @@ const createMissingDefaultFiles = async () => {
 
   return Promise.all(actions.map(performDefaultFileAction))
 }
+
+const identity = <T>(value : T) => value
 
 type FilepathSegments = {
   kind: PageKind,
@@ -245,5 +247,6 @@ const compileMainElm = (env : Environment) => async () => {
   }
   
 export default {
-  run: build('production')
+  build: build({ env: 'production', runElmMake: true }),
+  gen: build({ env: 'production', runElmMake: false })
 }

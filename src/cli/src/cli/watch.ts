@@ -3,7 +3,7 @@ import chokidar from 'chokidar'
 import config from '../config'
 
 export const watch = () => {
-  const runBuild = build('development')
+  const runBuild = build({ env: 'development', runElmMake: false })
 
   chokidar
     .watch(config.folders.src, { ignoreInitial: true })

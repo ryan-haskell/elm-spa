@@ -16,8 +16,11 @@ Commands:
 ${bold(`elm-spa ${cyan(`new`)}`)} . . . . . . . . .  create a new project
 ${bold(`elm-spa ${cyan(`add`)}`)} <url> . . . . . . . . create a new page
 ${bold(`elm-spa ${cyan(`build`)}`)} . . . . . . one-time production build
-${bold(`elm-spa ${cyan(`watch`)}`)} . . . . . . .  runs build as you code
 ${bold(`elm-spa ${cyan(`server`)}`)}  . . . . . . start a live dev server
+
+Other commands:
+${bold(`elm-spa ${cyan(`gen`)}`)} . . . . generates code without elm make
+${bold(`elm-spa ${cyan(`watch`)}`)} . . . .  runs elm-spa gen as you code
 
 Visit ${green(`https://next.elm-spa.dev`)} for more!
 `
