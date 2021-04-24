@@ -7,6 +7,7 @@ const commands : Commands = {
   new: CLI.new,
   add: CLI.add,
   build: CLI.build,
+  gen: CLI.gen,
   watch: CLI.watch,
   server: CLI.server,
   help: CLI.help
