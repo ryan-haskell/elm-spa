@@ -1,8 +1,7 @@
 module ElmSpa.Internals.Page exposing
     ( Page, static, sandbox, element, advanced
-    , Protected(..), protected3
+    , Protected(..), protected
     , Bundle, bundle
-    , protected, protected2
     )
 
 {-|
@@ -15,19 +14,12 @@ module ElmSpa.Internals.Page exposing
 
 # **User Authentication**
 
-@docs Protected, protected3
+@docs Protected, protected
 
 
 # For generated code
 
 @docs Bundle, bundle
-
-
-# Deprecated
-
-This will be removed before release, included to prevent bumping to 6.0.0 during beta!
-
-@docs protected, protected2
 
 -}
 
@@ -189,9 +181,7 @@ type Protected user route
     | RedirectTo route
 
 
-{-| **This will become `protected`, and [protected](#protected) will be removed in the v6 release.** Keeping them both to prevent a version bump!
-
-Prefixing any of the four functions above with `protected` will guarantee that the page has access to a user. Here's an example with `sandbox`:
+{-| Prefixing any of the four functions above with `protected` will guarantee that the page has access to a user. Here's an example with `sandbox`:
 
     -- before
     Page.sandbox
@@ -215,7 +205,7 @@ Prefixing any of the four functions above with `protected` will guarantee that t
     view : Model -> View Msg
 
 -}
-protected3 :
+protected :
     { effectNone : effect
     , fromCmd : Cmd msg -> effect
     , beforeInit : shared -> Request route () -> Protected user route
@@ -258,7 +248,7 @@ protected3 :
             )
             -> Page shared route effect view model msg
         }
-protected3 options =
+protected options =
     let
         protect toPage toRecord =
             Page
@@ -459,179 +449,4 @@ adapters =
             , view = page.view
             , subscriptions = page.subscriptions
             }
-    }
-
-
-
--- DEPRECATED - will be removed in v6
-
-
-{-| Deprecated! Will be replaced by [protected3](#protected3)
--}
-protected :
-    { effectNone : effect
-    , fromCmd : Cmd msg -> effect
-    , user : shared -> Request route () -> Maybe user
-    , route : route
-    }
-    ->
-        { static :
-            { view : user -> view
-            }
-            -> Page shared route effect view () msg
-        , sandbox :
-            { init : user -> model
-            , update : user -> msg -> model -> model
-            , view : user -> model -> view
-            }
-            -> Page shared route effect view model msg
-        , element :
-            { init : user -> ( model, Cmd msg )
-            , update : user -> msg -> model -> ( model, Cmd msg )
-            , view : user -> model -> view
-            , subscriptions : user -> model -> Sub msg
-            }
-            -> Page shared route effect view model msg
-        , advanced :
-            { init : user -> ( model, effect )
-            , update : user -> msg -> model -> ( model, effect )
-            , view : user -> model -> view
-            , subscriptions : user -> model -> Sub msg
-            }
-            -> Page shared route effect view model msg
-        }
-protected options =
-    let
-        protect pageWithUser page =
-            Page
-                (\shared req ->
-                    case options.user shared req of
-                        Just user ->
-                            Ok (pageWithUser user page)
-
-                        Nothing ->
-                            Err options.route
-                )
-    in
-    { static =
-        protect
-            (\user page ->
-                { init = \_ -> ( (), options.effectNone )
-                , update = \_ model -> ( model, options.effectNone )
-                , view = \_ -> page.view user
-                , subscriptions = \_ -> Sub.none
-                }
-            )
-    , sandbox =
-        protect
-            (\user page ->
-                { init = \_ -> ( page.init user, options.effectNone )
-                , update = \msg model -> ( page.update user msg model, options.effectNone )
-                , view = page.view user
-                , subscriptions = \_ -> Sub.none
-                }
-            )
-    , element =
-        protect
-            (\user page ->
-                { init = \_ -> page.init user |> Tuple.mapSecond options.fromCmd
-                , update = \msg model -> page.update user msg model |> Tuple.mapSecond options.fromCmd
-                , view = page.view user
-                , subscriptions = page.subscriptions user
-                }
-            )
-    , advanced =
-        protect
-            (\user page ->
-                { init = \_ -> page.init user
-                , update = page.update user
-                , view = page.view user
-                , subscriptions = page.subscriptions user
-                }
-            )
-    }
-
-
-{-| Deprecated! Will be replaced by [protected3](#protected3)
--}
-protected2 :
-    { effectNone : effect
-    , fromCmd : Cmd msg -> effect
-    , beforeInit : shared -> Request route () -> Protected user route
-    }
-    ->
-        { static :
-            { view : user -> view
-            }
-            -> Page shared route effect view () msg
-        , sandbox :
-            { init : user -> model
-            , update : user -> msg -> model -> model
-            , view : user -> model -> view
-            }
-            -> Page shared route effect view model msg
-        , element :
-            { init : user -> ( model, Cmd msg )
-            , update : user -> msg -> model -> ( model, Cmd msg )
-            , view : user -> model -> view
-            , subscriptions : user -> model -> Sub msg
-            }
-            -> Page shared route effect view model msg
-        , advanced :
-            { init : user -> ( model, effect )
-            , update : user -> msg -> model -> ( model, effect )
-            , view : user -> model -> view
-            , subscriptions : user -> model -> Sub msg
-            }
-            -> Page shared route effect view model msg
-        }
-protected2 options =
-    let
-        protect pageWithUser page =
-            Page
-                (\shared req ->
-                    case options.beforeInit shared req of
-                        Provide user ->
-                            Ok (pageWithUser user page)
-
-                        RedirectTo route ->
-                            Err route
-                )
-    in
-    { static =
-        protect
-            (\user page ->
-                { init = \_ -> ( (), options.effectNone )
-                , update = \_ model -> ( model, options.effectNone )
-                , view = \_ -> page.view user
-                , subscriptions = \_ -> Sub.none
-                }
-            )
-    , sandbox =
-        protect
-            (\user page ->
-                { init = \_ -> ( page.init user, options.effectNone )
-                , update = \msg model -> ( page.update user msg model, options.effectNone )
-                , view = page.view user
-                , subscriptions = \_ -> Sub.none
-                }
-            )
-    , element =
-        protect
-            (\user page ->
-                { init = \_ -> page.init user |> Tuple.mapSecond options.fromCmd
-                , update = \msg model -> page.update user msg model |> Tuple.mapSecond options.fromCmd
-                , view = page.view user
-                , subscriptions = page.subscriptions user
-                }
-            )
-    , advanced =
-        protect
-            (\user page ->
-                { init = \_ -> page.init user
-                , update = page.update user
-                , view = page.view user
-                , subscriptions = page.subscriptions user
-                }
-            )
     }

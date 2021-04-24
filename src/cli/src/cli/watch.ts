@@ -2,8 +2,8 @@ import { build } from './build'
 import chokidar from 'chokidar'
 import config from '../config'
 
-export const watch = () => {
-  const runBuild = build({ env: 'development', runElmMake: false })
+export const watch = (runElmMake : boolean) => {
+  const runBuild = build({ env: 'development', runElmMake })
 
   chokidar
     .watch(config.folders.src, { ignoreInitial: true })
@@ -12,10 +12,12 @@ export const watch = () => {
         .then(output => {
           console.info('')
           console.info(output)
+          console.info('')
         })
         .catch(reason => {
           console.info('')
           console.error(reason)
+          console.info('')
         })
     )
 
@@ -23,5 +25,5 @@ export const watch = () => {
 }
 
 export default {
-  run: watch
+  run: () => watch(false)
 }

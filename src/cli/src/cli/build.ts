@@ -23,7 +23,7 @@ export const build = ({ env, runElmMake } : { env : Environment, runElmMake: boo
     createMissingAddTemplates()
   ])
     .then(createGeneratedFiles)
-    .then(runElmMake ? compileMainElm(env): identity)
+    .then(runElmMake ? compileMainElm(env): _ => `  ${check} ${bold}elm-spa${reset} generated new files.`)
 
 const createMissingDefaultFiles = async () => {
   type Action

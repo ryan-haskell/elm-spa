@@ -117,7 +117,7 @@ protected :
         -> With model msg
     }
 protected =
-    ElmSpa.protected3
+    ElmSpa.protected
         { effectNone = Effect.none
         , fromCmd = Effect.fromCmd
         , beforeInit = Auth.beforeProtectedInit

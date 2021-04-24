@@ -70,7 +70,7 @@ const start = async () => new Promise((resolve, reject) => {
 
 export default {
   run: async () => {
-    const output = await watch()
+    const output = await watch(true)
     return start().then(serverOutput => [ serverOutput, output ])
   }
 }
