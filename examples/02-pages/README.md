@@ -1,4 +1,4 @@
-# my new project
+# examples/02-pages
 > 🌳  built with [elm-spa](https://elm-spa.dev)
 
 ## dependencies
