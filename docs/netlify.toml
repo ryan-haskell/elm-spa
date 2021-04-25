@@ -1,6 +1,6 @@
 [build]
   publish = "public"
-  command = "npm i elm elm-spa@beta && node scripts/generate-index.js && npx elm-spa build"
+  command = "cd ../src/cli && npm i && npm run build && npm link && npm i -g elm && cd ../../docs && node scripts/generate-index.js && elm-spa build"
 
 # Prevents missing markdown files from redirecting to index.html
 [[redirects]]
