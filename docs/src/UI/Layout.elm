@@ -2,7 +2,7 @@ module UI.Layout exposing
     ( Model, init
     , Msg, update
     , viewDefault, viewDocumentation
-    , page
+    , page, pageFullWidth
     )
 
 {-|
@@ -58,7 +58,23 @@ viewDefault :
     -> List (Html msg)
 viewDefault options view =
     [ navbar options
-    , Html.main_ [ Attr.class "container pad-x-md" ] view
+    , Html.main_ [ Attr.class "page container pad-x-md" ] view
+    , footer
+    ]
+
+
+viewFullWidth :
+    { model : Model
+    , onMsg : Msg -> msg
+    , shared : Shared.Model
+    , url : Url
+    }
+    -> List (Html msg)
+    -> List (Html msg)
+viewFullWidth options view =
+    [ navbar options
+    , Html.div [ Attr.class "page" ] view
+    , footer
     ]
 
 
@@ -73,7 +89,7 @@ viewDocumentation :
     -> List (Html msg)
 viewDocumentation options markdownContent view =
     [ navbar options
-    , Html.div [ Attr.class "container pad-md" ]
+    , Html.div [ Attr.class "page container pad-md" ]
         [ UI.row.xl [ UI.align.top, UI.padY.lg ]
             [ Html.aside [ Attr.class "only-desktop sticky pad-y-lg aside" ]
                 [ UI.Sidebar.viewSidebar
@@ -94,6 +110,7 @@ viewDocumentation options markdownContent view =
                 ]
             ]
         ]
+    , footer
     ]
 
 
@@ -115,27 +132,41 @@ navbar { onMsg, model, shared, url } =
                 ]
                 [ Html.text options.text ]
     in
-    Html.header [ Attr.class "header container pad-y-lg pad-x-md" ]
-        [ Html.div [ Attr.class "row gap-md spread" ]
-            [ Html.div [ Attr.class "row align-center gap-lg" ]
-                [ Html.a [ Attr.class "header__logo", Attr.href "/" ] [ UI.logo ]
-                , Html.nav [ Attr.class "row gap-md hidden-mobile pad-left-xs" ]
-                    [ navLink { text = "docs", route = Route.Docs }
-                    , navLink { text = "guides  ", route = Route.Guides }
-                    , navLink { text = "examples", route = Route.Examples }
+    Html.header [ Attr.class "header pad-y-lg pad-x-md" ]
+        [ Html.div [ Attr.class "container" ]
+            [ Html.div [ Attr.class "row gap-md spread" ]
+                [ Html.div [ Attr.class "row align-center gap-lg" ]
+                    [ Html.a [ Attr.class "header__logo", Attr.href "/" ] [ UI.logo ]
+                    , Html.nav [ Attr.class "row gap-md hidden-mobile pad-left-xs" ]
+                        [ navLink { text = "docs", route = Route.Docs }
+                        , navLink { text = "guides  ", route = Route.Guides }
+                        , navLink { text = "examples", route = Route.Examples }
+                        ]
+                    ]
+                , Html.div [ Attr.class "row gap-md spread" ]
+                    [ Html.nav [ Attr.class "row gap-md hidden-mobile" ]
+                        [ UI.iconLink { text = "GitHub Repo", icon = UI.icons.github, url = "https://github.com/ryannhg/elm-spa" }
+                        , UI.iconLink { text = "NPM Package", icon = UI.icons.npm, url = "https://npmjs.org/elm-spa" }
+                        , UI.iconLink { text = "Elm Package", icon = UI.icons.elm, url = "https://package.elm-lang.org/packages/ryannhg/elm-spa/latest" }
+                        ]
+                    , UI.Searchbar.view
+                        { index = shared.index
+                        , query = model.query
+                        , onQueryChange = onMsg << OnQueryChange
+                        }
                     ]
                 ]
-            , Html.div [ Attr.class "row gap-md spread" ]
-                [ Html.nav [ Attr.class "row gap-md hidden-mobile" ]
-                    [ UI.iconLink { text = "GitHub Repo", icon = UI.icons.github, url = "https://github.com/ryannhg/elm-spa" }
-                    , UI.iconLink { text = "NPM Package", icon = UI.icons.npm, url = "https://npmjs.org/elm-spa" }
-                    , UI.iconLink { text = "Elm Package", icon = UI.icons.elm, url = "https://package.elm-lang.org/packages/ryannhg/elm-spa/latest" }
-                    ]
-                , UI.Searchbar.view
-                    { index = shared.index
-                    , query = model.query
-                    , onQueryChange = onMsg << OnQueryChange
-                    }
+            ]
+        ]
+
+
+footer : Html msg
+footer =
+    Html.div [ Attr.class "footer__zone" ]
+        [ Html.footer [ Attr.class "footer container pad-top-xl" ]
+            [ Html.div [ Attr.class "row pad-x-md pad-y-lg pad-top-xl spread faded" ]
+                [ Html.a [ Attr.href "https://github.com/ryannhg/elm-spa/tree/main/docs", Attr.target "_blank", Attr.class "link" ] [ Html.text "Site source code" ]
+                , Html.span [] [ Html.text "© 2019 – 2021, Ryan Haskell-Glatz" ]
                 ]
             ]
         ]
@@ -155,6 +186,26 @@ page options shared req =
                 { title = options.view.title
                 , body =
                     viewDefault
+                        { shared = shared
+                        , url = req.url
+                        , model = model
+                        , onMsg = identity
+                        }
+                        options.view.body
+                }
+        }
+
+
+pageFullWidth : { view : View Msg } -> Shared.Model -> Request.With params -> Page.With Model Msg
+pageFullWidth options shared req =
+    Page.sandbox
+        { init = init
+        , update = update
+        , view =
+            \model ->
+                { title = options.view.title
+                , body =
+                    viewFullWidth
                         { shared = shared
                         , url = req.url
                         , model = model

@@ -65,8 +65,6 @@ const createMissingDefaultFiles = async () => {
   return Promise.all(actions.map(performDefaultFileAction))
 }
 
-const identity = <T>(value : T) => value
-
 type FilepathSegments = {
   kind: PageKind,
   entry: PageEntry
@@ -172,7 +170,6 @@ const compileMainElm = (env: Environment) => async () => {
     const inputFilepath = isSrcMainElmDefined
       ? path.join(config.folders.src, 'Main.elm')
       : path.join(config.folders.defaults.dest, 'Main.elm')
-
 
     return elm.compileToString(inputFilepath, {
       output: outputFilepath,

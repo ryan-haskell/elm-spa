@@ -14,6 +14,7 @@
   --color--grey-500: #696969;
   --color--grey-700: #333333;
   --color--green: #407742;
+  --color--green-dark: #264727;
   --color--green-light: #d7ead8;
   
   --size--h1: 3em;
@@ -29,6 +30,8 @@
 
   --height--header: 102px;
 }
+
+
 
 /* Resets */
 @media screen and (min-width: 1920px ) {
@@ -90,7 +93,7 @@ main {
 
 hr { border: 0; }
 
-.container { max-width: 64em; }
+.container { max-width: 64rem; }
 
 /* Typography */
 
@@ -143,6 +146,7 @@ hr { border: 0; }
   line-height: 1.45;
 }
 
+.faded { opacity: 0.6; }
 
 .markdown {
   display: flex;
@@ -338,9 +342,8 @@ hr { border: 0; }
   top: 0;
   left: 0;
   right: 0;
-  z-index: 1;
+  z-index: 2;
   background: var(--color--grey-100);
-  box-shadow: 0 1em 1em var(--color--grey-100);
 }
 
 .header__logo {
@@ -349,6 +352,13 @@ hr { border: 0; }
 
 @media screen and (max-width: 640px) {
   .header__logo { font-size: 1.25em }
+}
+
+.page {
+  min-height: 70vh;
+  background-color: var(--color--grey-100);
+  position: relative; 
+  z-index: 1;
 }
 
 .sticky {
@@ -376,6 +386,19 @@ hr { border: 0; }
   font-weight: var(--weight--bold);
   font-family: var(--font--display);
   font-size: 1.25em;
+}
+
+.hero {
+  padding: 10em 0;
+}
+
+.hero__logo {
+  font-size: 1.75em;
+}
+
+@media screen and (max-width: 640px) {
+  .hero { padding: 8em 0 }
+  .hero__logo { font-size: 1em }
 }
 
 /* Search */
@@ -462,4 +485,60 @@ hr { border: 0; }
 .toc {
   padding: 1rem;
   opacity: 0.9;
+}
+
+/* Homepage */
+
+.home__section:nth-child(2n + 1) {
+  background: linear-gradient(30deg, var(--color--green-dark), var(--color--green));
+  color: var(--color--white);
+}
+
+.home__section:nth-child(2n + 1) code {
+  color: var(--color--white);
+}
+
+.home__section:nth-child(2n + 1) .h2 {
+  text-shadow: 0 0 0.5em rgb(0 0 0 / 25%);
+}
+
+.home__section:nth-child(2n) .markdown {
+  margin-left: auto;
+}
+
+.home__section-icon {
+  position: absolute;
+  top: 50%;
+  transform: translate(50%, -50%);
+  right: calc(50% + 18rem);
+  font-size: 8em;
+  z-index: 2;
+}
+
+.home__section:nth-child(2n + 1)  .home__section-icon {
+  right: unset;
+  left: calc(50% + 18rem);
+  transform: translate(-50%, -50%);
+}
+
+@media screen and (max-width: 800px) {
+  .home__section-icon {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 640px) {
+  .home__section { font-size: 1em }
+}
+
+/* Footer */
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.footer__zone {
+  padding: 8em 0;
 }

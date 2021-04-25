@@ -316,8 +316,8 @@ align =
 
 hero : { title : String, description : String } -> Html msg
 hero options =
-    Html.div [ Attr.class "pad-y-xl" ]
-        [ Html.div [ Attr.class "row gap-md pad-y-xl" ]
+    Html.div [ Attr.class "hero" ]
+        [ Html.div [ Attr.class "hero__logo row gap-md" ]
             [ Html.div [ Attr.class "logo" ] []
             , Html.div [ Attr.class "col gap-xs" ]
                 [ h1 options.title
