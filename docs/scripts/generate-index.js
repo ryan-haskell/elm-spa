@@ -43,8 +43,6 @@ const main = () =>
                 acc[line.substring(2)] = 1
               } else if (line.startsWith('## ')) {
                 acc[line.substring(3)] = 2
-              } else if (line.startsWith('### ')) {
-                acc[line.substring(4)] = 3
               }
 
               return acc
