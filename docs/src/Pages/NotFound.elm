@@ -32,6 +32,6 @@ view =
             { title = "404"
             , description = "that page wasn't found."
             }
-        , UI.markdown { withHeaderLinks = False } "### Well, that's a shame...\n\nHow about the [homepage?](/)"
+        , UI.markdown { withHeaderLinks = False } "## But that's alright.\n\nThere's always [the homepage](/)!"
         ]
     }

@@ -125,10 +125,23 @@ navbar { onMsg, model, shared, url } =
     let
         navLink : { text : String, route : Route } -> Html msg
         navLink options =
+            let
+                href : String
+                href =
+                    Route.toHref options.route
+            in
             Html.a
                 [ Attr.class "link"
-                , Attr.href (Route.toHref options.route)
-                , Attr.classList [ ( "bold text-blue", String.startsWith (Route.toHref options.route) url.path ) ]
+                , Attr.href href
+                , Attr.classList
+                    [ ( "bold text-blue"
+                      , if href == "/" then
+                            href == url.path
+
+                        else
+                            String.startsWith href url.path
+                      )
+                    ]
                 ]
                 [ Html.text options.text ]
     in
@@ -138,8 +151,8 @@ navbar { onMsg, model, shared, url } =
                 [ Html.div [ Attr.class "row align-center gap-lg" ]
                     [ Html.a [ Attr.class "header__logo", Attr.href "/" ] [ UI.logo ]
                     , Html.nav [ Attr.class "row gap-md hidden-mobile pad-left-xs" ]
-                        [ navLink { text = "docs", route = Route.Docs }
-                        , navLink { text = "guides  ", route = Route.Guides }
+                        [ navLink { text = "about", route = Route.Home_ }
+                        , navLink { text = "guide", route = Route.Guide }
                         , navLink { text = "examples", route = Route.Examples }
                         ]
                     ]

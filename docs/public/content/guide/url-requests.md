@@ -12,7 +12,7 @@ This might be useful when you need to show the active link in your navbar, or na
 
 ## req.params
 
-Every [dynamic route](/docs/routing#dynamic-routes) has parameters that you'll want to get access to. For [static routes](/docs/routing@static-routes), those parameters will be `()`:
+Every [dynamic route](/guide/routing#dynamic-routes) has parameters that you'll want to get access to. For [static routes](/guide/routing@static-routes), those parameters will be `()`:
 
 URL | Request
  --- | ---

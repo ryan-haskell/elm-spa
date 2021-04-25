@@ -16,7 +16,7 @@ In this section, we'll cover the different kinds of routes you'll find in every 
 
 ## The homepage
  
-`Home_.elm` is a reserved filename that handles requests to your homepage. The easiest way to add a new homepage is with the [`elm-spa add`](/docs/cli#elm-spa-add) covered in the CLI docs:
+`Home_.elm` is a reserved filename that handles requests to your homepage. The easiest way to add a new homepage is with the [`elm-spa add`](/guide/cli#elm-spa-add) covered in the CLI docs:
 
 ```terminal
 elm-spa add /

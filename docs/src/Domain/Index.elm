@@ -106,8 +106,7 @@ sections : Index -> List Section
 sections index =
     let
         sectionOrder =
-            [ "Docs"
-            , "Guides"
+            [ "Guide"
             , "Examples"
             ]
 
@@ -143,6 +142,7 @@ sections index =
                 index
                     |> List.filter (.url >> (\url -> String.startsWith top.url url && url /= top.url))
                     |> toLabelUrls
+                    |> List.sortBy .url
                     |> toSection top
             )
         |> List.sortBy

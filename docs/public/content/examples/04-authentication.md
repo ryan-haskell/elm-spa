@@ -17,7 +17,7 @@ __Great news:__ This is exactly what we can do in __elm-spa__!
 
 ## Protected pages
 
-At the end of the [pages docs](/docs/pages#pageprotected), we learned that there are also `protected` versions of every __page type__. 
+At the end of the [pages docs](/guide/pages#pageprotected), we learned that there are also `protected` versions of every __page type__. 
 
 These protected pages have slightly different signatures:
 
@@ -116,7 +116,7 @@ But before that code will work we need to take care of two things:
 
 ## Updating Shared.elm
 
-If you haven't already ejected `Shared.elm`, you should move it from `.elm-spa/defaults` into your `src` folder. The [shared state](/docs/shared-state) docs cover this file in depth, but we'll provide all the code you'll need to change here.
+If you haven't already ejected `Shared.elm`, you should move it from `.elm-spa/defaults` into your `src` folder. The [shared state](/guide/shared-state) docs cover this file in depth, but we'll provide all the code you'll need to change here.
 
 Let's change `Shared.Model` to keep track of a `Maybe User`, the value that can either be a user or nothing:
 
@@ -382,4 +382,4 @@ Now everything is working! Visiting the `/sign-in` page and clicking "Sign In" s
 
 #### But wait...
 
-When we refresh the page, the user is signed out... how can we keep them signed in after refresh? Sounds like a job for [local storage](/guides/local-storage)!
+When we refresh the page, the user is signed out... how can we keep them signed in after refresh? Sounds like a job for [local storage](/examples/local-storage)!

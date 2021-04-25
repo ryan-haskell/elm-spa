@@ -279,6 +279,15 @@ hr { border: 0; }
   transform: translate(50%, -25%);
 }
 
+.markdown a img {
+  transition: transform 200ms ease-in-out, opacity 200ms ease-in-out;
+}
+
+.markdown a img:hover {
+  transform: scale(1.05);
+  opacity: 0.75;
+}
+
 .bold {
   font-weight: var(--weight--bold);
 }

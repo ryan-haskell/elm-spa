@@ -1,4 +1,4 @@
-module Pages.Guides exposing (Model, Msg, page)
+module Pages.Guide exposing (Model, Msg, page)
 
 import Page
 import Request

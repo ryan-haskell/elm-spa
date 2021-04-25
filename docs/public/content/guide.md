@@ -1,4 +1,4 @@
-# Docs
+# Guide
 
 Welcome to __elm-spa__, a framework for building web applications with [Elm](https://elm-lang.org)!
 If you are new to Elm, you should check out [the official guide](https://guide.elm-lang.org), which
@@ -68,4 +68,4 @@ Visit https://elm-spa.dev for more!
 
 __Ready for more?__
 
-Let's check out [the CLI](/docs/cli) to learn more about those five commands!
+Let's check out [the CLI](/guide/cli) to learn more about those five commands!

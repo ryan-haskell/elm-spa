@@ -52,7 +52,7 @@ type alias User =
     }
 ```
 
-As we saw in the [pages guide](/docs/pages), this `Shared.Model` will be passed into every page– so we can check if `shared.user` has a value or not!
+As we saw in the [pages guide](/guide/pages), this `Shared.Model` will be passed into every page– so we can check if `shared.user` has a value or not!
 
 ## Shared.init
 
@@ -65,7 +65,7 @@ init flags req =
 The `init` function is called when your application loads for the first time. It takes in two inputs:
 
 - `Flags` - initial JS values passed in on startup.
-- `Request` - the [Request](/docs/request) value with current URL information.
+- `Request` - the [Request](/guide/request) value with current URL information.
 
 The `init` function returns the initial `Shared.Model`, as well as any side effect's you'd like to run (like initial HTTP requests, etc)
 

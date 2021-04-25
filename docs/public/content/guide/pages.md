@@ -227,7 +227,7 @@ view : Model -> View Msg
 subscriptions : Model -> Sub Msg
 ```
 
-This `Effect Msg` value also allows support for folks using [elm-program-test](https://package.elm-lang.org/packages/avh4/elm-program-test/latest/), which requires users to define their own custom type on top of `Cmd Msg`. More about that in the [testing guide](/guides/06-testing)
+This `Effect Msg` value also allows support for folks using [elm-program-test](https://package.elm-lang.org/packages/avh4/elm-program-test/latest/), which requires users to define their own custom type on top of `Cmd Msg`. More about that in the [testing guide](/examples/06-testing)
 
 
 ## Page.protected
@@ -250,4 +250,4 @@ Page.protected.sandbox
     }
 ```
 
-When you are ready for user authentication, you can learn more about using `Page.protected` in the [authentication guide](/guides/04-authentication).
+When you are ready for user authentication, you can learn more about using `Page.protected` in the [authentication guide](/examples/04-authentication).
