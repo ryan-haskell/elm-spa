@@ -1,22 +1,22 @@
 module Pages.Home_ exposing (Model, Msg, page, view)
 
 import Auth
-import Effect exposing (Effect)
 import Html
 import Html.Events as Events
 import Page
 import Request exposing (Request)
 import Shared
+import Storage exposing (Storage)
 import UI
 import View exposing (View)
 
 
 page : Shared.Model -> Request -> Page.With Model Msg
-page _ _ =
-    Page.protected.advanced <|
+page shared _ =
+    Page.protected.element <|
         \user ->
             { init = init
-            , update = update
+            , update = update shared.storage
             , view = view user
             , subscriptions = \_ -> Sub.none
             }
@@ -30,9 +30,9 @@ type alias Model =
     {}
 
 
-init : ( Model, Effect Msg )
+init : ( Model, Cmd Msg )
 init =
-    ( {}, Effect.none )
+    ( {}, Cmd.none )
 
 
 
@@ -43,12 +43,12 @@ type Msg
     = ClickedSignOut
 
 
-update : Msg -> Model -> ( Model, Effect Msg )
-update msg model =
+update : Storage -> Msg -> Model -> ( Model, Cmd Msg )
+update storage msg model =
     case msg of
         ClickedSignOut ->
             ( model
-            , Effect.fromShared Shared.SignedOut
+            , Storage.signOut storage
             )
 
 

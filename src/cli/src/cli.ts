@@ -12,5 +12,8 @@ export default {
   server: Server.run,
   gen: Build.gen,
   watch: Watch.run,
-  help: Help.run
+  help: Help.run,
+  // Aliases for Elm folks
+  init: New.run,
+  make: Build.build,
 }

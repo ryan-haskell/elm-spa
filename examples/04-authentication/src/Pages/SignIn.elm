@@ -1,6 +1,5 @@
 module Pages.SignIn exposing (Model, Msg, page)
 
-import Effect exposing (Effect)
 import Gen.Params.SignIn exposing (Params)
 import Html
 import Html.Attributes as Attr
@@ -8,15 +7,16 @@ import Html.Events as Events
 import Page
 import Request
 import Shared
+import Storage exposing (Storage)
 import UI
 import View exposing (View)
 
 
 page : Shared.Model -> Request.With Params -> Page.With Model Msg
 page shared req =
-    Page.advanced
+    Page.element
         { init = init
-        , update = update
+        , update = update shared.storage
         , view = view
         , subscriptions = subscriptions
         }
@@ -30,10 +30,10 @@ type alias Model =
     { name : String }
 
 
-init : ( Model, Effect Msg )
+init : ( Model, Cmd Msg )
 init =
     ( { name = "" }
-    , Effect.none
+    , Cmd.none
     )
 
 
@@ -46,17 +46,17 @@ type Msg
     | SubmittedSignInForm
 
 
-update : Msg -> Model -> ( Model, Effect Msg )
-update msg model =
+update : Storage -> Msg -> Model -> ( Model, Cmd Msg )
+update storage msg model =
     case msg of
         UpdatedName name ->
             ( { model | name = name }
-            , Effect.none
+            , Cmd.none
             )
 
         SubmittedSignInForm ->
             ( model
-            , Effect.fromShared (Shared.SignedIn model.name)
+            , Storage.signIn { name = model.name } storage
             )
 
 

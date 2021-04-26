@@ -1,6 +1,6 @@
 # Pages
 
-In __elm-spa__, every URL connects to a single page. Let's take a closer look at the homepage we created earlier with the `elm-spa new` command:
+In __elm-spa__, every URL connects to a single page. Let's take a closer look at the homepage created with the `elm-spa new` command:
 
 ```elm
 module Pages.Home_ exposing (view)
@@ -17,13 +17,13 @@ view =
 
 This homepage renders __"Homepage"__ in the browser tab, and __"Hello, world!"__ onto the page.
 
-Because the file is named `Home_.elm`, we know it's the homepage. Visiting `http://localhost:1234` in a web browser will render the page.
+Because the file is named `Home_.elm`, elm-spa knows this is the homepage. Visiting `http://localhost:1234` in a web browser will render this view.
 
 A `view` function is perfect when all you need is to render some HTML on the screen. But many web pages in the real world do more interesting things!
 
 ### Upgrading "Hello, world!"
 
-Let's start by adding a `page` function, the first step in our journey from "Hello, world!" to the real world:
+Let's start by adding a new `page` function:
 
 ```elm
 module Pages.Home_ exposing (page)
@@ -47,20 +47,20 @@ view =
     }
 ```
 
-We haven't changed our original code much- except we've added a new `page` function that:
+We haven't changed the original code much- except we've added a new `page` function that:
 
 1. Accepts 2 inputs: `Shared.Model` and `Request`
 2. Returns a `Page` value
 3. Has been __exposed__ at the top of the file.
 
-> Exposing `page` from this module lets __elm-spa__ know to use it instead of the plain `view` function from before.
+> Exposing `page` from this module lets __elm-spa__ know we want to use `page` instead of the plain `view` function from before.
 
-The `view` function we had before is passed into `page`, so our user still sees __"Hello, world!"__ when they visit the homepage. However, this page now has access to two new bits of information!
+The `view` function from before is now passed into `page`. In the web browser, we still see __"Hello, world!"__. However, this page now has access to two new bits of information!
 
 1. `Shared.Model` is our global application state, which might contain the signed-in user, settings, or other things that should persist as we move from one page to another.
 2. `Request` is a record with access to the current route, query parameters, and any other information about the current URL.
 
-You can rely on the fact that the `page` will always be passed the latest `Shared.Model` and `Request` value. If we want either of these values to be available in our `view` function, we can pass them in:
+You can rely on the fact that the `page` will always be passed the latest `Shared.Model` and `Request` value. If we want either of these values to be available in our `view` function, we pass them in like so:
 
 ```elm
 page : Shared.Model -> Request -> Page
@@ -82,7 +82,7 @@ view req =
     }
 ```
 
-If we are running `elm-spa server`, this will print __"Hello, localhost!"__ on our screen.
+Now the browser should display __"Hello, localhost!"__
 
 ### Beyond static pages
 
@@ -90,7 +90,7 @@ You might have noticed `Page.static` earlier in our page function. This is one o
 
 The rest of this section will introduce you to the other __page types__ exposed by the `Page` module, so you know which one to reach for.
 
-> Always choose the __simplest__ page type for the job– and reach for the more advanced ones when your page needs the extra features!
+> Always choose the __simplest__ page type for the job– and reach for the more advanced ones when your page _really_ needs the extra features!
 
 - __[Page.static](#pagestatic)__ - for pages that only render a view.
 - __[Page.sandbox](#pagesandbox)__ - for pages that need to keep track of state.
@@ -104,7 +104,7 @@ The rest of this section will introduce you to the other __page types__ exposed 
 elm-spa add /example static
 ```
 
-This was the page type we took a look at earlier, perfect for pages that render static HTML, but might need access to the `Shared.Model` or `Request` values.
+This was the page type we looked at above. It is perfect for pages that render static HTML, but might need access to the `Shared.Model` or `Request` values.
 
 ```elm
 module Pages.Example exposing (page)
@@ -129,7 +129,7 @@ elm-spa add /example sandbox
 
 This is the first __page type__ that introduces [the Elm architecture](https://guide.elm-lang.org/architecture/), which uses `Model` to store the current page state and `Msg` to define what actions users can take on this page.
 
-It's time to upgrade to `Page.sandbox` when you need to track state on the page. Here are a few examples of things you'd store in page state:
+It's time to upgrade to `Page.sandbox` when you __need to track state__ on the page. Here are a few examples of things you'd store in page state:
 
 - The current slide of a carousel
 - The selected tab section to view
@@ -158,7 +158,7 @@ update : Msg -> Model -> Model
 view : Model -> View Msg
 ```
 
-> Our `page` function now returns `Page.With Model Msg` instead of `Page`. This is because our page is now __stateful__.
+> Our `page` function now returns `Page.With Model Msg` instead of `Page`. This is because our page is now stateful.
 
 _( Inspired by [__Browser.sandbox__](https://package.elm-lang.org/packages/elm/browser/latest/Browser#sandbox) )_
 
@@ -251,3 +251,7 @@ Page.protected.sandbox
 ```
 
 When you are ready for user authentication, you can learn more about using `Page.protected` in the [authentication guide](/examples/04-authentication).
+
+---
+
+__Next up:__ [Requests](./04-requests)

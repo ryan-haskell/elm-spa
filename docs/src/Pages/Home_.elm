@@ -38,7 +38,7 @@ view =
                 }
             ]
         , alternatingMarkdownSections
-            [ ( "🌳"
+            [ ( "💻"
               , """
 ## Build reliable applications with Elm
 
@@ -66,7 +66,7 @@ With __elm-spa__, routing is automatically generated for you based on a standard
               , """
 ## User authentication
 
-The latest release comes with an easy way to setup user authentication. Use the `Page.protected` API to easily guarantee only logged-in users can view certain pages.
+The latest release comes with a simple way to setup user authentication. Use the `Page.protected` API to easily guarantee only logged-in users can view certain pages.
 """
               , [ ( "See it in action", Gen.Route.Examples__Section_ { section = "04-authentication" } )
                 ]

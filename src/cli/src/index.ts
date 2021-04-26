@@ -10,7 +10,10 @@ const commands : Commands = {
   gen: CLI.gen,
   watch: CLI.watch,
   server: CLI.server,
-  help: CLI.help
+  help: CLI.help,
+  // Aliases for Elm folks
+  init: CLI.new,
+  make: CLI.build,
 }
 
 const command : string | undefined = process.argv[2]

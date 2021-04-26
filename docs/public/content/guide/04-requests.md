@@ -8,11 +8,11 @@ page shared req =
     ...
 ```
 
-This might be useful when you need to show the active link in your navbar, or navigate to a different page programmicatically. Let's look at the properties on `req` that you might find useful!
+This might be useful when you need to show the active link in your navbar, or navigate to a page programmatically. Let's look at the properties on `req` that you might find useful!
 
 ## req.params
 
-Every [dynamic route](/guide/routing#dynamic-routes) has parameters that you'll want to get access to. For [static routes](/guide/routing@static-routes), those parameters will be `()`:
+Every [dynamic route](/guide/02-routing#dynamic-routes) has parameters that you'll want to get access to. For [static routes](/guide/02-routing#static-routes), those parameters will be `()`:
 
 URL | Request
  --- | ---
@@ -64,7 +64,7 @@ req.route == Gen.Route.People.Name_ { name = "ryan" }
 
 ## req.url
 
-If you need the `port`, `hostname`, or anything else it is available at `req.url`, which contains the original [elm/url](https://package.elm-lang.org/packages/elm/url/latest/Url) URL value.
+If you need the `port`, `fragment`, or anything else, `req.url` contains the original [elm/url](https://package.elm-lang.org/packages/elm/url/latest/Url) URL value.
 
 ```elm
 type alias Url =
@@ -77,14 +77,24 @@ type alias Url =
     }
 ```
 
-This is less commonly used than `req.params` and `req.query`, but can be useful in certain cases.
+This is less commonly used than `req.params` and `req.query`, but is useful in specific cases.
 
 ## Programmatic Navigation
 
 Most of the time, navigation in Elm is as easy as giving an `href` attribute to an anchor tag:
 
 ```elm
-a [ href "/guide" ] [ text "elm-spa guide" ]
+link =
+  a [ href "/guide" ] [ text "Guide" ]
+```
+
+With the generated route code, we can even prevent the need for string URLs. This is great for refactoring and catching typos:
+
+```elm
+import Gen.Route as Route
+
+link =
+  a [ href (Route.toHref Route.Guide) ] [ text "Guide" ]
 ```
 
 Other times, you'll want to do __programmatic navigation__ – navigating to another page after some event completes. Maybe you want to __redirect__ to a sign in page, or head to the __dashboard after signing in successfully__.
@@ -105,3 +115,6 @@ update req msg model =
 
 When the `SignedIn` message is fired, this code will redirect the user to the `Dashboard` route.
 
+---
+
+__Next up:__ [Shared state](./05-shared-state)

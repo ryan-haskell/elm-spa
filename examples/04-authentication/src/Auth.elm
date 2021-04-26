@@ -10,6 +10,7 @@ module Auth exposing
 
 -}
 
+import Domain.User
 import ElmSpa.Internals.Page as ElmSpa
 import Gen.Route exposing (Route)
 import Request exposing (Request)
@@ -17,12 +18,12 @@ import Shared
 
 
 type alias User =
-    Shared.User
+    Domain.User.User
 
 
 beforeProtectedInit : Shared.Model -> Request -> ElmSpa.Protected User Route
-beforeProtectedInit shared req =
-    case shared.user of
+beforeProtectedInit { storage } _ =
+    case storage.user of
         Just user ->
             ElmSpa.Provide user
 

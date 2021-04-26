@@ -6,4 +6,7 @@ export type Commands = {
   watch: () => any
   server: () => any
   help: () => any
+  // Aliases for Elm folks
+  init: () => any
+  make: () => any
 }

@@ -17,7 +17,7 @@ __Great news:__ This is exactly what we can do in __elm-spa__!
 
 ## Protected pages
 
-At the end of the [pages docs](/guide/pages#pageprotected), we learned that there are also `protected` versions of every __page type__. 
+At the end of the [pages docs](/guide/03-pages#pageprotected), we learned that there are also `protected` versions of every __page type__. 
 
 These protected pages have slightly different signatures:
 

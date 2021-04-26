@@ -1,12 +1,12 @@
 # The CLI
 
-At the end of the last section, we installed the __elm-spa__ CLI using [npm](https://npmjs.org) like this:
+To install the __elm-spa__ CLI via [npm](https://npmjs.org) run this command:
 
 ```terminal
 npm install -g elm-spa@latest
 ```
 
-This gave us the ability to run a few commands:
+This CLI gives us these six commands:
 
 1. [__elm-spa new__](#elm-spa-new) - creates a new project
 1. [__elm-spa server__](#elm-spa-server) - runs a dev server as you code
@@ -15,11 +15,11 @@ This gave us the ability to run a few commands:
 1. [__elm-spa gen__](#elm-spa-gen) - generates files, without elm make
 1. [__elm-spa watch__](#elm-spa-watch) - generates files as you code
 
-What do these do? This section of the guide dives into more detail on each command!
+What do these do? Let's dive into each in detail!
 
 ## elm-spa new
 
-When you want to create a new project, you can use the `elm-spa new` command. This creates a new project in the current folder:
+When you want to create a new project, use the `elm-spa new` command. This creates a new project in the current folder:
 
 ```terminal
 elm-spa new
@@ -30,7 +30,7 @@ New project created in:
 /Users/ryan/code/my-new-app
 ```
 
-This command only creates __three__ files:
+The `new` command creates __three__ files:
 
 Filename | Description
 --- | ---
@@ -40,15 +40,15 @@ Filename | Description
 
 ## elm-spa server
 
-The first thing you'll want to do after creating a new project is try it out in the browser! The `elm-spa server` is all you need to see your app in action:
+The first thing you'll want to do after creating a new project is see it in the browser! The `elm-spa server` command is all you need to see the app in action:
 
 ```terminal
 elm-spa server
 ```
 
-This will start a development server for your project at [http://localhost:1234](http://localhost:1234).
+This command starts a development server for your project at [http://localhost:1234](http://localhost:1234).
 
-When we edit our code, `elm-spa server` automatically compiles your application.
+> When you edit your code, `elm-spa server` automatically compiles your application.
 
 
 ## elm-spa add
@@ -71,12 +71,11 @@ elm-spa add /settings      # src/Pages/Settings.elm
 elm-spa add /people/:id    # src/Pages/People/Id_.elm
 ```
 
-We'll cover this in more detail in the [routing section](./routing)
+We'll cover this in more detail in the [routing section](./02-routing)
 
 ### using page templates
 
-The `elm-spa add` command also accepts an optional `template` argument too for common
-pages you might create.
+The `elm-spa add` command also accepts an optional `template` argument too for common pages you might create.
 
 ```bash
 elm-spa add /example static
@@ -84,15 +83,23 @@ elm-spa add /example sandbox
 elm-spa add /example element
 ```
 
+We'll explore those page types in the [pages section](./03-pages)
+
 ## elm-spa build
 
-The `server` and `watch` commands are great for development, but for __production__, we'll want the `elm-spa build` command.
+The `elm-spa server` command is great for development, but for __production__, you'll want the `elm-spa build` command.
 
 ```terminal
 elm-spa build
 ```
 
 This compiles your app into __an optimized and minified JS file__. This makes it great for serving your application in the real world!
+
+### A note on hosting
+
+By default, the `public` folder can be statically served. Hosting platforms like [Netlify](https://netlify.com) make this free and easy.
+
+Because this is a single page application, be sure to setup redirects to `public/index.html`. Here's an [example of how to do this with Netlify](https://docs.netlify.com/routing/redirects/rewrites-proxies/#history-pushstate-and-single-page-apps).
 
 ## elm-spa gen
 
@@ -102,7 +109,7 @@ If you are working with another dev server, you won't need the `.js` file genera
 elm-spa gen
 ```
 
-This will generate files in the `.elm-spa` folder, but allow your custom workflow to define it's own way of compiling Elm. This is a great command to combine __elm-spa__ with another tool like [Vite](/examples/05-npm) or [Parcel](https://parceljs.org/elm.html).
+This will generate code in the `.elm-spa` folder, but allow your custom workflow to define it's own way of compiling Elm. This is a great command to combine __elm-spa__ with another tool like [Vite](/examples/05-npm) or [Parcel](https://parceljs.org/elm.html).
 
 
 ## elm-spa watch
@@ -115,3 +122,6 @@ elm-spa watch
 
 This will automatically generate code and compile your Elm files on save, but without the server.
 
+---
+
+__Next up__: [Routing](./02-routing)

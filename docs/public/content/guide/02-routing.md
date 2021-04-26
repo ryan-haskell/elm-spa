@@ -16,7 +16,7 @@ In this section, we'll cover the different kinds of routes you'll find in every 
 
 ## The homepage
  
-`Home_.elm` is a reserved filename that handles requests to your homepage. The easiest way to add a new homepage is with the [`elm-spa add`](/guide/cli#elm-spa-add) covered in the CLI docs:
+`Home_.elm` is a reserved filename that handles requests to your homepage. The easiest way to add a new homepage is with the [`elm-spa add`](/guide/01-cli#elm-spa-add) covered in the CLI docs:
 
 ```terminal
 elm-spa add /
@@ -128,3 +128,6 @@ Once you have a `NotFound.elm` within your `src/Pages` folder, __elm-spa__ will 
 
 The technique of moving a file from the `.elm-spa/defaults` folder is known as "ejecting a default file". Throughout the guide, we'll find more examples of files that we might want to move into our `src` folder.
 
+---
+
+__Next up:__ [Pages](./03-pages)

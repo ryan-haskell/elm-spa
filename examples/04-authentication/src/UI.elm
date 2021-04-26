@@ -12,9 +12,9 @@ layout children =
         viewLink label route =
             Html.a [ Attr.href (Route.toHref route) ] [ Html.text label ]
     in
-    [ Html.div [ Attr.class "container" ]
-        [ Html.header [ Attr.class "navbar" ]
-            [ Html.strong [ Attr.class "brand" ] [ viewLink "Home" Route.Home_ ]
+    [ Html.div [ Attr.style "margin" "2rem" ]
+        [ Html.header [ Attr.style "margin-bottom" "1rem" ]
+            [ Html.strong [ Attr.style "margin-right" "1rem" ] [ viewLink "Home" Route.Home_ ]
             , viewLink "Sign in" Route.SignIn
             ]
         , Html.main_ [] children

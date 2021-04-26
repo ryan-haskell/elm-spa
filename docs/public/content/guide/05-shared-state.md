@@ -1,10 +1,10 @@
 # Shared state
 
-With __elm-spa__, any time we move from one page to another, the `init` function for that new page is called. This means that the state of the previous page you were looking at has been replaced by the new page.
+With __elm-spa__, any time we move from one page to another, the `init` function for that new page is called. This means that the state of the previous page you were looking at has been replaced by the new page's state.
 
-So if we sign in a user at the `SignIn` page, we'll need a place to store the user before navigating over to the `Dashboard`.
+So if we sign in a user on the `SignIn` page, we'll need a place to store the user before navigating over to the `Dashboard`.
 
-This is where the `Shared` module comes in– the perfect place to store things that every page needs to access!
+This is where the `Shared` module comes in– the perfect place to store data that every page needs to access!
 
 ### Ejecting the default file
 
@@ -52,7 +52,7 @@ type alias User =
     }
 ```
 
-As we saw in the [pages guide](/guide/pages), this `Shared.Model` will be passed into every page– so we can check if `shared.user` has a value or not!
+As we saw in the [pages guide](/guide/03-pages), this `Shared.Model` will be passed into every page– so we can check if `shared.user` has a value or not!
 
 ## Shared.init
 
