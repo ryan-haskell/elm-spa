@@ -50,7 +50,7 @@ npx elm-spa new
 
 No need to configure webpack, gulp, or any other NPM dev tools. This __zero-configuration__ CLI comes with a live-reloading dev server, production-ready build commands, and even a few scaffolding commands for new and existing applications.
 """
-              , [ ( "Explore the CLI", Gen.Route.Guide__Section_ { section = "cli" } )
+              , [ ( "Explore the CLI", Gen.Route.Guide__Section_ { section = "01-cli" } )
                 ]
               )
             , ( "magic"
@@ -59,7 +59,7 @@ No need to configure webpack, gulp, or any other NPM dev tools. This __zero-conf
 
 With __elm-spa__, routing is automatically generated for you based on a standard file-structure convention. This means you'll be able to navigate any project, making it great for onboarding new hires or collaborating with a team!
 """
-              , [ ( "Learn how routing works", Gen.Route.Guide__Section_ { section = "routing" } )
+              , [ ( "Learn how routing works", Gen.Route.Guide__Section_ { section = "02-routing" } )
                 ]
               )
             , ( "lock"
