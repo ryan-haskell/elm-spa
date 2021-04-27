@@ -1,0 +1,15 @@
+[build]
+  publish = "public"
+  command = "cd ../src/cli && npm i && npm run build && npm link && npm i -g elm && cd ../../docs && node scripts/generate-index.js && elm-spa build"
+
+# Prevents missing markdown files from redirecting to index.html
+[[redirects]]
+  from = "/content/*"
+  to = "/content/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

@@ -1,0 +1,19 @@
+{
+  "name": "05-vite",
+  "version": "1.0.0",
+  "description": "built with [elm-spa](https://elm-spa.dev)",
+  "main": "index.js",
+  "scripts": {
+    "start": "npm install && npm run dev",
+    "dev": "elm-spa watch & vite",
+    "build": "elm-spa gen && vite build"
+  },
+  "keywords": [],
+  "author": "Ryan Haskell-Glatz",
+  "license": "ISC",
+  "devDependencies": {
+    "elm-spa": "6.0.0",
+    "rollup-plugin-elm": "3.0.0",
+    "vite": "2.2.2"
+  }
+}

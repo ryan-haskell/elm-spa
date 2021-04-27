@@ -1,0 +1,9 @@
+elm-stuff
+/node_modules
+/tests
+/jest.config.js
+/tsconfig.json
+/src/**
+!/src/new/**
+!/src/defaults/**
+!/src/templates/add/**
