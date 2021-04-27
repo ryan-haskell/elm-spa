@@ -1,31 +1,38 @@
 # Examples
 
-Prefer to learn by example? Wonderful! The source code for all of the examples on this site can be found in the Github repo's [examples](https://github.com/ryannhg/elm-spa/tree/main/examples) folder.
+Prefer to learn by example? Wonderful! The source code for all of the examples on this site can be found in the GitHub repo's [examples](https://github.com/ryannhg/elm-spa/tree/main/examples) folder.
 
 ### Hello, world!
 
 Get an introduction to the framework with a simple app.
 
-[![Hello, world!](/content/images/01-hello-world.png)](/examples/01-hello-world)
+[![Example 1 screenshot](/content/images/01-hello-world.png)](/examples/01-hello-world)
 
 ### Pages
 
 Learn how pages and URL routing work together.
 
-[![Hello, world!](/content/images/02-pages.png)](/examples/02-pages)
+[![Example 2 screenshot](/content/images/02-pages.png)](/examples/02-pages)
 
 ### Local storage
 
 Use ports and local storage to persist data on refresh.
 
-[![Hello, world!](/content/images/03-storage.png)](/examples/03-storage)
+[![Example 3 screenshot](/content/images/03-storage.png)](/examples/03-storage)
 
 ### User authentication
 
 Explore the elm-spa's user authentication API.
 
-[![Hello, world!](/content/images/04-authentication.png)](/examples/04-authentication)
+[![Example 4 screenshot](/content/images/04-authentication.png)](/examples/04-authentication)
 
+## Realworld example
+
+Implements the [Realworld app project](), inspired by Richard Feldman's "elm-spa-example" project. 
+
+[![Realworld app screenshot](/content/images/realworld.png)](https://realworld.elm-spa.dev)
+
+Source code: [GitHub](https://github.com/ryannhg/elm-spa-realworld)
 
 ## More examples
 

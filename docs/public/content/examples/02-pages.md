@@ -1,8 +1,9 @@
 # Pages & routing
 
+__Source code__: [GitHub](https://github.com/ryannhg/elm-spa/tree/main/examples/01-pages)
+
 This next guide will show you how pages, routing, and the `elm-spa add` command work together to automatically handle URLs in your __elm-spa__ application.
 
-> You can see the source code in the [examples](https://github.com/ryannhg/elm-spa/tree/next/examples/02-pages) folder on GitHub.
 
 ### The setup
 
@@ -202,3 +203,7 @@ After creating `style.css`, we can import the file in our `public/index.html` en
 
 Using the `<link>` tag as shown above (with the leading slash!) imports our CSS file. All files in the `public` folder are available at the root of our web application. That means a file stored at `public/images/dog.png` would be at `http://localhost:1234/images/dog`, without including `public` in the URL at all.
 
+
+---
+
+__Next up:__ [Storage](./03-storage)

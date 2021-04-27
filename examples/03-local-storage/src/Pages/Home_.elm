@@ -1,18 +1,16 @@
 module Pages.Home_ exposing (Model, Msg, init, page, update, view)
 
-import Gen.Params.Home_ exposing (Params)
-import Html exposing (Html)
+import Html
 import Html.Events
 import Page
-import Ports
-import Request
+import Request exposing (Request)
 import Shared
 import Storage exposing (Storage)
 import View exposing (View)
 
 
-page : Shared.Model -> Request.With Params -> Page.With Model Msg
-page shared req =
+page : Shared.Model -> Request -> Page.With Model Msg
+page shared _ =
     Page.element
         { init = init
         , update = update shared.storage
@@ -48,12 +46,12 @@ update storage msg model =
     case msg of
         Increment ->
             ( model
-            , Ports.save (Storage.increment storage)
+            , Storage.increment storage
             )
 
         Decrement ->
             ( model
-            , Ports.save (Storage.decrement storage)
+            , Storage.decrement storage
             )
 
 
@@ -62,7 +60,7 @@ update storage msg model =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
+subscriptions _ =
     Sub.none
 
 
@@ -71,7 +69,7 @@ subscriptions model =
 
 
 view : Storage -> Model -> View Msg
-view storage model =
+view storage _ =
     { title = "Homepage"
     , body =
         [ Html.h1 [] [ Html.text "Local storage" ]

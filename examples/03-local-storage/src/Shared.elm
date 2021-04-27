@@ -8,7 +8,6 @@ module Shared exposing
     )
 
 import Json.Decode as Json
-import Ports
 import Request exposing (Request)
 import Storage exposing (Storage)
 
@@ -24,7 +23,7 @@ type alias Model =
 
 init : Request -> Flags -> ( Model, Cmd Msg )
 init _ flags =
-    ( { storage = Storage.load flags }
+    ( { storage = Storage.fromJson flags }
     , Cmd.none
     )
 
@@ -37,9 +36,11 @@ update : Request -> Msg -> Model -> ( Model, Cmd Msg )
 update _ msg model =
     case msg of
         StorageUpdated storage ->
-            ( { model | storage = storage }, Cmd.none )
+            ( { model | storage = storage }
+            , Cmd.none
+            )
 
 
 subscriptions : Request -> Model -> Sub Msg
 subscriptions _ _ =
-    Ports.load StorageUpdated
+    Storage.onChange StorageUpdated

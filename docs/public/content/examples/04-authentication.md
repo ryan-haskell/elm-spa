@@ -1,5 +1,7 @@
 # User authentication
 
+__Source code__: [GitHub](https://github.com/ryannhg/elm-spa/tree/main/examples/04-authentication)
+
 In a real world application, it's common to have the notion of a signed-in users. When it comes to routing, it's often useful to only allow signed-in users to visit specific pages.
 
 It would be wonderful if we could define logic in _one place_ that guarantees only signed-in users could view those pages:
@@ -380,6 +382,30 @@ view user model =
 Now everything is working! Visiting the `/sign-in` page and clicking "Sign In" signs in the user and redirects to the homepage. Clicking "Sign out" on the homepage signs out the user, and our `Auth.elm` logic automatically redirects to the `SignIn` page.
 
 
-#### But wait...
+## Persisting the user
 
-When we refresh the page, the user is signed out... how can we keep them signed in after refresh? Sounds like a job for [local storage](/examples/local-storage)!
+When we refresh the page, the user is signed out... how can we keep them signed in after refresh? Let's tweak the `Storage.elm` file we made in the [last example](./03-storage):
+
+```elm
+-- src/Storage.elm
+
+type alias Storage =
+    { user : Maybe User
+    }
+```
+
+If we store this on the `Shared.Model` we can ensure the user is still signed in after they refresh their browser, or visit the app later.
+
+```elm
+-- src/Shared.elm
+
+type alias Model =
+    { storage : Storage
+    }
+```
+
+For more explanation of how this works, check out the [Storage example](./03-storage) in the last section, it will give a better basic understanding of how this mechanism works!
+
+---
+
+__Next up:__ [More examples](/examples#more-examples)
