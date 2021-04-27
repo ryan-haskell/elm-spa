@@ -530,6 +530,15 @@ hr { border: 0; }
   text-shadow: 0 0 0.5em rgb(0 0 0 / 25%);
 }
 
+.home__section pre {
+  font-size: 1.1em;
+  max-width: 16em;
+  padding: 0.85rem 1rem;
+}
+.home__section code {
+  font-size: 1.2em;
+}
+
 .home__section > .col {
   position: relative;
   z-index: 1;

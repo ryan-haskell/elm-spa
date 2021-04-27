@@ -26,13 +26,23 @@ Explore the elm-spa's user authentication API.
 
 [![Example 4 screenshot](/content/images/04-authentication.png)](/examples/04-authentication)
 
-## Realworld example
+## Real world examples
 
-Implements the [Realworld app project](), inspired by Richard Feldman's "elm-spa-example" project. 
+### RealWorld Conduit App
+
+Implements the [RealWorld app](https://github.com/gothinkster/realworld), inspired by Richard Feldman's "elm-spa-example" project. 
 
 [![Realworld app screenshot](/content/images/realworld.png)](https://realworld.elm-spa.dev)
 
 Source code: [GitHub](https://github.com/ryannhg/elm-spa-realworld)
+
+### This website
+
+The website you are looking at _right now_ was built with __elm-spa__. Mindbending, right?
+
+[![Realworld app screenshot](/content/images/this-site.png)](https://elm-spa.dev)
+
+Source code: [GitHub](https://github.com/ryannhg/elm-spa/tree/main/docs)
 
 ## More examples
 

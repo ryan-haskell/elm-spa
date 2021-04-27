@@ -16,10 +16,7 @@ npm install -g elm-spa@latest
 
 This will allow you to create a new project using the following commands:
 
-```
-mkdir 01-hello-world
-cd 01-hello-world
-
+```terminal
 elm-spa new
 ```
 

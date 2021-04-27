@@ -1,6 +1,6 @@
 # Pages & routing
 
-__Source code__: [GitHub](https://github.com/ryannhg/elm-spa/tree/main/examples/01-pages)
+__Source code__: [GitHub](https://github.com/ryannhg/elm-spa/tree/main/examples/02-pages)
 
 This next guide will show you how pages, routing, and the `elm-spa add` command work together to automatically handle URLs in your __elm-spa__ application.
 
@@ -10,14 +10,14 @@ This next guide will show you how pages, routing, and the `elm-spa add` command 
 Just like with the last guide, we can use `elm-spa new` and `elm-spa server` to get a brand new __elm-spa__ project up and running:
 
 ```terminal
-mkdir 02-pages
-cd 02-pages
-
 elm-spa new
-elm-spa server
 ```
 
 This generates the "Hello, world!" homepage from before:
+
+```terminal
+elm-spa server
+```
 
 ![A browser displaying "Hello world"](/content/images/01-hello-world.png)
 
@@ -203,6 +203,92 @@ After creating `style.css`, we can import the file in our `public/index.html` en
 
 Using the `<link>` tag as shown above (with the leading slash!) imports our CSS file. All files in the `public` folder are available at the root of our web application. That means a file stored at `public/images/dog.png` would be at `http://localhost:1234/images/dog`, without including `public` in the URL at all.
 
+### Adding more page types
+
+```terminal
+elm-spa add /sandbox sandbox
+elm-spa add /element element
+elm-spa add /advanced advanced
+```
+
+These commands add in the other three page types described in the [pages guide](/guides/03-pages).
+
+For each page, the `View.placeholder` function stubs out the `view` functions so you can visit them in the browser.
+
+For example, [http://localhost:1234/element](http://localhost:1234/element) should display "Element" on the screen.
+
+### Adding some dynamic routes
+
+To add in dynamic routes, we can use `elm-spa add` again:
+
+```terminal
+elm-spa add /dynamic/:name static
+```
+
+With this command, we just created a page at `src/Pages/Dynamic/Name_.elm`. When a user visits a URL like `/dynamic/ryan` or `dynamic/123`, we'll be taken to this page.
+
+Let's tweak the default `view` function to render the dynamic `name` parameter from the URL:
+
+```elm
+-- src/Pages/Dynamic/Name_.elm
+
+view : Params -> View msg
+view params =
+    { title = "Dynamic: " ++ params.name
+    , body =
+        UI.layout
+            [ UI.h1 "Dynamic Page"
+            , Html.h2 [] [ Html.text params.name ]
+            ]
+    }
+```
+
+We can provide in the `req.params` to the `view` function by telling our `page` function to pass it along:
+
+```elm
+page : Shared.Model -> Request.With Params -> Page
+page _ req =
+    Page.static    -- 👇 we pass in params here
+        { view = view req.params 
+        }          
+```
+
+### Updating the navbar
+
+Once we wire up these pages to use `UI.layout`, we can add links to the navbar:
+
+```elm
+-- src/UI.elm
+import Gen.Route as Route
+
+layout : List (Html msg) -> List (Html msg)
+layout children =
+    let
+        viewLink : String -> Route -> Html msg
+        viewLink label route =
+            Html.a [ Attr.href (Route.toHref route) ] [ Html.text label ]
+    in
+    [ Html.div [ Attr.class "container" ]
+        [ Html.header [ Attr.class "navbar" ]
+            [ Html.strong [ Attr.class "brand" ] [ viewLink "Home" Route.Home_ ]
+            , viewLink "Static" Route.Static
+            , viewLink "Sandbox" Route.Sandbox
+            , viewLink "Element" Route.Element
+            , viewLink "Advanced" Route.Advanced
+            , Html.div [ Attr.class "splitter" ] []
+            , viewLink "Dynamic: Apple" (Route.Dynamic__Name_ { name = "apple" })
+            , viewLink "Dynamic: Banana" (Route.Dynamic__Name_ { name = "banana" })
+            ]
+        , Html.main_ [] children
+        ]
+    ]
+```
+
+#### That's it!
+
+Feel free to play around with the `elm-spa add` command to mix-and-match different pages. 
+
+As always, the source code for this example is available on [GitHub](https://github.com/ryannhg/elm-spa/tree/main/examples/02-pages)
 
 ---
 

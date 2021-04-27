@@ -48,15 +48,11 @@ Feel free to follow along by creating a new __elm-spa__ project:
 npm install -g elm-spa@latest
 ```
 
-```
-mkdir user-auth-demo
-cd user-auth-demo
+```terminal
 elm-spa new
 ```
 
 This will create a new project that you can run with the `elm-spa server` command!
-
-The complete working example is also available at [examples/03-user-auth](https://github.com/ryannhg/elm-spa/tree/master/examples/03-user-auth) on GitHub.
 
 ### Ejecting Auth.elm
 
