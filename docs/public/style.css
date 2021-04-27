@@ -563,6 +563,7 @@ hr { border: 0; }
 
 @media screen and (max-width: 640px) {
   .home__section { font-size: 1em }
+  .margin-override { margin-right: 0 !important; }
 }
 
 /* Footer */

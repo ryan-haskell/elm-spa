@@ -100,3 +100,7 @@ subscriptions : Request -> Model -> Sub Msg
 If you want all pages to listen for keyboard events, window resizing, or other external updates, this `subscriptions` function is a great place to wire those up! 
 
 It also has access to the current URL request value, so you can conditionally subscribe to events.
+
+---
+
+__Next up:__ [Views](./06-views)

@@ -15,7 +15,7 @@ module Gen.Pages exposing (Model, Msg, init, subscriptions, update, view)
 
 import Browser.Navigation exposing (Key)
 import Effect exposing (Effect)
-import ElmSpa.Internals.Page
+import ElmSpa.Page
 ${paramsImports(pages)}
 import Gen.Model as Model
 import Gen.Msg as Msg
@@ -69,11 +69,11 @@ ${pagesBundleDefinition(pages, options)}
 
 
 type alias Bundle params model msg =
-    ElmSpa.Internals.Page.Bundle params model msg Shared.Model (Effect Msg) Model Msg (View Msg)
+    ElmSpa.Page.Bundle params model msg Shared.Model (Effect Msg) Model Msg (View Msg)
 
 
 bundle page toModel toMsg =
-    ElmSpa.Internals.Page.bundle
+    ElmSpa.Page.bundle
         { redirecting =
             { model = Model.Redirecting_
             , view = View.none

@@ -1,14 +1,12 @@
 {
     "type": "package",
     "name": "ryannhg/elm-spa",
-    "summary": "Single page apps made easy.",
+    "summary": "single page apps made easy.",
     "license": "BSD-3-Clause",
-    "version": "5.3.0",
+    "version": "6.0.0",
     "exposed-modules": [
-        "ElmSpa.Request",
         "ElmSpa.Page",
-        "ElmSpa.Beta",
-        "ElmSpa.Internals.Page"
+        "ElmSpa.Request"
     ],
     "elm-version": "0.19.0 <= v < 0.20.0",
     "dependencies": {

@@ -3,7 +3,7 @@ module Pages.Static exposing (page)
 import Gen.Params.Static exposing (Params)
 import Html
 import Page exposing (Page)
-import Request
+import Request exposing (Request)
 import Shared
 import UI
 import View exposing (View)

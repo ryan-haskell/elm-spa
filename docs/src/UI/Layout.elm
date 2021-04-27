@@ -99,7 +99,7 @@ viewDocumentation options markdownContent view =
                 ]
             , Html.main_ [ Attr.class "flex" ]
                 [ UI.row.lg [ UI.align.top ]
-                    [ Html.div [ Attr.class "col flex" ] view
+                    [ Html.div [ Attr.class "col flex margin-override" ] view
                     , Html.div [ Attr.class "hidden-mobile sticky pad-y-lg table-of-contents" ]
                         [ UI.Sidebar.viewTableOfContents
                             { content = markdownContent

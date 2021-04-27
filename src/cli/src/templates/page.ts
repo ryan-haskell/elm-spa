@@ -15,7 +15,7 @@ module Page exposing
 
 import Auth exposing (User)
 import Effect exposing (Effect)
-import ElmSpa.Internals.Page as ElmSpa
+import ElmSpa.Page as ElmSpa
 import Gen.Route exposing (Route)
 import Request exposing (Request)
 import Shared

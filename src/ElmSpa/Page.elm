@@ -1,4 +1,4 @@
-module ElmSpa.Internals.Page exposing
+module ElmSpa.Page exposing
     ( Page, static, sandbox, element, advanced
     , Protected(..), protected
     , Bundle, bundle
