@@ -1,4 +1,4 @@
-# my new project
+# examples/07-elm-ui
 > 🌳  built with [elm-spa](https://elm-spa.dev)
 
 ## dependencies
