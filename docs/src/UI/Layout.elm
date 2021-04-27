@@ -178,7 +178,7 @@ footer =
     Html.div [ Attr.class "footer__zone" ]
         [ Html.footer [ Attr.class "footer container pad-top-xl" ]
             [ Html.div [ Attr.class "row pad-x-md pad-y-lg pad-top-xl spread faded" ]
-                [ Html.a [ Attr.href "https://github.com/ryannhg/elm-spa/tree/main/docs", Attr.target "_blank", Attr.class "link" ] [ Html.text "Site source code" ]
+                [ Html.a [ Attr.href "https://github.com/ryannhg/elm-spa/tree/main/docs", Attr.target "_blank", Attr.class "link hidden-mobile" ] [ Html.text "Site source code" ]
                 , Html.span [] [ Html.text "© 2019 – 2021, Ryan Haskell-Glatz" ]
                 ]
             ]

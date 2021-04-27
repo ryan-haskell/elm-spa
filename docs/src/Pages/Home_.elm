@@ -38,7 +38,7 @@ view =
                 }
             ]
         , alternatingMarkdownSections
-            [ ( "💻"
+            [ ( "laptop"
               , """
 ## Build reliable applications with Elm
 
@@ -53,7 +53,7 @@ No need to configure webpack, gulp, or any other NPM dev tools. This __zero-conf
               , [ ( "Explore the CLI", Gen.Route.Guide__Section_ { section = "cli" } )
                 ]
               )
-            , ( "\u{1FA84}"
+            , ( "magic"
               , """
 ## Automatic routing
 
@@ -62,7 +62,7 @@ With __elm-spa__, routing is automatically generated for you based on a standard
               , [ ( "Learn how routing works", Gen.Route.Guide__Section_ { section = "routing" } )
                 ]
               )
-            , ( "🔒"
+            , ( "lock"
               , """
 ## User authentication
 
@@ -71,7 +71,7 @@ The latest release comes with a simple way to setup user authentication. Use the
               , [ ( "See it in action", Gen.Route.Examples__Section_ { section = "04-authentication" } )
                 ]
               )
-            , ( "🧠"
+            , ( "brain"
               , """
 ## Ready to learn more?
 
@@ -91,8 +91,8 @@ alternatingMarkdownSections sections =
     let
         viewSection i ( emoji, str, buttons ) =
             Html.section [ Attr.class "home__section" ]
-                [ Html.div [ Attr.class "container relative row", Attr.style "padding" "8em 1rem", Attr.classList [ ( "align-right", modBy 2 i == 1 ) ] ]
-                    [ Html.div [ Attr.class "home__section-icon" ] [ Html.text emoji ]
+                [ Html.div [ Attr.class "home__section-row container relative row", Attr.classList [ ( "align-right", modBy 2 i == 1 ) ] ]
+                    [ Html.img [ Attr.class "home__section-icon", Attr.src ("/images/icons/" ++ emoji ++ ".svg"), Attr.alt emoji ] []
                     , Html.div [ Attr.class "col gap-lg" ]
                         [ UI.markdown { withHeaderLinks = False } str
                         , Html.div [ Attr.class "row gap-md" ]
