@@ -76,15 +76,15 @@ map fn view =
     }
 ```
 
-## View.empty
+## View.none
 
-When loading between pages, __elm-spa__ also needs a `View.empty` to be specified for your custom `View` type.
+When loading between pages, __elm-spa__ also needs a `View.none` to be specified for your custom `View` type.
 
 For Elm UI, that is just `Element.none`:
 
 ```elm
-empty : View msg
-empty =
+none : View msg
+none =
     { title = ""
     , element = Element.none
     }
