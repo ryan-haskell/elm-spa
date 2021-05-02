@@ -28,7 +28,17 @@ Explore the elm-spa's user authentication API.
 
 ## Real world examples
 
+### elm-css patterns
+
+_Author_: [@bigardone](https://github.com/bigardone)
+
+[![elm-css patterns screenshot](/content/images/community/01-elmcss-patterns.png)](https://elmcsspatterns.io/)
+
+Source code: [GitHub](https://github.com/bigardone/elm-css-patterns)
+
 ### RealWorld Conduit App
+
+_Author_: [@ryannhg](https://github.com/ryannhg)
 
 Implements the [RealWorld app](https://github.com/gothinkster/realworld), inspired by Richard Feldman's "elm-spa-example" project. 
 
@@ -37,6 +47,8 @@ Implements the [RealWorld app](https://github.com/gothinkster/realworld), inspir
 Source code: [GitHub](https://github.com/ryannhg/elm-spa-realworld)
 
 ### This website
+
+_Author_: [@ryannhg](https://github.com/ryannhg)
 
 The website you are looking at _right now_ was built with __elm-spa__. Mindbending, right?
 
