@@ -14,7 +14,7 @@ const scrollToHash = () => {
 }
 
 app.ports.onUrlChange.subscribe(_ => setTimeout(scrollToHash, 400))
-setTimeout(scrollToHash, 200)
+setTimeout(scrollToHash, 400)
 
 // Quick search shortcut (/)
 window.addEventListener('keypress', (e) => {
