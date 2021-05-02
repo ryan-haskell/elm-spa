@@ -1,15 +1,18 @@
 import chokidar from "chokidar"
 import Url from 'url'
 import http from 'http'
+import https from "https";
 import websocket, { connection } from 'websocket'
 import path from 'path'
 import * as File from "../file"
 import { watch } from './watch'
 import { colors, reset } from "../terminal"
 import mime from 'mime'
-import { createReadStream } from "fs"
+import { createReadStream, readFileSync } from "fs"
 
-const start = async () => new Promise((resolve, reject) => {
+const bold = (str: string) => '\x1b[1m' + str + '\x1b[0m'
+
+const start = async (options: https.ServerOptions) => new Promise((resolve, reject) => {
   const config = {
     port: process.env.PORT || 1234,
     base: path.join(process.cwd(), 'public'),
@@ -19,7 +22,14 @@ const start = async () => new Promise((resolve, reject) => {
   const contentType = (extension : string) : string =>
     mime.getType(extension) || 'text/plain'
 
-  const server = http.createServer(async (req, res) => {
+  let createServer = http.createServer
+  let serverScheme = 'http'
+  if (options.cert && options.key) {
+    createServer = https.createServer
+    serverScheme = 'https'
+  }
+
+  const server = createServer(options, async (req, res) => {
     const url = Url.parse(req.url || '')
     const error = () => {
       res.statusCode = 404
@@ -62,7 +72,7 @@ const start = async () => new Promise((resolve, reject) => {
     .on('all', () => Object.values(connections).forEach(conn => conn.sendUTF('reload')))
 
   // Start server
-  server.listen(config.port, () => resolve(`Ready at ${colors.cyan}http://localhost:${config.port}${reset}`))
+  server.listen(config.port, () => resolve(`Ready at ${colors.cyan}${serverScheme}://localhost:${config.port}${reset}`))
   server.on('error', _ => {
     reject(`Unable to start server... is port ${config.port} in use?`)
   })
@@ -70,7 +80,20 @@ const start = async () => new Promise((resolve, reject) => {
 
 export default {
   run: async () => {
+    let [ cert, key ] = process.argv.slice(3)
+    if ((cert && !key) || cert === '--help' || key === '--help') {
+      return Promise.reject(example)
+    }
+    let options: https.ServerOptions = {}
+    if (cert && key) {
+      options.cert = readFileSync(cert)
+      options.key = readFileSync(key)
+    }
     const output = await watch(true)
-    return start().then(serverOutput => [ serverOutput, output ])
+    return start(options).then(serverOutput => [ serverOutput, output ])
   }
 }
+
+const example = '  ' + `
+  ${bold(`elm-spa server`)} [path/to/ssl_cert path/to/ssl_key]
+`.trim()
