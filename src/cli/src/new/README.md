@@ -12,7 +12,9 @@ npm install -g elm elm-spa
 ## running locally
 
 ```bash
-elm-spa server  # starts this app at http:/localhost:1234
+elm-spa server                   # starts this app at http:/localhost:1234
+elm-spa server ssl_cert ssl_key  # starts this app at https:/localhost:1234
+
 ```
 
 ### other commands
