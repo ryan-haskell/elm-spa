@@ -199,3 +199,25 @@ describe.each([['Model'], ['Msg']])
       `.trim())).toBe(true)
     })
   })
+
+describe('exposes', () => {
+  it('works with unexposed variants', () =>{
+    expect(Utils.exposesMsg('module Page exposing (Msg)')).toBe(true)
+    expect(Utils.exposesMsg('module Page exposing (Model, Msg)')).toBe(true)
+    expect(Utils.exposesMsg('module Page exposing (Model, Msg, view)')).toBe(true)
+  })
+  it('works with exposed variants', () =>{
+    expect(Utils.exposesMsg('module Page exposing (Msg(..))')).toBe(true)
+    expect(Utils.exposesMsg('module Page exposing (Model, Msg(..))')).toBe(true)
+    expect(Utils.exposesMsg('module Page exposing (Model, Msg(..), view)')).toBe(true)
+  })
+  it(`exposed variants don't cause issues for other keywords`, () => {
+    expect(Utils.exposesModel('module Page exposing (Model, Msg(..), view, page)')).toBe(true)
+    expect(Utils.exposesViewFunction('module Page exposing (Model, Msg(..), view, page)')).toBe(true)
+    expect(Utils.exposesPageFunction('module Page exposing (Model, Msg(..), view, page)')).toBe(true)
+
+    expect(Utils.exposesModel('module Page exposing (Msg(..), view) Model')).toBe(false)
+    expect(Utils.exposesViewFunction('module Page exposing (Model, Msg(..)) view')).toBe(false)
+    expect(Utils.exposesPageFunction('module Page exposing (Model, Msg(..)) page')).toBe(false)
+  })
+})
