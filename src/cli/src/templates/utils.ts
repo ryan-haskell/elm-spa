@@ -317,7 +317,7 @@ const pageModelArguments = (path: string[], options : Options) : string => {
 }
 
 const exposes = (value : string) => (str : string) : boolean => {
-  const regex = new RegExp('^module\\s+[^\\s]+\\s+exposing\\s+\\((([^\\\\])+)\\)')
+  const regex = new RegExp('^module\\s+[^\\s]+\\s+exposing\\s+\\(((?:\\.\\)|[^)])+)\\)')
   const match = (str.match(regex) || [])[1]
   if (match) {
     return match.split(',').filter(a => a).map(a => a.trim()).includes(value)
