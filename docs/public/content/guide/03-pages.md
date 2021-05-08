@@ -243,11 +243,12 @@ Page.sandbox
     }
 
 -- protected
-Page.protected.sandbox        
-    { init : User -> Model
-    , update : User -> Msg -> Model -> Model
-    , view : User -> Model -> View Msg
-    }
+Page.protected.sandbox :
+     User ->
+          { init : Model
+          , update : Msg -> Model -> Model
+          , view : Model -> View Msg
+          }
 ```
 
 When you are ready for user authentication, you can learn more about using `Page.protected` in the [authentication guide](/examples/04-authentication).
