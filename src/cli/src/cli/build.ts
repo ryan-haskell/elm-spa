@@ -185,7 +185,7 @@ const compileMainElm = (env: Environment) => async () => {
           `${RED}!${reset} elm-spa failed to understand an error`,
           `Please report the output below to ${green}https://github.com/ryannhg/elm-spa/issues${reset}`,
           `-----`,
-          error,
+          JSON.stringify(error, null, 2),
           `-----`,
           `${RED}!${reset} elm-spa failed to understand an error`,
           `Please send the output above to ${green}https://github.com/ryannhg/elm-spa/issues${reset}`,
