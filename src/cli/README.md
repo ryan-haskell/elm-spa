@@ -37,7 +37,9 @@ Check out the official guide at https://elm-spa.dev!
 The CLI is written with TypeScript + NodeJS. Here's how you can get started contributing:
 
 ```bash
-npm start       # first time dev setup
+git clone git@github.com:ryannhg/elm-spa  # clone the repo
+cd elm-spa/src/cli                        # enter the CLI folder
+npm start                                 # run first time dev setup
 ```
 
 ```bash
