@@ -52,9 +52,11 @@ const start = async () => new Promise((resolve, reject) => {
   const ws = new websocket.server({ httpServer: server })
   const script = ` new WebSocket('ws://' + window.location.host, 'elm-spa').onmessage = function () { window.location.reload() } `
   ws.on('request', (req) => {
-    const conn = req.accept('elm-spa', req.origin)
-    connections[req.remoteAddress] = conn
-    conn.on('close', () => delete connections[conn.remoteAddress])
+    try {
+      const conn = req.accept('elm-spa', req.origin)
+      connections[req.remoteAddress] = conn
+      conn.on('close', () => delete connections[conn.remoteAddress])
+    } catch (_) { /* Safely ignores unknown requests */ }
   })
   
   // Send reload if any files change
