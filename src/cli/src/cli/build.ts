@@ -195,7 +195,21 @@ const compileMainElm = (env: Environment) => async () => {
     })
   }
 
-  type ElmError = {
+  type ElmError
+    = ElmCompileError
+    | ElmJsonError
+  
+  type ElmCompileError = {
+    type: 'compile-errors'
+    errors: ElmProblemError[]
+  }
+
+  type ElmJsonError = Problem & {
+    type: 'error',
+    path: string,
+  }
+
+  type ElmProblemError = {
     path: string
     problems: Problem[]
   }
@@ -212,9 +226,11 @@ const compileMainElm = (env: Environment) => async () => {
     string: string
   }
 
-  const colorElmError = (output : { errors: ElmError[] }) => {
-
-    const { errors } = output
+  const colorElmError = (output : ElmError) => {
+    const errors : ElmProblemError[] =
+      output.type === 'compile-errors'
+        ? output.errors
+        : [ { path: output.path, problems: [output] } ]
 
     const strIf = (str: string) => (cond: boolean): string => cond ? str : ''
     const boldIf = strIf(bold)
@@ -222,7 +238,7 @@ const compileMainElm = (env: Environment) => async () => {
 
     const repeat = (str: string, num: number, min = 3) => [...Array(num < 0 ? min : num)].map(_ => str).join('')
 
-    const errorToString = (error: ElmError): string => {
+    const errorToString = (error: ElmProblemError): string => {
       const problemToString = (problem: Problem): string => {
         const path = error.path.substr(process.cwd().length + 1)
         return [
