@@ -387,7 +387,7 @@ page shared _ =
 
 In the browser, we now have a working counter app that persists on refresh. Even if you close the browser and open it up again, you'll see your previous counter value on the screen.
 
-As a reminder, all the source code for this example is available on [GitHub](https://github.com/ryannhg/elm-spa/tree/main/examples/03-storage)
+As a reminder, all the source code for this example is available on [GitHub](https://github.com/ryannhg/elm-spa/tree/main/examples/03-local-storage)
 
 ---
 
