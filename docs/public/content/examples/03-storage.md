@@ -1,6 +1,6 @@
 # Storage
 
-__Source code__: [GitHub](https://github.com/ryannhg/elm-spa/tree/main/examples/03-storage)
+__Source code__: [GitHub](https://github.com/ryannhg/elm-spa/tree/main/examples/03-local-storage)
 
 Let's start by creating a new project with the __elm-spa__ CLI:
 
@@ -256,7 +256,7 @@ That's it for this file- now we're ready to use our `Storage` module in our app!
 
 ### Wiring up the shared state
 
-Let's eject `Shared.elm` by moving it from `.elm-spa/defaults` into our `src` folder. This will allow us to make local changes to it, as explained in the [shared state section](/guides/05-shared-state) of the guide.
+Let's eject `Shared.elm` by moving it from `.elm-spa/defaults` into our `src` folder. This will allow us to make local changes to it, as explained in the [shared state section](/guide/05-shared-state) of the guide.
 
 Our first step is to add `Storage` to our `Shared.Model`, so we can access `storage` from _any_ page in our application:
 
