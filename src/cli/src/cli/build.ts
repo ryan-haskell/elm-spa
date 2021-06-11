@@ -122,7 +122,6 @@ const createGeneratedFiles = async () => {
     { filepath: ['Page'], contents: PageTemplate() },
     { filepath: ['Request'], contents: RequestTemplate() },
     { filepath: ['Gen', 'Route'], contents: RouteTemplate(segments, options(kindForPage)) },
-    { filepath: ['Gen', 'Route'], contents: RouteTemplate(segments, options(kindForPage)) },
     { filepath: ['Gen', 'Pages'], contents: PagesTemplate(segments, options(kindForPage)) },
     { filepath: ['Gen', 'Model'], contents: ModelTemplate(segments, options(kindForPage)) },
     { filepath: ['Gen', 'Msg'], contents: MsgTemplate(segments, options(kindForPage)) }
