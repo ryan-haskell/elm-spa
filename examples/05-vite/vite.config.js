@@ -1,4 +1,4 @@
-import elmPlugin from 'rollup-plugin-elm'
+import elmPlugin from 'vite-plugin-elm'
 
 export default {
   root: 'public',
