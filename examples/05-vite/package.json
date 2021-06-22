@@ -14,7 +14,7 @@
   "devDependencies": {
     "concurrently": "6.0.2",
     "elm-spa": "6.0.0",
-    "rollup-plugin-elm": "3.0.0",
+    "vite-plugin-elm": "2.3.1",
     "vite": "2.2.2"
   }
 }
