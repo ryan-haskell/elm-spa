@@ -224,7 +224,7 @@ update msg model =
     case msg of
         ClickedSignIn ->
             ( model
-            , Effect.fromShared (Shared.SignIn "Ryan")
+            , Effect.fromShared (Shared.SignIn { name = "Ryan"} )
             )
 ```
 
