@@ -16,14 +16,14 @@ Let's create a simple interactive app, based on the official Elm [counter exampl
 elm-spa add / sandbox
 ```
 
-This will stub out the `init`, `update`, and `view` function for us, and wire them together with `Page.static` like this:
+This will stub out the `init`, `update`, and `view` function for us, and wire them together with `Page.sandbox` like this:
 
 ```elm
 -- src/Pages/Home_.elm
 
 page : Shared.Model -> Request -> Page.With Model Msg
 page =
-    Page.static
+    Page.sandbox
         { init = init
         , update = update
         , view = view
@@ -308,7 +308,7 @@ That's all for `src/Shared.elm`. The last step is to upgrade our homepage to sen
 
 ### Upgrading Home_.elm
 
-To gain access to `Cmd msg`, we'll start by using `Page.element` instead of `Page.static`. The signature of our `init` and `update` functions will need to change to handle the new capabilities:
+To gain access to `Cmd msg`, we'll start by using `Page.element` instead of `Page.sandbox`. The signature of our `init` and `update` functions will need to change to handle the new capabilities:
 
 Our `Model` no longer needs to track the state of the application. This means the `Home_.init` function won't be doing much at all:
 
