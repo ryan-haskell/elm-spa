@@ -2,7 +2,7 @@
 
 __Source code__: [GitHub](https://github.com/ryannhg/elm-spa/tree/main/examples/04-authentication)
 
-In a real world application, it's common to have the notion of a signed-in users. When it comes to routing, it's often useful to only allow signed-in users to visit specific pages.
+In a real world application, it's common to have the notion of a signed-in user. When it comes to routing, it's often useful to only allow signed-in users to visit specific pages.
 
 It would be wonderful if we could define logic in _one place_ that guarantees only signed-in users could view those pages:
 
