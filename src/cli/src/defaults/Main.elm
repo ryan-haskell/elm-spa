@@ -3,8 +3,8 @@ module Main exposing (main)
 import Browser
 import Browser.Navigation as Nav exposing (Key)
 import Effect
+import Gen.Gen.Pages as Pages
 import Gen.Model
-import Gen.Pages as Pages
 import Gen.Route as Route
 import Request
 import Shared
@@ -43,7 +43,7 @@ init flags url key =
             Shared.init (Request.create () url key) flags
 
         ( page, effect ) =
-            Pages.init (Route.fromUrl url) shared url key
+            Gen.Pages.init (Route.fromUrl url) shared url key
     in
     ( Model url key shared page
     , Cmd.batch
@@ -81,7 +81,7 @@ update msg model =
             if url.path /= model.url.path then
                 let
                     ( page, effect ) =
-                        Pages.init (Route.fromUrl url) model.shared url model.key
+                        Gen.Pages.init (Route.fromUrl url) model.shared url model.key
                 in
                 ( { model | url = url, page = page }
                 , Effect.toCmd ( Shared, Page ) effect
@@ -96,7 +96,7 @@ update msg model =
                     Shared.update (Request.create () model.url model.key) sharedMsg model.shared
 
                 ( page, effect ) =
-                    Pages.init (Route.fromUrl model.url) shared model.url model.key
+                    Gen.Pages.init (Route.fromUrl model.url) shared model.url model.key
             in
             if page == Gen.Model.Redirecting_ then
                 ( { model | shared = shared, page = page }
@@ -114,7 +114,7 @@ update msg model =
         Page pageMsg ->
             let
                 ( page, effect ) =
-                    Pages.update pageMsg model.page model.shared model.url model.key
+                    Gen.Pages.update pageMsg model.page model.shared model.url model.key
             in
             ( { model | page = page }
             , Effect.toCmd ( Shared, Page ) effect
@@ -127,7 +127,7 @@ update msg model =
 
 view : Model -> Browser.Document Msg
 view model =
-    Pages.view model.page model.shared model.url model.key
+    Gen.Pages.view model.page model.shared model.url model.key
         |> View.map Page
         |> View.toBrowserDocument
 
@@ -139,6 +139,6 @@ view model =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ Pages.subscriptions model.page model.shared model.url model.key |> Sub.map Page
+        [ Gen.Pages.subscriptions model.page model.shared model.url model.key |> Sub.map Page
         , Shared.subscriptions (Request.create () model.url model.key) model.shared |> Sub.map Shared
         ]

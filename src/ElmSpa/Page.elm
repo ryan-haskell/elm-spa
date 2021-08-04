@@ -63,7 +63,7 @@ static :
         }
     -> Page shared route effect view () msg
 static none page =
-    Page (\_ _ -> Ok (adapters.static none page))
+    Page { toResult = \_ _ -> Ok (adapters.static none page) }
 
 
 {-| A page that can keep track of application state.
@@ -94,7 +94,7 @@ sandbox :
         }
     -> Page shared route effect view model msg
 sandbox none page =
-    Page (\_ _ -> Ok (adapters.sandbox none page))
+    Page { toResult = \_ _ -> Ok (adapters.sandbox none page) }
 
 
 {-| A page that can handle effects like [HTTP requests or subscriptions](https://guide.elm-lang.org/effects/).
@@ -128,7 +128,7 @@ element :
         }
     -> Page shared route effect view model msg
 element fromCmd page =
-    Page (\_ _ -> Ok (adapters.element fromCmd page))
+    Page { toResult = \_ _ -> Ok (adapters.element fromCmd page) }
 
 
 {-| A page that can handles **custom** effects like sending a `Shared.Msg` or other general user-defined effects.
@@ -159,7 +159,7 @@ advanced :
     }
     -> Page shared route effect view model msg
 advanced page =
-    Page (\_ _ -> Ok (adapters.advanced page))
+    Page { toResult = \_ _ -> Ok (adapters.advanced page) }
 
 
 {-| Actions to take when a user visits a `protected` page
@@ -252,14 +252,15 @@ protected options =
     let
         protect toPage toRecord =
             Page
-                (\shared req ->
-                    case options.beforeInit shared req of
-                        Provide user ->
-                            Ok (user |> toRecord |> toPage)
+                { toResult =
+                    \shared req ->
+                        case options.beforeInit shared req of
+                            Provide user ->
+                                Ok (user |> toRecord |> toPage)
 
-                        RedirectTo route ->
-                            Err route
-                )
+                            RedirectTo route ->
+                                Err route
+                }
     in
     { static = protect (adapters.static options.effectNone)
     , sandbox = protect (adapters.sandbox options.effectNone)
@@ -366,10 +367,10 @@ toResult :
     -> Result route (PageRecord effect view model msg)
 toResult toPage shared req =
     let
-        (Page toResult_) =
+        (Page page) =
             toPage shared req
     in
-    toResult_ shared (ElmSpa.Request.create req.route () req.url req.key)
+    page.toResult shared (ElmSpa.Request.create req.route () req.url req.key)
 
 
 
@@ -377,7 +378,8 @@ toResult toPage shared req =
 
 
 type alias Internals shared route effect view model msg =
-    shared -> Request route () -> Result route (PageRecord effect view model msg)
+    { toResult : shared -> Request route () -> Result route (PageRecord effect view model msg)
+    }
 
 
 type alias PageRecord effect view model msg =
