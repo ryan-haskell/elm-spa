@@ -7,8 +7,11 @@ import Gen.Layouts exposing (Layout)
 import Gen.Model
 import Gen.Pages_ as Pages
 import Gen.Route as Route
+import Process
 import Request exposing (Request)
 import Shared
+import Task
+import Transition
 import Url exposing (Url)
 import View
 
@@ -35,7 +38,14 @@ type alias Model =
     , shared : Shared.Model
     , layout : Maybe { kind : Layout, model : Gen.Layouts.Model }
     , page : Pages.Model
+    , transition : Transition
     }
+
+
+type Transition
+    = InvisibleApp { before : Maybe Layout, after : Maybe Layout }
+    | FadingOutPage { before : Maybe Layout, after : Maybe Layout }
+    | VisiblePage { before : Maybe Layout, after : Maybe Layout }
 
 
 init : Shared.Flags -> Url -> Key -> ( Model, Cmd Msg )
@@ -53,14 +63,35 @@ init flags url key =
         maybeLayout =
             Pages.layout (Route.fromUrl url)
                 |> Maybe.map (initializeLayout Nothing { shared = shared, request = req })
+
+        transitionEffect =
+            if Transition.duration > 0 then
+                sendDelayedMsg Transition.duration FadeInApp
+
+            else
+                Cmd.none
     in
-    ( Model url key shared (Maybe.map toKindAndModel maybeLayout) page
+    ( { url = url
+      , key = key
+      , shared = shared
+      , layout = Maybe.map toKindAndModel maybeLayout
+      , page = page
+      , transition = InvisibleApp { before = Nothing, after = Maybe.map .kind maybeLayout }
+      }
     , Cmd.batch
         [ Cmd.map Shared sharedCmd
         , Effect.toCmd ( Shared, Page ) pageEffect
         , Effect.toCmd ( Shared, Layout ) (toLayoutEffect maybeLayout)
+        , transitionEffect
         ]
     )
+
+
+sendDelayedMsg : Int -> Msg -> Cmd Msg
+sendDelayedMsg ms msg =
+    Process.sleep (toFloat ms)
+        |> Task.map (\_ -> msg)
+        |> Task.perform identity
 
 
 initializeLayout : Maybe Gen.Layouts.Model -> { shared : Shared.Model, request : Request } -> Layout -> { kind : Layout, model : Gen.Layouts.Model, effect : Effect Gen.Layouts.Msg }
@@ -97,6 +128,8 @@ type Msg
     | Shared Shared.Msg
     | Layout Gen.Layouts.Msg
     | Page Pages.Msg
+    | FadeInApp
+    | FadeInPage Url
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -114,48 +147,28 @@ update msg model =
 
         ChangedUrl url ->
             if url.path /= model.url.path then
-                let
-                    route =
-                        Route.fromUrl url
-
-                    ( page, effect ) =
-                        Pages.init route model.shared url model.key
-
-                    currentLayout =
-                        model.layout
-
-                    newLayoutKind =
-                        Pages.layout route
-                in
-                if Maybe.map .kind currentLayout == newLayoutKind then
-                    ( { model | url = url, page = page }
-                    , Effect.toCmd ( Shared, Page ) effect
+                if Transition.duration > 0 then
+                    ( { model
+                        | transition =
+                            FadingOutPage
+                                { before = Maybe.map .kind model.layout
+                                , after = Pages.layout (Route.fromUrl url)
+                                }
+                      }
+                    , sendDelayedMsg Transition.duration (FadeInPage url)
                     )
 
                 else
-                    let
-                        maybeLayout =
-                            newLayoutKind
-                                |> Maybe.map
-                                    (initializeLayout (Maybe.map .model currentLayout)
-                                        { shared = model.shared
-                                        , request = Request.create () url model.key
-                                        }
-                                    )
-                    in
-                    ( { model
-                        | url = url
-                        , page = page
-                        , layout = Maybe.map toKindAndModel maybeLayout
-                      }
-                    , Cmd.batch
-                        [ Effect.toCmd ( Shared, Page ) effect
-                        , Effect.toCmd ( Shared, Layout ) (toLayoutEffect maybeLayout)
-                        ]
-                    )
+                    updateModelFromUrl url model
 
             else
                 ( { model | url = url }, Cmd.none )
+
+        FadeInApp ->
+            ( { model | transition = VisiblePage { before = Nothing, after = Maybe.map .kind model.layout } }, Cmd.none )
+
+        FadeInPage url ->
+            updateModelFromUrl url model
 
         Shared sharedMsg ->
             let
@@ -205,6 +218,54 @@ update msg model =
                     ( model, Cmd.none )
 
 
+updateModelFromUrl : Url -> Model -> ( Model, Cmd Msg )
+updateModelFromUrl url model =
+    let
+        route =
+            Route.fromUrl url
+
+        ( page, effect ) =
+            Pages.init route model.shared url model.key
+
+        currentLayout =
+            model.layout
+
+        newLayoutKind =
+            Pages.layout route
+    in
+    if Maybe.map .kind currentLayout == newLayoutKind then
+        ( { model
+            | url = url
+            , page = page
+            , transition = VisiblePage { before = Maybe.map .kind currentLayout, after = newLayoutKind }
+          }
+        , Effect.toCmd ( Shared, Page ) effect
+        )
+
+    else
+        let
+            maybeLayout =
+                newLayoutKind
+                    |> Maybe.map
+                        (initializeLayout (Maybe.map .model currentLayout)
+                            { shared = model.shared
+                            , request = Request.create () url model.key
+                            }
+                        )
+        in
+        ( { model
+            | url = url
+            , page = page
+            , layout = Maybe.map toKindAndModel maybeLayout
+            , transition = VisiblePage { before = Maybe.map .kind currentLayout, after = newLayoutKind }
+          }
+        , Cmd.batch
+            [ Effect.toCmd ( Shared, Page ) effect
+            , Effect.toCmd ( Shared, Layout ) (toLayoutEffect maybeLayout)
+            ]
+        )
+
+
 
 -- VIEW
 
@@ -216,10 +277,24 @@ view model =
             Pages.view model.page model.shared model.url model.key
                 |> View.map Page
 
+        ( attrs, layoutKinds ) =
+            case model.transition of
+                InvisibleApp kinds ->
+                    ( Transition.invisible, kinds )
+
+                FadingOutPage kinds ->
+                    ( Transition.invisible, kinds )
+
+                VisiblePage kinds ->
+                    ( Transition.visible, kinds )
+
         viewLayout =
             case model.layout of
                 Just layout ->
-                    Gen.Layouts.view layout.model
+                    Gen.Layouts.view
+                        layoutKinds
+                        { current = attrs }
+                        layout.model
                         { viewPage = viewPage
                         , toMainMsg = Layout
                         }
@@ -227,9 +302,14 @@ view model =
                         (Request.create () model.url model.key)
 
                 Nothing ->
-                    viewPage
+                    Transition.apply attrs viewPage
     in
-    View.toBrowserDocument viewLayout
+    case ( layoutKinds.before, layoutKinds.after ) of
+        ( Just _, Just _ ) ->
+            View.toBrowserDocument (Transition.apply Transition.visible viewLayout)
+
+        _ ->
+            View.toBrowserDocument (Transition.apply attrs viewLayout)
 
 
 

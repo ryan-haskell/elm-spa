@@ -22,6 +22,7 @@ import Layouts.Sidebar
 import Layouts.Sidebar.Header
 import Request exposing (Request)
 import Shared
+import Transition
 import View exposing (View)
 
 
@@ -116,15 +117,26 @@ subscriptions model_ shared req =
 
 
 view :
-    Model
+    { before : Maybe Layout, after : Maybe Layout }
+    -> { current : List Transition.Attribute }
+    -> Model
     -> { viewPage : View mainMsg, toMainMsg : Msg -> mainMsg }
     -> Shared.Model
     -> Request
     -> View mainMsg
-view model_ options shared req =
+view { before, after } { current } model_ options shared req =
     case model_ of
         Sidebar_Model model ->
-            layouts.sidebar.view model options shared req
+            layouts.sidebar.view current model options shared req
 
         Sidebar__Header_Model model1 model2 ->
-            layouts.sidebar.view model1 { options | viewPage = layouts.sidebar__header.view model2 options shared req } shared req
+            let
+                ( transition1, transition2 ) =
+                    case ( before, after ) of
+                        ( Just Sidebar__Header, Just Sidebar__Header ) ->
+                            ( Transition.visible, current )
+
+                        _ ->
+                            ( current, Transition.visible )
+            in
+            layouts.sidebar.view transition1 model1 { options | viewPage = layouts.sidebar__header.view transition2 model2 options shared req } shared req

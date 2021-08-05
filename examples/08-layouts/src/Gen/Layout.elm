@@ -16,6 +16,7 @@ module Gen.Layout exposing
 import Effect exposing (Effect)
 import Request exposing (Request)
 import Shared
+import Transition
 import View exposing (View)
 
 
@@ -98,7 +99,7 @@ toBundle :
         { init : Shared.Model -> Request -> ( genModel, Effect genMsg )
         , update : msg -> model -> Shared.Model -> Request -> ( genModel, Effect genMsg )
         , subscriptions : model -> Shared.Model -> Request -> Sub genMsg
-        , view : model -> { viewPage : View mainMsg, toMainMsg : genMsg -> mainMsg } -> Shared.Model -> Request -> View mainMsg
+        , view : List Transition.Attribute -> model -> { viewPage : View mainMsg, toMainMsg : genMsg -> mainMsg } -> Shared.Model -> Request -> View mainMsg
         }
 toBundle toModel toMsg toLayout =
     let
@@ -120,9 +121,9 @@ toBundle toModel toMsg toLayout =
             (toRecord shared req).subscriptions model
                 |> Sub.map toMsg
     , view =
-        \model options shared req ->
+        \attrs model options shared req ->
             (toRecord shared req).view
-                { viewPage = options.viewPage
+                { viewPage = Transition.apply attrs options.viewPage
                 , toMainMsg = toMsg >> options.toMainMsg
                 }
                 model
@@ -140,7 +141,7 @@ toBundle2 :
         , update1 : model2 -> msg1 -> model1 -> Shared.Model -> Request -> ( genModel, Effect genMsg )
         , update2 : model1 -> msg2 -> model2 -> Shared.Model -> Request -> ( genModel, Effect genMsg )
         , subscriptions : model2 -> Shared.Model -> Request -> Sub genMsg
-        , view : model2 -> { viewPage : View mainMsg, toMainMsg : genMsg -> mainMsg } -> Shared.Model -> Request -> View mainMsg
+        , view : List Transition.Attribute -> model2 -> { viewPage : View mainMsg, toMainMsg : genMsg -> mainMsg } -> Shared.Model -> Request -> View mainMsg
         }
 toBundle2 toModel toMsg1 toMsg2 toLayout1 toLayout2 =
     let
@@ -182,9 +183,9 @@ toBundle2 toModel toMsg1 toMsg2 toLayout1 toLayout2 =
             (toRecord2 shared req).subscriptions model
                 |> Sub.map toMsg2
     , view =
-        \model options shared req ->
+        \attrs model options shared req ->
             (toRecord2 shared req).view
-                { viewPage = options.viewPage
+                { viewPage = Transition.apply attrs options.viewPage
                 , toMainMsg = toMsg2 >> options.toMainMsg
                 }
                 model
