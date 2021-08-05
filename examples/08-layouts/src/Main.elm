@@ -52,7 +52,7 @@ init flags url key =
 
         maybeLayout =
             Pages.layout (Route.fromUrl url)
-                |> Maybe.map (initializeLayout { shared = shared, request = req })
+                |> Maybe.map (initializeLayout Nothing { shared = shared, request = req })
     in
     ( Model url key shared (Maybe.map toKindAndModel maybeLayout) page
     , Cmd.batch
@@ -63,11 +63,11 @@ init flags url key =
     )
 
 
-initializeLayout : { shared : Shared.Model, request : Request } -> Layout -> { kind : Layout, model : Gen.Layouts.Model, effect : Effect Gen.Layouts.Msg }
-initializeLayout { shared, request } layoutKind =
+initializeLayout : Maybe Gen.Layouts.Model -> { shared : Shared.Model, request : Request } -> Layout -> { kind : Layout, model : Gen.Layouts.Model, effect : Effect Gen.Layouts.Msg }
+initializeLayout maybeModel { shared, request } layoutKind =
     let
         ( model, effect ) =
-            Gen.Layouts.init layoutKind shared request
+            Gen.Layouts.init maybeModel layoutKind shared request
     in
     { kind = layoutKind
     , model = model
@@ -137,7 +137,7 @@ update msg model =
                         maybeLayout =
                             newLayoutKind
                                 |> Maybe.map
-                                    (initializeLayout
+                                    (initializeLayout (Maybe.map .model currentLayout)
                                         { shared = model.shared
                                         , request = Request.create () url model.key
                                         }

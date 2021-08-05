@@ -1,6 +1,6 @@
 module Layouts.Sidebar exposing (Model, Msg, layout)
 
-import Gen.Layout exposing (Layout)
+import Gen.Layout as Layout
 import Gen.Route as Route exposing (Route)
 import Html exposing (Html)
 import Html.Attributes as Attr
@@ -11,12 +11,12 @@ import Shared
 import View exposing (View)
 
 
-layout : Shared.Model -> Request -> Layout Model Msg mainMsg
+layout : Shared.Model -> Request -> Layout.With Model Msg mainMsg
 layout shared req =
-    Gen.Layout.sandbox
+    Layout.sandbox
         { init = init
         , update = update
-        , view = view
+        , view = view req.route
         }
 
 
@@ -68,43 +68,45 @@ update msg model =
 
 
 view :
-    { viewPage : View mainMsg
-    , toMainMsg : Msg -> mainMsg
-    }
+    Route
+    ->
+        { viewPage : View mainMsg
+        , toMainMsg : Msg -> mainMsg
+        }
     -> Model
     -> View mainMsg
-view { viewPage, toMainMsg } model =
+view route { viewPage, toMainMsg } model =
     { title = viewPage.title
     , body =
         [ Html.div [ Attr.class "row align-top pad-xl gap-lg fill-y" ]
-            [ Html.map toMainMsg (viewSidebar model)
+            [ Html.map toMainMsg (viewSidebar route model)
             , Html.div [ Attr.class "page" ] viewPage.body
             ]
         ]
     }
 
 
-viewSidebar : Model -> Html Msg
-viewSidebar model =
+viewSidebar : Route -> Model -> Html Msg
+viewSidebar route model =
     Html.aside [ Attr.class "col gap-xl fill-y border-right pad-right-lg" ]
         [ Html.div [ Attr.class "col gap-md" ]
             [ Html.a [ Attr.class "h3", Attr.href (Route.toHref Route.Home_) ] [ Html.text "Super App" ]
             , Html.div [ Attr.class "col gap-md" ]
-                (List.map (viewSidebarSection model.expandedSections) [ SystemOfRecord, Settings ])
+                (List.map (viewSidebarSection route model.expandedSections) [ SystemOfRecord, Settings ])
             ]
-        , viewSectionLink { label = "Sign out", route = Route.SignIn }
+        , viewSectionLink route { label = "Sign out", route = Route.SignIn }
         ]
 
 
-viewSidebarSection : List Section -> Section -> Html Msg
-viewSidebarSection expandedSections section =
+viewSidebarSection : Route -> List Section -> Section -> Html Msg
+viewSidebarSection route expandedSections section =
     let
         isExpanded =
             List.member section expandedSections
 
         viewExpandedItems =
             if isExpanded then
-                Html.div [ Attr.class "col gap-sm pad-left-lg" ] (List.map viewSectionLink (sectionLinks section))
+                Html.div [ Attr.class "col gap-sm pad-left-lg" ] (List.map (viewSectionLink route) (sectionLinks section))
 
             else
                 Html.text ""
@@ -122,9 +124,14 @@ viewSidebarSection expandedSections section =
         ]
 
 
-viewSectionLink : { label : String, route : Route } -> Html msg
-viewSectionLink { label, route } =
-    Html.a [ Attr.class "row h5", Attr.href (Route.toHref route) ] [ Html.text label ]
+viewSectionLink : Route -> { label : String, route : Route } -> Html msg
+viewSectionLink active { label, route } =
+    Html.a
+        [ Attr.class "row h5"
+        , Attr.classList [ ( "active", active == route ) ]
+        , Attr.href (Route.toHref route)
+        ]
+        [ Html.text label ]
 
 
 
