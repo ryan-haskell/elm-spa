@@ -45,9 +45,9 @@ URL | File
 
 ### Capitalization matters
 
-Notice how the filename `AboutUs.elm` translated to `/about-us`?
+Notice how the filename `AboutUs.elm` was created from the route `/about-us`?
 
-If we named the file `Aboutus.elm` (with a lowercase "u"), then we'd have a path to `/aboutus` (without the dash between words).
+If we named the path `/aboutus` (without the dash between words) then we'd have a file `Aboutus.elm` (with a lowercase "u").
 
 > In __elm-spa__, we use "kebab-case" rather than "snake_case" as the convention for separating words.
 
