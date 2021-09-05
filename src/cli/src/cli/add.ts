@@ -51,7 +51,7 @@ const example = '  ' + `
   ${bold(`elm-spa ${cyan(`add`)}`)} ${yellow('/about-us')} ${pink('sandbox')}
   ${bold(`elm-spa ${cyan(`add`)}`)} ${yellow('/people/:id')} ${pink('element')}
 
-  Visit ${green(`https://elm-spa.dev/guide/cli`)} for more details!
+  Visit ${green(`https://elm-spa.dev/guide/01-cli`)} for more details!
 `.trim()
 
 const template404 = (url : string, template : string, suggestions: string[]) => {
@@ -65,6 +65,6 @@ const template404 = (url : string, template : string, suggestions: string[]) => 
   ${bold(`elm-spa`)} couldn't find a ${bold(pink(template))} template
   in the ${cyan('.elm-spa/templates')} folder.
   ${suggestions.length ? suggest : ''}
-  Visit ${green(`https://elm-spa.dev/guide/cli`)} for more details!
+  Visit ${green(`https://elm-spa.dev/guide/01-cli`)} for more details!
 
 `.trim()}
