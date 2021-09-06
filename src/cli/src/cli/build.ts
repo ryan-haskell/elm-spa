@@ -98,7 +98,7 @@ const invalidExportsMessage = (entry: PageEntry) => {
     `  ${dot} module ${moduleName} exposing (${cyan('page')})`,
     `  ${dot} module ${moduleName} exposing (${cyan('Model')}, ${cyan('Msg')}, ${cyan('page')})`,
     ``,
-    `Visit ${colors.green}https://elm-spa.dev/guide/pages${reset} for more details!`
+    `Visit ${colors.green}https://elm-spa.dev/guide/03-pages${reset} for more details!`
   ].join('\n')
 }
 
