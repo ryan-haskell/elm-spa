@@ -52,7 +52,7 @@ const createMissingDefaultFiles = async () => {
 }
 
 const removeUnusedGeneratedFiles = async () => {
-  const genFilePath = config.folders.generated
+  const genFilePath = config.folders.pages.generated
   const generatedFiles = await relativePagePaths(genFilePath)
 
   const toAction = async (filepath: string): Promise<any> => {
