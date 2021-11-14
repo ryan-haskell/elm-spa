@@ -25,20 +25,21 @@ export const remove = async (filepath: string) => {
 
 export const scan = async (dir: string, extension = '.elm'): Promise<string[]> => {
   const doesExist = await exists(dir)
-  if (!doesExist) return []
+  if (!doesExist) return Promise.resolve([])
   const items = await ls(dir)
   const [folders, files] = await Promise.all([
     keepFolders(items),
-    items.filter(f => f.endsWith(extension))
+    Promise.resolve(items.filter(f => f.endsWith(extension)))
   ])
   const listOfFiles = await Promise.all(folders.map(f => scan(f, extension)))
   const nestedFiles = listOfFiles.reduce((a, b) => a.concat(b), [])
-  return files.concat(nestedFiles)
+  return Promise.resolve(files.concat(nestedFiles))
 }
 
 const ls = (dir: string): Promise<string[]> =>
   fs.readdir(dir)
     .then(data => data.map(p => path.join(dir, p)))
+    .catch(_ => [])
 
 const isDirectory = (dir: string): Promise<boolean> =>
   fs.lstat(dir).then(data => data.isDirectory()).catch(_ => false)
