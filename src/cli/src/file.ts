@@ -39,7 +39,6 @@ export const scan = async (dir: string, extension = '.elm'): Promise<string[]> =
 const ls = (dir: string): Promise<string[]> =>
   fs.readdir(dir)
     .then(data => data.map(p => path.join(dir, p)))
-    .catch(_ => [])
 
 const isDirectory = (dir: string): Promise<boolean> =>
   fs.lstat(dir).then(data => data.isDirectory()).catch(_ => false)
