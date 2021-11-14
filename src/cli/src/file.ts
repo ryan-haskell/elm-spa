@@ -7,7 +7,7 @@ import path from "path"
  * @param filepath - the absolute path of the file to create
  * @param contents - the raw string contents of the file
  */
-export const create = async (filepath : string, contents : string) => {
+export const create = async (filepath: string, contents: string) => {
   await ensureFolderExists(filepath)
   return fs.writeFile(filepath, contents, { encoding: 'utf8' })
 }
@@ -57,15 +57,16 @@ export const exists = (filepath: string) =>
     .catch(_ => false)
 
 
+
 /**
  * Copy the file or folder at the given path.
  * @param filepath - the path of the file or folder to copy
  */
-export const copy = (src : string, dest : string) => {
+export const copy = (src: string, dest: string) => {
   const exists = oldFs.existsSync(src)
   const stats = exists && oldFs.statSync(src)
   if (stats && stats.isDirectory()) {
-    try { oldFs.mkdirSync(dest, { recursive: true }) } catch (_) {}
+    try { oldFs.mkdirSync(dest, { recursive: true }) } catch (_) { }
     oldFs.readdirSync(src).forEach(child =>
       copy(path.join(src, child), path.join(dest, child))
     )
@@ -74,18 +75,18 @@ export const copy = (src : string, dest : string) => {
   }
 }
 
-export const copyFile = async (src : string, dest : string) => {
+export const copyFile = async (src: string, dest: string) => {
   await ensureFolderExists(dest)
   return fs.copyFile(src, dest)
 }
 
 
-const ensureFolderExists = async (filepath : string) => {
+const ensureFolderExists = async (filepath: string) => {
   const folder = filepath.split(path.sep).slice(0, -1).join(path.sep)
   return fs.mkdir(folder, { recursive: true })
 }
 
-export const mkdir = (folder : string) : Promise<string> =>
+export const mkdir = (folder: string): Promise<string> =>
   fs.mkdir(folder, { recursive: true })
 
 export const read = async (path: string) =>
