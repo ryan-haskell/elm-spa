@@ -23,6 +23,16 @@ export const remove = async (filepath: string) => {
     : fs.rmdir(filepath, { recursive: true })
 }
 
+export const scanEmptyDirs = async (dir: string): Promise<string[]> => {
+  const doesExist = await exists(dir)
+  if (!doesExist) return Promise.resolve([])
+  const items = await ls(dir)
+  if (!items.length) return Promise.resolve([dir])
+  const dirs = await keepFolders(items)
+  const nestedEmptyDirs = await Promise.all(dirs.map(f => scanEmptyDirs(f)))
+  return Promise.resolve(nestedEmptyDirs.reduce((a, b) => a.concat(b), []))
+}
+
 export const scan = async (dir: string, extension = '.elm'): Promise<string[]> => {
   const doesExist = await exists(dir)
   if (!doesExist) return Promise.resolve([])

@@ -15,13 +15,15 @@ import terser from 'terser'
 import { bold, underline, colors, reset, check, dim, dot, warn, error } from "../terminal"
 import { isStandardPage, isStaticPage, isStaticView, options, PageKind } from "../templates/utils"
 import { createMissingAddTemplates } from "./_common"
+import { fileURLToPath } from "url"
 const elm = require('node-elm-compiler')
 
 export const build = ({ env, runElmMake }: { env: Environment, runElmMake: boolean }) => () =>
   Promise.all([
     createMissingDefaultFiles(),
     createMissingAddTemplates(),
-    removeUnusedGeneratedFiles()
+    removeUnusedGeneratedFiles(),
+    removeEmptyDirs()
   ])
     .then(createGeneratedFiles)
     .then(runElmMake ? compileMainElm(env) : _ => `  ${check} ${bold}elm-spa${reset} generated new files.`)
@@ -70,6 +72,15 @@ const removeUnusedGeneratedFiles = async () => {
   return await Promise.all(generatedFiles.map(toAction))
 }
 
+export const removeEmptyDirs = async (): Promise<void> => {
+  const scanEmptyPageDirsIn = async (folder: string) =>
+    File.scanEmptyDirs(folder)
+
+  const emptyDirsInGen = await scanEmptyPageDirsIn(config.folders.pages.generated)
+  if (!emptyDirsInGen.length) return Promise.resolve()
+  await Promise.all(emptyDirsInGen.map(File.remove))
+  return Promise.resolve(removeEmptyDirs())
+}
 
 type FilepathSegments = {
   kind: PageKind,
