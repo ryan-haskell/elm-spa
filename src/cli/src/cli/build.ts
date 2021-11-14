@@ -15,7 +15,7 @@ import terser from 'terser'
 import { bold, underline, colors, reset, check, dim, dot, warn, error } from "../terminal"
 import { isStandardPage, isStaticPage, isStaticView, options, PageKind } from "../templates/utils"
 import { createMissingAddTemplates } from "./_common"
-import { fileURLToPath } from "url"
+
 const elm = require('node-elm-compiler')
 
 export const build = ({ env, runElmMake }: { env: Environment, runElmMake: boolean }) => () =>
