@@ -230,8 +230,9 @@ update msg model =
 
 ```elm
 -- Make view show a sign out button
+-- We must return the concrete type `Msg` because we use ClickedSignIn
 
-view : Model -> Html msg
+view : Model -> View Msg
 view model =
     { title = "Sign In"
     , body =
