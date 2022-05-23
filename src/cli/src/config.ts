@@ -16,7 +16,8 @@ const config = {
     src: path.join(cwd, 'src'),
     pages: {
       src: path.join(cwd, 'src', 'Pages'),
-      defaults: path.join(cwd, '.elm-spa', 'defaults', 'Pages')
+      defaults: path.join(cwd, '.elm-spa', 'defaults', 'Pages'),
+      generated: path.join(cwd, '.elm-spa', 'generated', 'Gen', 'Params')
     },
     defaults: {
       src: path.join(root, 'src', 'defaults'),

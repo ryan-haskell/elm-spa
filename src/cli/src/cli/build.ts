@@ -15,43 +15,30 @@ import terser from 'terser'
 import { bold, underline, colors, reset, check, dim, dot, warn, error } from "../terminal"
 import { isStandardPage, isStaticPage, isStaticView, options, PageKind } from "../templates/utils"
 import { createMissingAddTemplates } from "./_common"
+
 const elm = require('node-elm-compiler')
 
-export const build = ({ env, runElmMake } : { env : Environment, runElmMake: boolean }) => () =>
+export const build = ({ env, runElmMake }: { env: Environment, runElmMake: boolean }) => () =>
   Promise.all([
     createMissingDefaultFiles(),
-    createMissingAddTemplates()
+    createMissingAddTemplates(),
+    removeUnusedGeneratedFiles(),
+    removeEmptyDirs()
   ])
     .then(createGeneratedFiles)
-    .then(runElmMake ? compileMainElm(env): _ => `  ${check} ${bold}elm-spa${reset} generated new files.`)
+    .then(runElmMake ? compileMainElm(env) : _ => `  ${check} ${bold}elm-spa${reset} generated new files.`)
 
 const createMissingDefaultFiles = async () => {
-  type Action
-    = ['DELETE_FROM_DEFAULTS', string[]]
-    | ['CREATE_IN_DEFAULTS', string[]]
-    | ['DO_NOTHING', string[]]
-
-  const toAction = async (filepath: string[]): Promise<Action> => {
+  const toAction = async (filepath: string[]): Promise<any> => {
     const [inDefaults, inSrc] = await Promise.all([
       exists(path.join(config.folders.defaults.dest, ...filepath)),
       exists(path.join(config.folders.src, ...filepath))
     ])
 
-    if (inSrc && inDefaults) {
-      return ['DELETE_FROM_DEFAULTS', filepath]
-    } else if (!inSrc) {
-      return ['CREATE_IN_DEFAULTS', filepath]
-    } else {
-      return ['DO_NOTHING', filepath]
-    }
-  }
-
-  const actions = await Promise.all(config.defaults.map(toAction))
-
-  const performDefaultFileAction = ([action, relative]: Action): Promise<any> =>
-    action === 'CREATE_IN_DEFAULTS' ? createDefaultFile(relative)
-      : action === 'DELETE_FROM_DEFAULTS' ? deleteFromDefaults(relative)
+    return inSrc && inDefaults ? deleteFromDefaults(filepath)
+      : !inSrc ? createDefaultFile(filepath)
         : Promise.resolve()
+  }
 
   const createDefaultFile = async (relative: string[]) =>
     File.copyFile(
@@ -62,7 +49,37 @@ const createMissingDefaultFiles = async () => {
   const deleteFromDefaults = async (relative: string[]) =>
     File.remove(path.join(config.folders.defaults.dest, ...relative))
 
-  return Promise.all(actions.map(performDefaultFileAction))
+  return await Promise.all(config.defaults.map(toAction))
+
+}
+
+const removeUnusedGeneratedFiles = async () => {
+  const genFilePath = config.folders.pages.generated
+  const generatedFiles = await relativePagePaths(genFilePath)
+
+  const toAction = async (filepath: string): Promise<any> => {
+    const [inSrc, inDefaults] = await Promise.all([
+      exists(path.join(config.folders.defaults.src, filepath)),
+      exists(path.join(genFilePath, filepath))
+    ]);
+
+    return !inSrc && !inDefaults ? deleteFromGenerated(filepath) : Promise.resolve()
+  }
+
+  const deleteFromGenerated = async (relative: string) =>
+    File.remove(path.join(genFilePath, relative))
+
+  return await Promise.all(generatedFiles.map(toAction))
+}
+
+export const removeEmptyDirs = async (): Promise<void> => {
+  const scanEmptyPageDirsIn = async (folder: string) =>
+    File.scanEmptyDirs(folder)
+
+  const emptyDirsInGen = await scanEmptyPageDirsIn(config.folders.pages.generated)
+  if (!emptyDirsInGen.length) return Promise.resolve()
+  await Promise.all(emptyDirsInGen.map(File.remove))
+  return Promise.resolve(removeEmptyDirs())
 }
 
 type FilepathSegments = {
@@ -140,10 +157,10 @@ type PageEntry = {
 const getAllPageEntries = async (): Promise<PageEntry[]> => {
   const scanPageFilesIn = async (folder: string) => {
     const items = await File.scan(folder)
-    return items.map(s => ({
+    return Promise.resolve(items.map(s => ({
       filepath: s,
       segments: s.substring(folder.length + 1, s.length - '.elm'.length).split(path.sep)
-    }))
+    })))
   }
 
   return Promise.all([
@@ -151,6 +168,12 @@ const getAllPageEntries = async (): Promise<PageEntry[]> => {
     scanPageFilesIn(config.folders.pages.defaults)
   ]).then(([left, right]) => left.concat(right))
 }
+
+const relativePagePaths = async (folder: string) => {
+  const items = await File.scan(folder)
+  return Promise.resolve(items.map(s => s.substring(folder.length, s.length)))
+}
+
 
 type Environment = 'production' | 'development'
 
@@ -176,28 +199,28 @@ const compileMainElm = (env: Environment) => async () => {
       debug: inDevelopment,
       optimize: inProduction,
     })
-    .catch((error: Error) => {
-      try { return colorElmError(JSON.parse(error.message.split('\n')[1])) }
-      catch {
-        const { RED, green } = colors
-        return Promise.reject([
-          `${RED}!${reset} elm-spa failed to understand an error`,
-          `Please report the output below to ${green}https://github.com/ryannhg/elm-spa/issues${reset}`,
-          `-----`,
-          JSON.stringify(error, null, 2),
-          `-----`,
-          `${RED}!${reset} elm-spa failed to understand an error`,
-          `Please send the output above to ${green}https://github.com/ryannhg/elm-spa/issues${reset}`,
-          ``
-        ].join('\n\n'))
-      }
-    })
+      .catch((error: Error) => {
+        try { return colorElmError(JSON.parse(error.message.split('\n')[1])) }
+        catch {
+          const { RED, green } = colors
+          return Promise.reject([
+            `${RED}!${reset} elm-spa failed to understand an error`,
+            `Please report the output below to ${green}https://github.com/ryannhg/elm-spa/issues${reset}`,
+            `-----`,
+            JSON.stringify(error, null, 2),
+            `-----`,
+            `${RED}!${reset} elm-spa failed to understand an error`,
+            `Please send the output above to ${green}https://github.com/ryannhg/elm-spa/issues${reset}`,
+            ``
+          ].join('\n\n'))
+        }
+      })
   }
 
   type ElmError
     = ElmCompileError
     | ElmJsonError
-  
+
   type ElmCompileError = {
     type: 'compile-errors'
     errors: ElmProblemError[]
@@ -225,11 +248,11 @@ const compileMainElm = (env: Environment) => async () => {
     string: string
   }
 
-  const colorElmError = (output : ElmError) => {
-    const errors : ElmProblemError[] =
+  const colorElmError = (output: ElmError) => {
+    const errors: ElmProblemError[] =
       output.type === 'compile-errors'
         ? output.errors
-        : [ { path: output.path, problems: [output] } ]
+        : [{ path: output.path, problems: [output] }]
 
     const strIf = (str: string) => (cond: boolean): string => cond ? str : ''
     const boldIf = strIf(bold)
@@ -274,7 +297,7 @@ const compileMainElm = (env: Environment) => async () => {
       .then(_ => [success() + '\n'])
 }
 
-const ensureElmIsInstalled = async (environment : Environment) => {
+const ensureElmIsInstalled = async (environment: Environment) => {
   await new Promise((resolve, reject) => {
     ChildProcess.exec('elm', (err) => {
       if (err) {

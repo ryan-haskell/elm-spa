@@ -7,7 +7,7 @@ import path from "path"
  * @param filepath - the absolute path of the file to create
  * @param contents - the raw string contents of the file
  */
-export const create = async (filepath : string, contents : string) => {
+export const create = async (filepath: string, contents: string) => {
   await ensureFolderExists(filepath)
   return fs.writeFile(filepath, contents, { encoding: 'utf8' })
 }
@@ -23,17 +23,27 @@ export const remove = async (filepath: string) => {
     : fs.rmdir(filepath, { recursive: true })
 }
 
+export const scanEmptyDirs = async (dir: string): Promise<string[]> => {
+  const doesExist = await exists(dir)
+  if (!doesExist) return Promise.resolve([])
+  const items = await ls(dir)
+  if (!items.length) return Promise.resolve([dir])
+  const dirs = await keepFolders(items)
+  const nestedEmptyDirs = await Promise.all(dirs.map(f => scanEmptyDirs(f)))
+  return Promise.resolve(nestedEmptyDirs.reduce((a, b) => a.concat(b), []))
+}
+
 export const scan = async (dir: string, extension = '.elm'): Promise<string[]> => {
   const doesExist = await exists(dir)
-  if (!doesExist) return []
+  if (!doesExist) return Promise.resolve([])
   const items = await ls(dir)
   const [folders, files] = await Promise.all([
     keepFolders(items),
-    items.filter(f => f.endsWith(extension))
+    Promise.resolve(items.filter(f => f.endsWith(extension)))
   ])
   const listOfFiles = await Promise.all(folders.map(f => scan(f, extension)))
   const nestedFiles = listOfFiles.reduce((a, b) => a.concat(b), [])
-  return files.concat(nestedFiles)
+  return Promise.resolve(files.concat(nestedFiles))
 }
 
 const ls = (dir: string): Promise<string[]> =>
@@ -56,15 +66,16 @@ export const exists = (filepath: string) =>
     .catch(_ => false)
 
 
+
 /**
  * Copy the file or folder at the given path.
  * @param filepath - the path of the file or folder to copy
  */
-export const copy = (src : string, dest : string) => {
+export const copy = (src: string, dest: string) => {
   const exists = oldFs.existsSync(src)
   const stats = exists && oldFs.statSync(src)
   if (stats && stats.isDirectory()) {
-    try { oldFs.mkdirSync(dest, { recursive: true }) } catch (_) {}
+    try { oldFs.mkdirSync(dest, { recursive: true }) } catch (_) { }
     oldFs.readdirSync(src).forEach(child =>
       copy(path.join(src, child), path.join(dest, child))
     )
@@ -73,18 +84,18 @@ export const copy = (src : string, dest : string) => {
   }
 }
 
-export const copyFile = async (src : string, dest : string) => {
+export const copyFile = async (src: string, dest: string) => {
   await ensureFolderExists(dest)
   return fs.copyFile(src, dest)
 }
 
 
-const ensureFolderExists = async (filepath : string) => {
+const ensureFolderExists = async (filepath: string) => {
   const folder = filepath.split(path.sep).slice(0, -1).join(path.sep)
   return fs.mkdir(folder, { recursive: true })
 }
 
-export const mkdir = (folder : string) : Promise<string> =>
+export const mkdir = (folder: string): Promise<string> =>
   fs.mkdir(folder, { recursive: true })
 
 export const read = async (path: string) =>
