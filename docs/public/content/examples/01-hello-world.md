@@ -120,12 +120,12 @@ The files in `.elm-spa/generated` should not be changed, so they are stored in a
 By default, a `.gitignore` file is generated to promote best practices when working with __elm-spa__ and your git repo:
 
 ```
-.elm-spa
+.elm-spa/generated
 elm-stuff
 dist
 ```
 
-Notice that the `.elm-spa` folder is __ignored from git__. You shouldn't push any generated __elm-spa__ code to your repo. Instead, use commands like `elm-spa build` to reliably regenerate these files during deployments.
+Notice that the `.elm-spa/generated` folder is __ignored from git__. You shouldn't push any generated __elm-spa__ code to your repo. Instead, use commands like `elm-spa build` to reliably regenerate these files during deployments.
 
 ```terminal
 elm-spa build
