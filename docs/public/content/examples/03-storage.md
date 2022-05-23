@@ -175,7 +175,10 @@ port load : (Json.Value -> msg) -> Sub msg
 Above, we've created a `port module` that defines our `save` and `load` ports. Next, we'll describe the data we want to store, as well as how to convert it to and from JSON:
 
 ```elm
-port module Storage exposing (..)
+port module Storage exposing
+    ( Storage, fromJson, onChange
+    , increment, decrement
+    )
 
 import Json.Encode as Encode
 
