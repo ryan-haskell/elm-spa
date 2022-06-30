@@ -109,7 +109,7 @@ If you are working with another dev server, you won't need the `.js` file genera
 elm-spa gen
 ```
 
-This will generate code in the `.elm-spa` folder, but allow your custom workflow to define it's own way of compiling Elm. This is a great command to combine __elm-spa__ with another tool like [Vite](https://vitejs.dev) or [Parcel](https://parceljs.org/elm.html).
+This will generate code in the `.elm-spa` folder, but allow your custom workflow to define it's own way of compiling Elm. This is a great command to combine __elm-spa__ with another tool like [Vite](https://vitejs.dev) or [Parcel](https://parceljs.org/languages/elm/).
 
 
 ## elm-spa watch
