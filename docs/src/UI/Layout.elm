@@ -158,9 +158,9 @@ navbar { onMsg, model, shared, url } =
                     ]
                 , Html.div [ Attr.class "row gap-md spread" ]
                     [ Html.nav [ Attr.class "row gap-md hidden-mobile" ]
-                        [ UI.iconLink { text = "GitHub Repo", icon = UI.icons.github, url = "https://github.com/ryannhg/elm-spa" }
+                        [ UI.iconLink { text = "GitHub Repo", icon = UI.icons.github, url = "https://github.com/ryan-haskell/elm-spa" }
                         , UI.iconLink { text = "NPM Package", icon = UI.icons.npm, url = "https://npmjs.org/elm-spa" }
-                        , UI.iconLink { text = "Elm Package", icon = UI.icons.elm, url = "https://package.elm-lang.org/packages/ryannhg/elm-spa/latest" }
+                        , UI.iconLink { text = "Elm Package", icon = UI.icons.elm, url = "https://package.elm-lang.org/packages/ryan-haskell/elm-spa/latest" }
                         ]
                     , UI.Searchbar.view
                         { index = shared.index
@@ -178,7 +178,7 @@ footer =
     Html.div [ Attr.class "footer__zone" ]
         [ Html.footer [ Attr.class "footer container pad-top-xl" ]
             [ Html.div [ Attr.class "row pad-x-md pad-y-lg pad-top-xl spread faded" ]
-                [ Html.a [ Attr.href "https://github.com/ryannhg/elm-spa/tree/main/docs", Attr.target "_blank", Attr.class "link hidden-mobile" ] [ Html.text "Site source code" ]
+                [ Html.a [ Attr.href "https://github.com/ryan-haskell/elm-spa/tree/main/docs", Attr.target "_blank", Attr.class "link hidden-mobile" ] [ Html.text "Site source code" ]
                 , Html.span [] [ Html.text "© 2019 – 2021, Ryan Haskell-Glatz" ]
                 ]
             ]

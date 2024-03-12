@@ -1,6 +1,6 @@
 # Pages & routing
 
-__Source code__: [GitHub](https://github.com/ryannhg/elm-spa/tree/main/examples/02-pages)
+__Source code__: [GitHub](https://github.com/ryan-haskell/elm-spa/tree/main/examples/02-pages)
 
 This next guide will show you how pages, routing, and the `elm-spa add` command work together to automatically handle URLs in your __elm-spa__ application.
 
@@ -288,7 +288,7 @@ layout children =
 
 Feel free to play around with the `elm-spa add` command to mix-and-match different pages. 
 
-As always, the source code for this example is available on [GitHub](https://github.com/ryannhg/elm-spa/tree/main/examples/02-pages)
+As always, the source code for this example is available on [GitHub](https://github.com/ryan-haskell/elm-spa/tree/main/examples/02-pages)
 
 ---
 

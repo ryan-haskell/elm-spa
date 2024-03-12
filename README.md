@@ -35,6 +35,6 @@ __Visit the official site__ at [elm-spa.dev](https://elm-spa.dev) for more examp
 
 ### **Do I need the Elm package?**
 
-If you are using elm-spa, there's no need to read the [ryannhg/elm-spa](https://package.elm-lang.org/packages/ryannhg/elm-spa/latest/) package documentation. The package only exists to constrain the CLI, and provides a few basic internal helper functions. 
+If you are using elm-spa, there's no need to read the [ryan-haskell/elm-spa](https://package.elm-lang.org/packages/ryan-haskell/elm-spa/latest/) package documentation. The package only exists to constrain the CLI, and provides a few basic internal helper functions. 
 
 Check out [the official website](https://elm-spa.dev) instead!

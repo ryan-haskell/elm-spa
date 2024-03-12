@@ -14,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ryannhg/elm-spa.git"
+    "url": "git+https://github.com/ryan-haskell/elm-spa.git"
   },
   "keywords": [
     "elm",
@@ -25,9 +25,9 @@
   "author": "Ryan Haskell-Glatz",
   "license": "BSD-3-Clause",
   "bugs": {
-    "url": "https://github.com/ryannhg/elm-spa/issues"
+    "url": "https://github.com/ryan-haskell/elm-spa/issues"
   },
-  "homepage": "https://github.com/ryannhg/elm-spa#readme",
+  "homepage": "https://github.com/ryan-haskell/elm-spa#readme",
   "devDependencies": {
     "@types/chokidar": "2.1.3",
     "@types/jest": "26.0.14",

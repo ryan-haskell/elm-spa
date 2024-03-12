@@ -1,6 +1,6 @@
 # Hello, world!
 
-__Source code__: [GitHub](https://github.com/ryannhg/elm-spa/tree/main/examples/01-hello-world)
+__Source code__: [GitHub](https://github.com/ryan-haskell/elm-spa/tree/main/examples/01-hello-world)
 
 Welcome to __elm-spa__! This guide is a breakdown of the simplest project you can make: the "Hello, world!" example.
 

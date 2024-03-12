@@ -1,6 +1,6 @@
 # Storage
 
-__Source code__: [GitHub](https://github.com/ryannhg/elm-spa/tree/main/examples/03-local-storage)
+__Source code__: [GitHub](https://github.com/ryan-haskell/elm-spa/tree/main/examples/03-local-storage)
 
 Let's start by creating a new project with the __elm-spa__ CLI:
 
@@ -390,7 +390,7 @@ page shared _ =
 
 In the browser, we now have a working counter app that persists on refresh. Even if you close the browser and open it up again, you'll see your previous counter value on the screen.
 
-As a reminder, all the source code for this example is available on [GitHub](https://github.com/ryannhg/elm-spa/tree/main/examples/03-local-storage)
+As a reminder, all the source code for this example is available on [GitHub](https://github.com/ryan-haskell/elm-spa/tree/main/examples/03-local-storage)
 
 ---
 

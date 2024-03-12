@@ -17,13 +17,13 @@ import { isStandardPage, isStaticPage, isStaticView, options, PageKind } from ".
 import { createMissingAddTemplates } from "./_common"
 const elm = require('node-elm-compiler')
 
-export const build = ({ env, runElmMake } : { env : Environment, runElmMake: boolean }) => () =>
+export const build = ({ env, runElmMake }: { env: Environment, runElmMake: boolean }) => () =>
   Promise.all([
     createMissingDefaultFiles(),
     createMissingAddTemplates()
   ])
     .then(createGeneratedFiles)
-    .then(runElmMake ? compileMainElm(env): _ => `  ${check} ${bold}elm-spa${reset} generated new files.`)
+    .then(runElmMake ? compileMainElm(env) : _ => `  ${check} ${bold}elm-spa${reset} generated new files.`)
 
 const createMissingDefaultFiles = async () => {
   type Action
@@ -176,28 +176,28 @@ const compileMainElm = (env: Environment) => async () => {
       debug: inDevelopment,
       optimize: inProduction,
     })
-    .catch((error: Error) => {
-      try { return colorElmError(JSON.parse(error.message.split('\n')[1])) }
-      catch {
-        const { RED, green } = colors
-        return Promise.reject([
-          `${RED}!${reset} elm-spa failed to understand an error`,
-          `Please report the output below to ${green}https://github.com/ryannhg/elm-spa/issues${reset}`,
-          `-----`,
-          JSON.stringify(error, null, 2),
-          `-----`,
-          `${RED}!${reset} elm-spa failed to understand an error`,
-          `Please send the output above to ${green}https://github.com/ryannhg/elm-spa/issues${reset}`,
-          ``
-        ].join('\n\n'))
-      }
-    })
+      .catch((error: Error) => {
+        try { return colorElmError(JSON.parse(error.message.split('\n')[1])) }
+        catch {
+          const { RED, green } = colors
+          return Promise.reject([
+            `${RED}!${reset} elm-spa failed to understand an error`,
+            `Please report the output below to ${green}https://github.com/ryan-haskell/elm-spa/issues${reset}`,
+            `-----`,
+            JSON.stringify(error, null, 2),
+            `-----`,
+            `${RED}!${reset} elm-spa failed to understand an error`,
+            `Please send the output above to ${green}https://github.com/ryan-haskell/elm-spa/issues${reset}`,
+            ``
+          ].join('\n\n'))
+        }
+      })
   }
 
   type ElmError
     = ElmCompileError
     | ElmJsonError
-  
+
   type ElmCompileError = {
     type: 'compile-errors'
     errors: ElmProblemError[]
@@ -225,11 +225,11 @@ const compileMainElm = (env: Environment) => async () => {
     string: string
   }
 
-  const colorElmError = (output : ElmError) => {
-    const errors : ElmProblemError[] =
+  const colorElmError = (output: ElmError) => {
+    const errors: ElmProblemError[] =
       output.type === 'compile-errors'
         ? output.errors
-        : [ { path: output.path, problems: [output] } ]
+        : [{ path: output.path, problems: [output] }]
 
     const strIf = (str: string) => (cond: boolean): string => cond ? str : ''
     const boldIf = strIf(bold)
@@ -274,7 +274,7 @@ const compileMainElm = (env: Environment) => async () => {
       .then(_ => [success() + '\n'])
 }
 
-const ensureElmIsInstalled = async (environment : Environment) => {
+const ensureElmIsInstalled = async (environment: Environment) => {
   await new Promise((resolve, reject) => {
     ChildProcess.exec('elm', (err) => {
       if (err) {

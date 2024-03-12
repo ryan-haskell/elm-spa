@@ -1,6 +1,6 @@
 {
     "type": "package",
-    "name": "ryannhg/elm-spa",
+    "name": "ryan-haskell/elm-spa",
     "summary": "single page apps made easy.",
     "license": "BSD-3-Clause",
     "version": "6.0.0",

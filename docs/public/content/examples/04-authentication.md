@@ -1,6 +1,6 @@
 # User authentication
 
-__Source code__: [GitHub](https://github.com/ryannhg/elm-spa/tree/main/examples/04-authentication)
+__Source code__: [GitHub](https://github.com/ryan-haskell/elm-spa/tree/main/examples/04-authentication)
 
 In a real world application, it's common to have the notion of a signed-in user. When it comes to routing, it's often useful to only allow signed-in users to visit specific pages.
 
