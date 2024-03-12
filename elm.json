@@ -3,7 +3,7 @@
     "name": "ryan-haskell/elm-spa",
     "summary": "single page apps made easy.",
     "license": "BSD-3-Clause",
-    "version": "6.0.0",
+    "version": "1.0.0",
     "exposed-modules": [
         "ElmSpa.Page",
         "ElmSpa.Request"
