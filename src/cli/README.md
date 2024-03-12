@@ -13,7 +13,7 @@ npm install -g elm-spa@latest
 $ elm-spa help
 ```
 ```
-elm-spa – version 6.0.4
+elm-spa – version 6.0.6
 
 Commands:
 elm-spa new . . . . . . . . .  create a new project
