@@ -211,7 +211,7 @@ elm-spa add /element element
 elm-spa add /advanced advanced
 ```
 
-These commands add in the other three page types described in the [pages guide](/guides/03-pages).
+These commands add in the other three page types described in the [pages guide](/guide/03-pages).
 
 For each page, the `View.placeholder` function stubs out the `view` functions so you can visit them in the browser.
 
