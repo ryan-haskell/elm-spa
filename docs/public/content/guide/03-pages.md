@@ -90,6 +90,21 @@ You might have noticed `Page.static` earlier in our page function. This is one o
 
 The rest of this section will introduce you to the other __page types__ exposed by the `Page` module, so you know which one to reach for.
 
+Don't forget to run the command
+```terminal
+elm-spa gen
+```
+to generate the modules needed for the existing code.
+Use
+```terminal
+elm-spa watch
+```
+or
+```terminal
+elm-spa server
+```
+to generate the modules while you are editing the files.
+
 > Always choose the __simplest__ page type for the job– and reach for the more advanced ones when your page _really_ needs the extra features!
 
 - __[Page.static](#pagestatic)__ - for pages that only render a view.
