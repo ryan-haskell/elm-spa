@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 
 import CLI from './cli'
+import { dotElmSpa } from './config'
+import { checkIfFolderExists } from './file'
 import { Commands } from './types'
 
-const commands : Commands = {
+const commands: Commands = {
   new: CLI.new,
   add: CLI.add,
   build: CLI.build,
@@ -16,13 +18,23 @@ const commands : Commands = {
   make: CLI.build,
 }
 
-const command : string | undefined = process.argv[2]
+const commandsNotRequiringInitialization = ['new', 'init', 'help']
+
+const command: string | undefined = process.argv[2]
 
 Promise.resolve(command)
+  .then(async cmd =>  {
+    if (!commandsNotRequiringInitialization.includes(cmd as string)) {
+      if (!await checkIfFolderExists(dotElmSpa)) {
+        throw '  This command must be run in a project folder containing a .elm-spa folder.'
+      }
+    }
+    return cmd
+  })
   .then(cmd => commands[cmd as keyof Commands] || commands.help)
   .then(task => task())
   .then(output => {
-    const message = output instanceof Array ? output : [ output ]
+    const message = output instanceof Array ? output : [output]
     console.info('')
     console.info(message.join('\n\n'))
   })
