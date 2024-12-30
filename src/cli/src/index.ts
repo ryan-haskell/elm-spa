@@ -18,13 +18,13 @@ const commands: Commands = {
   make: CLI.build,
 }
 
-const commandsRequiringDotElmSpa = ['add', 'build', 'gen', 'watch', 'server', 'make']
+const commandsNotRequiringInitialization = ['new', 'init', 'help']
 
 const command: string | undefined = process.argv[2]
 
 Promise.resolve(command)
   .then(async cmd =>  {
-    if (commandsRequiringDotElmSpa.includes(cmd as string)) {
+    if (!commandsNotRequiringInitialization.includes(cmd as string)) {
       if (!await checkIfFolderExists(dotElmSpa)) {
         throw '  This command must be run in a project folder containing a .elm-spa folder.'
       }
