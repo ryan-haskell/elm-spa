@@ -8,6 +8,7 @@ const reserved = {
 
 const root = path.join(__dirname, '..', '..')
 const cwd = process.cwd()
+export const dotElmSpa = path.join(cwd, '.elm-spa');
 
 const config = {
   reserved,
@@ -16,18 +17,18 @@ const config = {
     src: path.join(cwd, 'src'),
     pages: {
       src: path.join(cwd, 'src', 'Pages'),
-      defaults: path.join(cwd, '.elm-spa', 'defaults', 'Pages')
+      defaults: path.join(dotElmSpa, 'defaults', 'Pages')
     },
     defaults: {
       src: path.join(root, 'src', 'defaults'),
-      dest: path.join(cwd, '.elm-spa', 'defaults')
+      dest: path.join(dotElmSpa, 'defaults')
     },
-    generated: path.join(cwd, '.elm-spa', 'generated'),
+    generated: path.join(dotElmSpa, 'generated'),
     templates: {
       defaults: path.join(root, 'src', 'templates', 'add'),
-      user: path.join(cwd, '.elm-spa', 'templates')
+      user: path.join(dotElmSpa, 'templates')
     },
-    package: path.join(cwd, '.elm-spa', 'package'),
+    package: path.join(dotElmSpa, 'package'),
     public: path.join(cwd, 'public'),
     dist: path.join(cwd, 'public', 'dist'),
   },
