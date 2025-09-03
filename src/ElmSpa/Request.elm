@@ -109,7 +109,7 @@ query str =
                     >> (\eq ->
                             Maybe.map2 Tuple.pair
                                 (List.head eq)
-                                (eq |> List.drop 1 |> List.head |> Maybe.withDefault "" |> Just)
+                                (eq |> List.drop 1 |> String.join "=" |> Just)
                        )
                 )
             |> List.map (Tuple.mapBoth decode decode)
