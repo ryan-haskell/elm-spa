@@ -245,7 +245,7 @@ This should look pretty similar to how our homepage handled the `Increment` and 
 
 ### Listening for data from JS
 
-We're going to add one final function to `Storage.elm` that will allow us to subscribe to events from the `load` port, that use's our `fromJson` function to safely parse the message we get back:
+We're going to add one final function to `Storage.elm` that will allow us to subscribe to events from the `load` port, that uses our `fromJson` function to safely parse the message we get back:
 
 ```elm
 onChange : (Storage -> msg) -> Sub msg
